@@ -35,7 +35,7 @@ def validate_user_command(chat_id: int, send_by_user_id: int, username_on_comman
     if user == None:
         message_service.send_message(
             chat_id,
-            f"eu ainda não conheço *{username}* :(",
+            f"Eu ainda não conheço *{username}* :(",
         )
         return False
 
