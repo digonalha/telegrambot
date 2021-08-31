@@ -1,0 +1,7 @@
+/.env
+/.vscode
+/bot-venv
+/info.log
+/ragequit-bot.py
+__pycache__
+*.pyc
