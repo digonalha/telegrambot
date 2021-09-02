@@ -86,7 +86,7 @@ def add_user(user_id, user_name):
     return db_user
 
 
-def add_if_user_not_exists(user_id, user_name):
+def add_user_if_not_exists(user_id, user_name):
     result = False
 
     for user in users:

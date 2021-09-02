@@ -82,7 +82,7 @@ def resolve_action(message):
         item_caption = ""
 
         # persistindo usuarios:
-        user_service.add_if_user_not_exists(
+        user_service.add_user_if_not_exists(
             message_from["id"], message_from["username"]
         )
 
