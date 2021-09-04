@@ -5,7 +5,6 @@ from src.schemas import user_schema
 from src.services import moderator_service, message_service
 
 users = []
-
 syslog = SystemLogging(__name__)
 
 
