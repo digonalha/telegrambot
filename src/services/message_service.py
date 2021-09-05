@@ -1,6 +1,11 @@
 from datetime import datetime
 from src.api import telegram_api
-from src.services import user_service, moderator_service, timeout_service
+from src.services import (
+    user_service,
+    moderator_service,
+    timeout_service,
+    custom_command_service,
+)
 from src.helpers.logging_helper import SystemLogging
 
 syslog = SystemLogging(__name__)
@@ -104,7 +109,9 @@ def resolve_action(message):
             "!newcommand"
         ) or item_caption.lower().startswith("!newcommand"):
             text = item_text if item_caption == "" else item_caption
-            timeout_service.remove_timeout_user(chat_id, text, message_from["id"])
+            custom_command_service.insert_custom_command(
+                chat_id, text, message_from["id"]
+            )
 
     except Exception as ex:
         syslog.create_warning("resolve_action", ex)
