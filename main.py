@@ -4,6 +4,7 @@ from src.services import (
     user_service,
     moderator_service,
     timeout_service,
+    custom_command_service,
 )
 
 # create tables if not exists
@@ -12,6 +13,7 @@ database.create_tables()
 # get current users on database
 user_service.get_all()
 moderator_service.get_all()
+custom_command_service.get_all()
 
 updates = message_service.get_updates(0)
 offset = 0 if len(updates) == 0 else message_service.get_last_update_id(updates) + 1

@@ -26,11 +26,13 @@ def get_all():
 
 
 def add_moderator(user_id: int, chat_id: int):
-    db_moderator = None
+    if len(moderators) > 0 and next(
+        (m for m in moderators if m["user_id"] == user_id and m["chat_id"] == chat_id),
+        None,
+    ):
+        return False
 
-    moderator_already_in_db = moderator_repository.get(user_id, chat_id)
-
-    if not moderator_already_in_db:
+    if not moderator_repository.get(user_id, chat_id):
         db_moderator = moderator_repository.add(
             moderator_schema.ModeratorCreate(
                 telegram_user_id=user_id,
@@ -39,43 +41,19 @@ def add_moderator(user_id: int, chat_id: int):
             )
         )
 
-    return db_moderator
-
-
-def add_moderator_if_not_exists(user_id, chat_id):
-    result = False
-
-    if len(moderators) > 0 and next(
-        (m for m in moderators if m["user_id"] == user_id and m["chat_id"] == chat_id),
-        None,
-    ):
-        return True
-
-    db_moderator = add_moderator(user_id, chat_id)
-
-    if db_moderator != None:
-        moderators.append(
-            {
-                "user_id": db_moderator.telegram_user_id,
-                "chat_id": db_moderator.chat_id,
-            }
-        )
-
-    return result
-
-
-def delete_moderator(user_id: int, chat_id: int):
-    moderator_exists_in_db = moderator_repository.get(user_id, chat_id)
-
-    if moderator_exists_in_db:
-        moderator_repository.delete(user_id, chat_id)
-        get_all()
-        return True
+        if db_moderator:
+            moderators.append(
+                {
+                    "user_id": db_moderator.telegram_user_id,
+                    "chat_id": db_moderator.chat_id,
+                }
+            )
+            return True
 
     return False
 
 
-def delete_moderator_if_exists(user_id, chat_id):
+def delete_moderator(user_id: int, chat_id: int):
     if len(moderators) == 0 or not (
         next(
             (
@@ -88,7 +66,12 @@ def delete_moderator_if_exists(user_id, chat_id):
     ):
         return False
 
-    return delete_moderator(user_id, chat_id)
+    if moderator_repository.get(user_id, chat_id):
+        moderator_repository.delete(user_id, chat_id)
+        get_all()
+        return True
+
+    return False
 
 
 def insert_moderator(chat_id, message_text: str, send_by_user_id: int):
@@ -105,12 +88,15 @@ def insert_moderator(chat_id, message_text: str, send_by_user_id: int):
         syslog.create_warning("insert_moderator", ex)
         return
 
-    user = user_service.validate_user_command(chat_id, send_by_user_id, username)
+    if not user_service.validate_user_permission(chat_id, send_by_user_id):
+        return
+
+    user = user_service.validate_username_exists(chat_id, username)
 
     if not user:
         return
 
-    if not add_moderator_if_not_exists(user["user_id"], chat_id):
+    if add_moderator(user["user_id"], chat_id):
         message_service.send_message(chat_id, f"*{username}* agora é um moderador")
     else:
         message_service.send_message(chat_id, f"*{username}* já é um moderador")
@@ -130,12 +116,15 @@ def remove_moderator(chat_id, message_text: str, send_by_user_id: int):
         syslog.create_warning("remove_moderator", ex)
         return
 
-    user = user_service.validate_user_command(chat_id, send_by_user_id, username)
+    if not user_service.validate_user_permission(chat_id, send_by_user_id):
+        return
+
+    user = user_service.validate_username_exists(chat_id, username)
 
     if not user:
         return
 
-    if delete_moderator_if_exists(user["user_id"], chat_id):
+    if delete_moderator(user["user_id"], chat_id):
         message_service.send_message(chat_id, f"*{username}* não é mais um moderador")
     else:
         message_service.send_message(chat_id, f"*{username}* não é um moderador")

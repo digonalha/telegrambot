@@ -28,11 +28,11 @@ def get_all():
     return local_session.query(custom_command_model.CustomCommand).all()
 
 
-def get(command_name: str, chat_id: int):
+def get(command: str, chat_id: int):
     return (
         local_session.query(custom_command_model.CustomCommand)
         .filter(
-            custom_command_model.CustomCommand.telegram_user_id == command_name
+            custom_command_model.CustomCommand.command == command
             and custom_command_model.CustomCommand.chat_id == chat_id
         )
         .first()

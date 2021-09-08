@@ -86,7 +86,10 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
         syslog.create_warning("remove_timeout_user", ex)
         return
 
-    user = user_service.validate_user_command(chat_id, send_by_user_id, username)
+    if not user_service.validate_user_permission(chat_id, send_by_user_id):
+        return
+
+    user = user_service.validate_username_exists(chat_id, username)
 
     if not user:
         return

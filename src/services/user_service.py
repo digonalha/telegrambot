@@ -8,19 +8,14 @@ users = []
 syslog = SystemLogging(__name__)
 
 
-def validate_user_command(chat_id: int, send_by_user_id: int, username_on_command: str):
-    username = username_on_command
-
-    if username.startswith("@"):
-        username = username.split("@")[1]
-
-    user_send = next((u for u in users if u["user_id"] == send_by_user_id), None)
+def validate_user_permission(chat_id: int, user_id: int):
+    user_send = next((u for u in users if u["user_id"] == user_id), None)
 
     if (user_send == None or not user_send["is_admin"]) and next(
         (
             m
             for m in moderator_service.moderators
-            if m["chat_id"] == chat_id and m["user_id"] == send_by_user_id
+            if m["chat_id"] == chat_id and m["user_id"] == user_id
         ),
         None,
     ) == None:
@@ -28,6 +23,13 @@ def validate_user_command(chat_id: int, send_by_user_id: int, username_on_comman
             chat_id, "Você não tem permissão para utilizar esse comando"
         )
         return False
+
+    return True
+
+
+def validate_username_exists(chat_id: int, username: int):
+    if username.startswith("@"):
+        username = username.split("@")[1]
 
     user = next((u for u in users if u["username"] == username), None)
 
@@ -65,40 +67,29 @@ def get_all():
         return users
 
 
-def add_user(user_id, user_name):
-    db_user = None
+def add_user_if_not_exists(user_id, user_name):
+    for user in users:
+        if user["user_id"] == user_id:
+            return
 
-    user_already_in_db = user_repository.get_by_id(user_id)
-
-    if not user_already_in_db:
-        created_date = datetime.now()
+    if not user_repository.get_by_id(user_id):
+        now = datetime.now()
 
         create_schema = user_schema.UserCreate(
             telegram_user_id=user_id,
             telegram_username=user_name,
             is_admin=False,
-            created_on=created_date,
-            modified_on=created_date,
+            created_on=now,
+            modified_on=now,
         )
+
         db_user = user_repository.add(create_schema)
 
-    return db_user
-
-
-def add_user_if_not_exists(user_id, user_name):
-    result = False
-
-    for user in users:
-        if user["user_id"] == user_id:
-            return
-
-    db_user = add_user(user_id, user_name)
-    if db_user != None:
-        users.append(
-            {
-                "user_id": db_user.telegram_user_id,
-                "username": db_user.telegram_username,
-                "is_admin": db_user.is_admin,
-            }
-        )
-    return result
+        if db_user:
+            users.append(
+                {
+                    "user_id": db_user.telegram_user_id,
+                    "username": db_user.telegram_username,
+                    "is_admin": db_user.is_admin,
+                }
+            )

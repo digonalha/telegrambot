@@ -11,79 +11,104 @@ syslog = SystemLogging(__name__)
 def get_all():
     global custom_commands
     try:
-        mods = custom_command_repository.get_all()
+        commands = custom_command_repository.get_all()
         custom_commands = []
 
-        for mod in mods:
+        for command in commands:
             custom_commands.append(
                 {
-                    "user_id": mod.telegram_user_id,
-                    "chat_id": mod.chat_id,
+                    "command": command.command,
+                    "text": command.text,
+                    "description": command.description,
+                    "chat_id": command.chat_id,
                 }
             )
     except:
         return custom_commands
 
 
-def add_custom_command(custom_command: custom_command_schema.CustomCommandCreate):
-    db_custom_command = None
-
-    custom_command_already_in_db = custom_command_repository.get(
-        custom_command.command, custom_command.chat_id
-    )
-
-    if not custom_command_already_in_db:
-        db_custom_command = custom_command_repository.add(custom_command)
-
-    return db_custom_command
-
-
-def add_custom_command_if_not_exists(user_id, chat_id):
-    result = False
-
+def add_custom_command(new_command):
     if len(custom_commands) > 0 and next(
         (
-            m
-            for m in custom_commands
-            if m["user_id"] == user_id and m["chat_id"] == chat_id
+            cc
+            for cc in custom_commands
+            if cc["command"] == new_command["command"]
+            and cc["chat_id"] == new_command["chat_id"]
         ),
         None,
     ):
-        return True
+        return False
 
-    db_custom_command = add_custom_command(user_id, chat_id)
+    db_custom_command = None
 
-    if db_custom_command != None:
+    custom_command_already_in_db = custom_command_repository.get(
+        new_command["command"], new_command["chat_id"]
+    )
+
+    custom_command = custom_command_schema.CustomCommandCreate(**new_command)
+
+    if not custom_command_already_in_db:
+        db_custom_command = custom_command_repository.add(custom_command)
         custom_commands.append(
             {
-                "user_id": db_custom_command.telegram_user_id,
+                "command": db_custom_command.command,
+                "text": db_custom_command.text,
+                "description": db_custom_command.description,
                 "chat_id": db_custom_command.chat_id,
             }
         )
+        return True
 
-    return result
+    return False
 
 
 def insert_custom_command(chat_id, message_text: str, send_by_user_id: int):
     try:
-        command, username = message_text.split()
+        command, answer, description = message_text.split("|")
+        command, new_custom_command = command.split()
+
+        command.strip()
+        new_custom_command.strip()
 
         if command != "!newcommand":
             raise Exception("unknow command: " + command)
+        elif len(new_custom_command) < 3:
+            raise Exception("error creating custom command: " + new_custom_command)
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para criar um novo comando, utilize *!newcommand <resposta> <descrição>*",
+            "Para criar um novo comando, utilize *!newcommand <comando> | <resposta> | <descrição>*",
         )
-        syslog.create_warning("insert_moderator", ex)
+        syslog.create_warning("insert_custom_command", ex)
         return
 
-    user = user_service.validate_user_command(chat_id, send_by_user_id, username)
+    message = "No foi possível cadastrar o novo comando :("
 
-    if not user:
-        return
+    try:
+        is_valid = user_service.validate_user_permission(chat_id, send_by_user_id)
 
-    if not add_custom_command(user["user_id"], chat_id):
-        message_service.send_message(chat_id, f"Novo comando *!{command}* criado!")
-    else:
-        message_service.send_message(chat_id, f"O comando *!{command}* já existe")
+        if not is_valid:
+            return
+
+        user = user_service.get_user(send_by_user_id)
+        now = datetime.now()
+
+        new_custom_command_obj = {
+            "command": new_custom_command,
+            "text": answer.strip(),
+            "description": description.strip(),
+            "chat_id": chat_id,
+            "created_by_user_id": user["user_id"],
+            "created_by_username": user["username"],
+            "created_on": now,
+            "modified_on": now,
+        }
+
+        if add_custom_command(new_custom_command_obj):
+            message = f"Novo comando *!{new_custom_command}* criado!"
+        else:
+            message = f"O comando *!{new_custom_command}* já existe"
+    except Exception as ex:
+        syslog.create_warning("insert_custom_command", ex)
+
+    message_service.send_message(chat_id, message)
