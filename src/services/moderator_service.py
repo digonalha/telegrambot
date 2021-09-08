@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import final
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import moderator_repository
 from src.schemas import moderator_schema
