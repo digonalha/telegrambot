@@ -112,6 +112,26 @@ def resolve_action(message):
             custom_command_service.insert_custom_command(
                 chat_id, text, message_from["id"]
             )
+        elif item_text.startswith("!") or item_caption.startswith("!"):
+            text = item_text if item_caption == "" else item_caption
+
+            if text == "!":
+                return
+
+            custom_command = text.split(" ", 0)[0]
+            custom_command = custom_command.split("!")[1]
+
+            result = next(
+                (
+                    cc
+                    for cc in custom_command_service.custom_commands
+                    if cc["command"] == custom_command and cc["chat_id"] == chat_id
+                ),
+                None,
+            )
+
+            if result:
+                send_message(chat_id, result["text"])
 
     except Exception as ex:
         syslog.create_warning("resolve_action", ex)

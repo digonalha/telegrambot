@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import final
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import moderator_repository
 from src.schemas import moderator_schema
@@ -53,6 +54,41 @@ def add_moderator(user_id: int, chat_id: int):
     return False
 
 
+def insert_moderator(chat_id: int, message_text: str, send_by_user_id: int):
+    try:
+        command, username = message_text.split()
+
+        if command != "!mod":
+            raise Exception("unknow command: " + command)
+    except Exception as ex:
+        message_service.send_message(
+            chat_id,
+            "Para tornar um usuário moderador, utilize *!mod username*",
+        )
+        syslog.create_warning("insert_moderator", ex)
+        return
+
+    message = "Não foi possível cadastrar o novo moderador :("
+
+    try:
+        if not user_service.validate_user_permission(chat_id, send_by_user_id):
+            return
+
+        user = user_service.validate_username_exists(chat_id, username)
+
+        if not user:
+            return
+
+        if add_moderator(user["user_id"], chat_id):
+            message = f"*{username}* agora é um moderador"
+        else:
+            message = f"*{username}* já é um moderador"
+    except Exception as ex:
+        syslog.create_warning("insert_moderator", ex)
+    finally:
+        message_service.send_message(chat_id, message)
+
+
 def delete_moderator(user_id: int, chat_id: int):
     if len(moderators) == 0 or not (
         next(
@@ -74,35 +110,7 @@ def delete_moderator(user_id: int, chat_id: int):
     return False
 
 
-def insert_moderator(chat_id, message_text: str, send_by_user_id: int):
-    try:
-        command, username = message_text.split()
-
-        if command != "!mod":
-            raise Exception("unknow command: " + command)
-    except Exception as ex:
-        message_service.send_message(
-            chat_id,
-            "Para tornar um usuário moderador, utilize *!mod username*",
-        )
-        syslog.create_warning("insert_moderator", ex)
-        return
-
-    if not user_service.validate_user_permission(chat_id, send_by_user_id):
-        return
-
-    user = user_service.validate_username_exists(chat_id, username)
-
-    if not user:
-        return
-
-    if add_moderator(user["user_id"], chat_id):
-        message_service.send_message(chat_id, f"*{username}* agora é um moderador")
-    else:
-        message_service.send_message(chat_id, f"*{username}* já é um moderador")
-
-
-def remove_moderator(chat_id, message_text: str, send_by_user_id: int):
+def remove_moderator(chat_id: int, message_text: str, send_by_user_id: int):
     try:
         command, username = message_text.split()
 
@@ -116,15 +124,22 @@ def remove_moderator(chat_id, message_text: str, send_by_user_id: int):
         syslog.create_warning("remove_moderator", ex)
         return
 
-    if not user_service.validate_user_permission(chat_id, send_by_user_id):
-        return
+    message = "Não foi possível remover o moderador :("
 
-    user = user_service.validate_username_exists(chat_id, username)
+    try:
+        if not user_service.validate_user_permission(chat_id, send_by_user_id):
+            return
 
-    if not user:
-        return
+        user = user_service.validate_username_exists(chat_id, username)
 
-    if delete_moderator(user["user_id"], chat_id):
-        message_service.send_message(chat_id, f"*{username}* não é mais um moderador")
-    else:
-        message_service.send_message(chat_id, f"*{username}* não é um moderador")
+        if not user:
+            return
+
+        if delete_moderator(user["user_id"], chat_id):
+            message = f"*{username}* não é mais um moderador"
+        else:
+            message = f"*{username}* não é um moderador"
+    except Exception as ex:
+        syslog.create_warning("remove_moderator", ex)
+    finally:
+        message_service.send_message(chat_id, message)

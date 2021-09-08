@@ -62,7 +62,7 @@ def add_custom_command(new_command):
     return False
 
 
-def insert_custom_command(chat_id, message_text: str, send_by_user_id: int):
+def insert_custom_command(chat_id: int, message_text: str, send_by_user_id: int):
     try:
         command, answer, description = message_text.split("|")
         command, new_custom_command = command.split()
@@ -82,12 +82,10 @@ def insert_custom_command(chat_id, message_text: str, send_by_user_id: int):
         syslog.create_warning("insert_custom_command", ex)
         return
 
-    message = "No foi possível cadastrar o novo comando :("
+    message = "Não foi possível cadastrar o novo comando :("
 
     try:
-        is_valid = user_service.validate_user_permission(chat_id, send_by_user_id)
-
-        if not is_valid:
+        if not user_service.validate_user_permission(chat_id, send_by_user_id):
             return
 
         user = user_service.get_user(send_by_user_id)
@@ -110,5 +108,5 @@ def insert_custom_command(chat_id, message_text: str, send_by_user_id: int):
             message = f"O comando *!{new_custom_command}* já existe"
     except Exception as ex:
         syslog.create_warning("insert_custom_command", ex)
-
-    message_service.send_message(chat_id, message)
+    finally:
+        message_service.send_message(chat_id, message)

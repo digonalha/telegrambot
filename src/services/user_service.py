@@ -67,29 +67,32 @@ def get_all():
         return users
 
 
-def add_user_if_not_exists(user_id, user_name):
-    for user in users:
-        if user["user_id"] == user_id:
-            return
+def add_user_if_not_exists(user_id: int, username: str):
+    try:
+        for user in users:
+            if user["user_id"] == user_id:
+                return
 
-    if not user_repository.get_by_id(user_id):
-        now = datetime.now()
+        if not user_repository.get_by_id(user_id):
+            now = datetime.now()
 
-        create_schema = user_schema.UserCreate(
-            telegram_user_id=user_id,
-            telegram_username=user_name,
-            is_admin=False,
-            created_on=now,
-            modified_on=now,
-        )
-
-        db_user = user_repository.add(create_schema)
-
-        if db_user:
-            users.append(
-                {
-                    "user_id": db_user.telegram_user_id,
-                    "username": db_user.telegram_username,
-                    "is_admin": db_user.is_admin,
-                }
+            create_schema = user_schema.UserCreate(
+                telegram_user_id=user_id,
+                telegram_username=username,
+                is_admin=False,
+                created_on=now,
+                modified_on=now,
             )
+
+            db_user = user_repository.add(create_schema)
+
+            if db_user:
+                users.append(
+                    {
+                        "user_id": db_user.telegram_user_id,
+                        "username": db_user.telegram_username,
+                        "is_admin": db_user.is_admin,
+                    }
+                )
+    except Exception as ex:
+        syslog.create_warning("add_user_if_not_exists", ex)
