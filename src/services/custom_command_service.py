@@ -8,6 +8,17 @@ custom_commands = []
 syslog = SystemLogging(__name__)
 
 
+def get_command(command: str, chat_id: int):
+    return next(
+        (
+            cc
+            for cc in custom_commands
+            if cc["command"] == command and cc["chat_id"] == chat_id
+        ),
+        None,
+    )
+
+
 def get_all():
     global custom_commands
     try:
