@@ -117,6 +117,8 @@ def insert_command(
             if sl_desc != None:
                 description = sl_desc.split("d ", 1)[1]
 
+        new_custom_command = new_custom_command.replace('!', '')
+
         if command != "!add":
             raise Exception("unknow command: " + command)
         elif len(new_custom_command) < 3 or len(new_custom_command) > 15:
