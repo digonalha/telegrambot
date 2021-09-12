@@ -11,10 +11,10 @@ class SystemLogging:
         file_handler.setLevel(logging.WARNING)
 
         console_handler.setFormatter(
-            logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+            logging.Formatter("  → %(levelname)s | %(name)s | %(message)s")
         )
         file_handler.setFormatter(
-            logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            logging.Formatter("%(asctime)s - %(levelname)s | %(name)s | %(message)s")
         )
 
         self.logger.addHandler(console_handler)

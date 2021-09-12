@@ -1,4 +1,6 @@
 from datetime import datetime
+
+from sqlalchemy.sql.expression import desc
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import custom_command_repository
 from src.schemas import custom_command_schema
@@ -32,6 +34,8 @@ def get_all():
                     "text": command.text,
                     "description": command.description,
                     "chat_id": command.chat_id,
+                    "file_id": command.file_id,
+                    "media_type": command.media_type,
                 }
             )
     except:
@@ -66,6 +70,8 @@ def add_custom_command(new_command):
                 "text": db_custom_command.text,
                 "description": db_custom_command.description,
                 "chat_id": db_custom_command.chat_id,
+                "file_id": db_custom_command.file_id,
+                "media_type": db_custom_command.media_type,
             }
         )
         return True
@@ -73,24 +79,70 @@ def add_custom_command(new_command):
     return False
 
 
-def insert_custom_command(chat_id: int, message_text: str, send_by_user_id: int):
+def insert_command(
+    chat_id: int,
+    message_text: str,
+    send_by_user_id: int,
+    file_id: str = None,
+    media_type: str = None,
+):
     try:
-        command, answer, description = message_text.split("|")
-        command, new_custom_command = command.split()
+        using_pipe = False
+        word_list = []
+        command, new_custom_command, answer, description = "", "", "", ""
 
-        command.strip()
-        new_custom_command.strip()
+        if " -c " in message_text:
+            word_list = message_text.split("-")
+        else:
+            word_list = message_text.split("|")
+            using_pipe = True
 
-        if command != "!newcommand":
+        stripped_list = [w.strip() for w in word_list]
+
+        if using_pipe:
+            command, new_custom_command = stripped_list[0].split()
+            answer = stripped_list[1]
+            description = stripped_list[2]
+        else:
+            command = stripped_list[0]
+
+            sl_command = next((x for x in stripped_list if x.startswith("c ")), None)
+            sl_answer = next((x for x in stripped_list if x.startswith("a ")), None)
+            sl_desc = next((x for x in stripped_list if x.startswith("d ")), None)
+
+            if sl_command != None:
+                new_custom_command = sl_command.split("c ", 1)[1]
+            if sl_answer != None:
+                answer = sl_answer.split("a ", 1)[1]
+            if sl_desc != None:
+                description = sl_desc.split("d ", 1)[1]
+
+        if command != "!add":
             raise Exception("unknow command: " + command)
-        elif len(new_custom_command) < 3:
-            raise Exception("error creating custom command: " + new_custom_command)
+        elif len(new_custom_command) < 3 or len(new_custom_command) > 15:
+            message_service.send_message(
+                chat_id,
+                "O novo comando deve ter entre 2 e 15 caracteres",
+            )
+            return
+        elif media_type == None and (len(answer) < 5 or len(answer) > 1000):
+            message_service.send_message(
+                chat_id,
+                "A resposta deve ter entre 5 e 1000 caracteres",
+            )
+            return
+        elif len(description) < 5 or len(description) > 150:
+            message_service.send_message(
+                chat_id,
+                "A descrição deve ter entre 5 e 150 caracteres",
+            )
+            return
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para criar um novo comando, utilize *!newcommand <comando> | <resposta> | <descrição>*",
+            "Para criar um novo comando, utilize:\n*!add <comando> | <resposta> | <descrição>*\nou\n*!add -c <comando> -a <resposta> -d <descrição>*",
         )
-        syslog.create_warning("insert_custom_command", ex)
+        syslog.create_warning("insert_command", ex)
         return
 
     message = "Não foi possível cadastrar o novo comando :("
@@ -113,11 +165,15 @@ def insert_custom_command(chat_id: int, message_text: str, send_by_user_id: int)
             "modified_on": now,
         }
 
+        if file_id != None and media_type != None:
+            new_custom_command_obj["file_id"] = file_id
+            new_custom_command_obj["media_type"] = media_type
+
         if add_custom_command(new_custom_command_obj):
             message = f"Novo comando *!{new_custom_command}* criado!"
         else:
             message = f"O comando *!{new_custom_command}* já existe"
     except Exception as ex:
-        syslog.create_warning("insert_custom_command", ex)
+        syslog.create_warning("insert_command", ex)
     finally:
         message_service.send_message(chat_id, message)

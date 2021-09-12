@@ -2,6 +2,8 @@ import requests
 import os
 from dotenv import load_dotenv
 from src.helpers.logging_helper import SystemLogging
+from ast import literal_eval
+from random import randint
 
 syslog = SystemLogging(__name__)
 
@@ -70,10 +72,33 @@ def send_video(chat_id: int, video_url: str, reply_id: int = 0):
         syslog.create_warning("send_video", ex)
 
 
-def send_photo(chat_id: int, photo: str, caption: str, reply_id: int = 0):
+def send_audio(chat_id: int, file_id: str, title: str, username: str):
     try:
-        data = {"chat_id": chat_id, "photo": photo, "caption": caption}
-        if reply_id != None and reply_id > 0:
+        data = {
+            "chat_id": chat_id,
+            # "title": title,
+            # "performer": username,
+            "audio": file_id,
+        }
+
+        res = requests.post(f"{API_URI}/sendAudio", data=data)
+        create_log_from_response("send_audio", res.json())
+    except Exception as ex:
+        syslog.create_warning("send_audio", ex)
+
+
+def send_image(chat_id: int, file_id: str, caption: str = None, reply_id: int = None):
+    try:
+        if file_id.startswith("[") and file_id.endswith("]"):
+            arr_photo = literal_eval(file_id)
+            random_index = randint(0, len(arr_photo) - 1)
+            file_id = arr_photo[random_index]
+
+        data = {"chat_id": chat_id, "photo": file_id}
+
+        if caption != None:
+            data["caption"] = caption
+        if reply_id != None:
             data["reply_to_message_id"] = reply_id
         res = requests.post(f"{API_URI}/sendPhoto", data=data)
         create_log_from_response("send_photo", res.json())

@@ -5,7 +5,8 @@ from datetime import datetime
 class CustomCommandBase(BaseModel):
     command: str
     description: str
-    telegram_file_id: str = None
+    file_id: str = None
+    media_type: str = None
     text: str = None
     chat_id: int
     created_by_user_id: int
