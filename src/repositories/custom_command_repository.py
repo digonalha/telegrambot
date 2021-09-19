@@ -17,8 +17,8 @@ def add(custom_command: custom_command_schema.CustomCommandCreate):
 
 def delete(command_name: str, chat_id: int):
     local_session.query(custom_command_model.CustomCommand).filter(
-        custom_command_model.CustomCommand.telegram_user_id == command_name
-        and custom_command_model.CustomCommand.chat_id == chat_id
+        custom_command_model.CustomCommand.command == command_name,
+        custom_command_model.CustomCommand.chat_id == chat_id,
     ).delete()
 
     local_session.commit()
@@ -32,8 +32,8 @@ def get(command: str, chat_id: int):
     return (
         local_session.query(custom_command_model.CustomCommand)
         .filter(
-            custom_command_model.CustomCommand.command == command
-            and custom_command_model.CustomCommand.chat_id == chat_id
+            custom_command_model.CustomCommand.command == command,
+            custom_command_model.CustomCommand.chat_id == chat_id,
         )
         .first()
     )

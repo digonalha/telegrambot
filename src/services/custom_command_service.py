@@ -60,10 +60,10 @@ def add_custom_command(new_command):
         new_command["command"], new_command["chat_id"]
     )
 
-    custom_command = custom_command_schema.CustomCommandCreate(**new_command)
-
     if not custom_command_already_in_db:
-        db_custom_command = custom_command_repository.add(custom_command)
+        db_custom_command = custom_command_repository.add(
+            custom_command_schema.CustomCommandCreate(**new_command)
+        )
         custom_commands.append(
             {
                 "command": db_custom_command.command,
@@ -117,11 +117,11 @@ def insert_command(
             if sl_desc != None:
                 description = sl_desc.split("d ", 1)[1]
 
-        new_custom_command = new_custom_command.replace('!', '')
+        new_custom_command = new_custom_command.replace("!", "")
 
         if command != "!add":
             raise Exception("unknow command: " + command)
-        elif len(new_custom_command) < 3 or len(new_custom_command) > 15:
+        elif len(new_custom_command) < 2 or len(new_custom_command) > 15:
             message_service.send_message(
                 chat_id,
                 "O novo comando deve ter entre 2 e 15 caracteres",
@@ -179,3 +179,6 @@ def insert_command(
         syslog.create_warning("insert_command", ex)
     finally:
         message_service.send_message(chat_id, message)
+
+
+# def remove_command(chat_id: int, message_text: str, send_by_user_id: int):

@@ -17,8 +17,8 @@ def add(moderator: moderator_schema.ModeratorCreate):
 
 def delete(user_id: int, chat_id: int):
     local_session.query(moderator_model.Moderator).filter(
-        moderator_model.Moderator.telegram_user_id == user_id
-        and moderator_model.Moderator.chat_id == chat_id
+        moderator_model.Moderator.telegram_user_id == user_id,
+        moderator_model.Moderator.chat_id == chat_id,
     ).delete()
 
     local_session.commit()
@@ -32,8 +32,8 @@ def get(user_id: int, chat_id: int):
     return (
         local_session.query(moderator_model.Moderator)
         .filter(
-            moderator_model.Moderator.telegram_user_id == user_id
-            and moderator_model.Moderator.chat_id == chat_id
+            moderator_model.Moderator.telegram_user_id == user_id,
+            moderator_model.Moderator.chat_id == chat_id,
         )
         .first()
     )
