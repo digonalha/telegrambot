@@ -28,7 +28,7 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
             raise Exception("unknow command: " + command)
     except Exception as ex:
         message_service.send_message(
-            chat_id, "Para silenciar um usuário, utilize *!mute username 30~3600*"
+            chat_id, "Para silenciar um usuário, utilize *!mute <username> <30~3600>*"
         )
         syslog.create_warning("insert_timeout_user", ex)
         return
@@ -38,7 +38,7 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
         if timer < 30 or timer > 3600:
             message_service.send_message(
                 chat_id,
-                "Valor em segundos inválido! Utilize valores entre 30 (meio minuto) e 3600 (uma hora)",
+                "Valor em segundos inválido! Utilize valores entre 30 (½ min) e 3600 (1h)",
             )
             return
 
@@ -88,7 +88,7 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para habilitar a fala de um usuário, utilize *!unmute username*",
+            "Para habilitar a fala de um usuário, utilize *!unmute <username>*",
         )
         syslog.create_warning("remove_timeout_user", ex)
         return
