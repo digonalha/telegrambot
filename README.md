@@ -1,7 +1,5 @@
 # telegrambot
 
-Projeto de bot para telegram utilizando python + postgres.
-
 Criei esse bot para gerenciar alguns canais de telegram que sou administrador. Preferi não utilizar nenhum wrapper já conhecido da API (como o python-telegram-bot) e criar o meu próprio, mas por enquanto não tem tantos comandos.
 
 No momento o bot atende os seguintes comandos:
