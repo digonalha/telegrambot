@@ -26,6 +26,8 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
 
         if command != "!mute":
             raise Exception("unknow command: " + command)
+
+        username = username.replace("@", "")
     except Exception as ex:
         message_service.send_message(
             chat_id, "Para silenciar um usuário, utilize *!mute <username> <30~3600>*"
@@ -51,7 +53,7 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
             return
         elif user["is_admin"]:
             message_service.send_message(
-                chat_id, f"*{username}* é um administrador e não pode ser silenciado"
+                chat_id, f"*@{username}* é um administrador e não pode ser silenciado"
             )
             return
 
@@ -60,7 +62,7 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
             for tu in timeout_users
             if tu["user_id"] == user["user_id"] and tu["chat_id"] == chat_id
         ):
-            message_service.send_message(chat_id, f"*{username}* já está silenciado!")
+            message_service.send_message(chat_id, f"*@{username}* já está silenciado!")
         else:
             timeout_until = datetime.now() + timedelta(0, timer)
             timeout_users.append(
@@ -72,7 +74,7 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
                 }
             )
             message_service.send_message(
-                chat_id, f"*{username}* silenciado por {timer} segundos..."
+                chat_id, f"*@{username}* silenciado por {timer} segundos..."
             )
     except Exception as ex:
         syslog.create_warning("insert_timeout_user", ex)
@@ -85,6 +87,8 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
 
         if command != "!unmute":
             raise Exception("unknow command: " + command)
+
+        username = username.replace("@", "")
     except Exception as ex:
         message_service.send_message(
             chat_id,
@@ -103,7 +107,7 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
             return
 
         if len(timeout_users) == 0:
-            message_service.send_message(chat_id, f"*{username}* não está silenciado!")
+            message_service.send_message(chat_id, f"*@{username}* não está silenciado!")
 
         silenced_user = next(
             (
@@ -115,12 +119,12 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
         )
 
         if not silenced_user:
-            message_service.send_message(chat_id, f"*{username}* não está silenciado!")
+            message_service.send_message(chat_id, f"*@{username}* não está silenciado!")
         else:
             timeout_users.remove(silenced_user)
             message_service.send_message(
                 silenced_user["chat_id"],
-                f"*{(silenced_user['username'])}* já pode voltar a falar :)",
+                f"*@{(silenced_user['username'])}* já pode voltar a falar :)",
             )
     except Exception as ex:
         syslog.create_warning("remove_timeout_user", ex)

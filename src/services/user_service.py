@@ -8,10 +8,14 @@ users = []
 syslog = SystemLogging(__name__)
 
 
-def validate_user_permission(chat_id: int, user_id: int):
+def validate_user_permission(
+    chat_id: int, user_id: int, validate_admin_only: bool = False
+) -> bool:
     user_send = next((u for u in users if u["user_id"] == user_id), None)
 
-    if (user_send == None or not user_send["is_admin"]) and next(
+    if user_send == None and validate_admin_only == True:
+        return False
+    elif (user_send == None or not user_send["is_admin"]) and next(
         (
             m
             for m in moderator_service.moderators

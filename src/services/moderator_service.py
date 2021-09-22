@@ -59,6 +59,8 @@ def insert_moderator(chat_id: int, message_text: str, send_by_user_id: int):
 
         if command != "!mod":
             raise Exception("unknow command: " + command)
+
+        username = username.replace("@", "")
     except Exception as ex:
         message_service.send_message(
             chat_id,
@@ -79,9 +81,9 @@ def insert_moderator(chat_id: int, message_text: str, send_by_user_id: int):
             return
 
         if add_moderator(user["user_id"], chat_id):
-            message = f"*{username}* agora é um moderador"
+            message = f"*@{username}* agora é um moderador"
         else:
-            message = f"*{username}* já é um moderador"
+            message = f"*@{username}* já é um moderador"
     except Exception as ex:
         syslog.create_warning("insert_moderator", ex)
     finally:
@@ -115,6 +117,8 @@ def remove_moderator(chat_id: int, message_text: str, send_by_user_id: int):
 
         if command != "!unmod":
             raise Exception("unknow command: " + command)
+
+        username = username.replace("@", "")
     except Exception as ex:
         message_service.send_message(
             chat_id,
@@ -135,9 +139,9 @@ def remove_moderator(chat_id: int, message_text: str, send_by_user_id: int):
             return
 
         if delete_moderator(user["user_id"], chat_id):
-            message = f"*{username}* não é mais um moderador"
+            message = f"*@{username}* não é mais um moderador"
         else:
-            message = f"*{username}* não é um moderador"
+            message = f"*@{username}* não é um moderador"
     except Exception as ex:
         syslog.create_warning("remove_moderator", ex)
     finally:

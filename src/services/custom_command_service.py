@@ -208,6 +208,9 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int):
 
         if command != "!del":
             raise Exception("unknow command: " + command)
+
+        custom_command_name = custom_command_name.replace("!", "")
+
     except Exception as ex:
         message_service.send_message(
             chat_id,
@@ -217,7 +220,9 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int):
         return
 
     try:
-        if not user_service.validate_user_permission(chat_id, send_by_user_id):
+        if not user_service.validate_user_permission(
+            chat_id, send_by_user_id, validate_admin_only=True
+        ):
             return
 
         if delete_custom_command(custom_command_name, chat_id):
