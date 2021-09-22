@@ -125,5 +125,5 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
     except Exception as ex:
         syslog.create_warning("remove_timeout_user", ex)
         message_service.send_message(
-            chat_id, "Não foi possível remover o usuário da lista de silenciados :("
+            chat_id, "Não foi possível remover o usuário da lista de silenciados"
         )

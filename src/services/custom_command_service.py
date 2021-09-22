@@ -85,7 +85,7 @@ def insert_command(
     send_by_user_id: int,
     file_id: str = None,
     media_type: str = None,
-):
+) -> bool:
     try:
         using_pipe = False
         word_list = []
@@ -124,30 +124,30 @@ def insert_command(
         elif len(new_custom_command) < 2 or len(new_custom_command) > 15:
             message_service.send_message(
                 chat_id,
-                "O novo comando deve ter entre 2 e 15 caracteres.",
+                "O novo comando deve ter entre 2 e 15 caracteres",
             )
             return
         elif media_type == None and (len(answer) < 5 or len(answer) > 1000):
             message_service.send_message(
                 chat_id,
-                "A resposta deve ter entre 5 e 1000 caracteres.",
+                "A resposta deve ter entre 5 e 1000 caracteres",
             )
             return
         elif len(description) < 5 or len(description) > 150:
             message_service.send_message(
                 chat_id,
-                "A descrição deve ter entre 5 e 150 caracteres.",
+                "A descrição deve ter entre 5 e 150 caracteres",
             )
             return
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para criar um novo comando, utilize:\n*!add <comando> | <resposta> | <descrição>*\nou\n*!add -c <comando> -a <resposta> -d <descrição>*.",
+            "Para criar um novo comando, utilize:\n*!add <comando> | <resposta> | <descrição>*\nou\n*!add -c <comando> -a <resposta> -d <descrição>*",
         )
         syslog.create_warning("insert_command", ex)
         return
 
-    message = "Não foi possível cadastrar o novo comando."
+    message = "Não foi possível cadastrar o novo comando"
 
     try:
         if not user_service.validate_user_permission(chat_id, send_by_user_id):
@@ -174,11 +174,32 @@ def insert_command(
         if add_custom_command(new_custom_command_obj):
             message = f"Novo comando *!{new_custom_command}* criado!"
         else:
-            message = f"O comando *!{new_custom_command}* já existe."
+            message = f"O comando *!{new_custom_command}* já existe"
     except Exception as ex:
         syslog.create_warning("insert_command", ex)
     finally:
         message_service.send_message(chat_id, message)
+
+
+def delete_custom_command(command_name: str, chat_id: int) -> bool:
+    db_custom_command = next(
+        (
+            cc
+            for cc in custom_commands
+            if cc["chat_id"] == chat_id and cc["command"] == command_name
+        ),
+        None,
+    )
+
+    if not db_custom_command:
+        return False
+
+    if custom_command_repository.get(command_name, chat_id):
+        custom_command_repository.delete(command_name, chat_id)
+        custom_commands.remove(db_custom_command)
+        return True
+
+    return False
 
 
 def remove_command(chat_id: int, message_text: str, send_by_user_id: int):
@@ -190,7 +211,7 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int):
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para remover um comando customizado, utilize *!del <nome comando>*.",
+            "Para remover um comando customizado, utilize *!del <nome comando>*",
         )
         syslog.create_warning("remove_command", ex)
         return
@@ -199,16 +220,17 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int):
         if not user_service.validate_user_permission(chat_id, send_by_user_id):
             return
 
-        if delete_custom_command(chat_id, custom_command_name):
+        if delete_custom_command(custom_command_name, chat_id):
             message_service.send_message(
-                chat_id, f"O comando *!{custom_command_name}* não existe."
+                chat_id, f"Comando *!{custom_command_name}* foi removido!"
             )
         else:
-            timeout_users.remove(silenced_user)
             message_service.send_message(
-                silenced_user["chat_id"],
-                f"*{(silenced_user['username'])}* já pode voltar a falar.",
+                chat_id,
+                f"O comando *!{custom_command_name}* não existe",
             )
     except Exception as ex:
         syslog.create_warning("remove_command", ex)
-        message_service.send_message(chat_id, f"Não foi possível remover o comando **.")
+        message_service.send_message(
+            chat_id, f"Não foi possível remover o comando *{custom_command_name}*"
+        )
