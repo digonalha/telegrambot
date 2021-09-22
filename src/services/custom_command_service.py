@@ -85,7 +85,7 @@ def insert_command(
     send_by_user_id: int,
     file_id: str = None,
     media_type: str = None,
-):
+) -> bool:
     try:
         using_pipe = False
         word_list = []
@@ -147,7 +147,7 @@ def insert_command(
         syslog.create_warning("insert_command", ex)
         return
 
-    message = "Não foi possível cadastrar o novo comando :("
+    message = "Não foi possível cadastrar o novo comando"
 
     try:
         if not user_service.validate_user_permission(chat_id, send_by_user_id):
@@ -181,4 +181,56 @@ def insert_command(
         message_service.send_message(chat_id, message)
 
 
-# def remove_command(chat_id: int, message_text: str, send_by_user_id: int):
+def delete_custom_command(command_name: str, chat_id: int) -> bool:
+    db_custom_command = next(
+        (
+            cc
+            for cc in custom_commands
+            if cc["chat_id"] == chat_id and cc["command"] == command_name
+        ),
+        None,
+    )
+
+    if not db_custom_command:
+        return False
+
+    if custom_command_repository.get(command_name, chat_id):
+        custom_command_repository.delete(command_name, chat_id)
+        custom_commands.remove(db_custom_command)
+        return True
+
+    return False
+
+
+def remove_command(chat_id: int, message_text: str, send_by_user_id: int):
+    try:
+        command, custom_command_name = message_text.split()
+
+        if command != "!del":
+            raise Exception("unknow command: " + command)
+    except Exception as ex:
+        message_service.send_message(
+            chat_id,
+            "Para remover um comando customizado, utilize *!del <nome comando>*",
+        )
+        syslog.create_warning("remove_command", ex)
+        return
+
+    try:
+        if not user_service.validate_user_permission(chat_id, send_by_user_id):
+            return
+
+        if delete_custom_command(custom_command_name, chat_id):
+            message_service.send_message(
+                chat_id, f"Comando *!{custom_command_name}* foi removido!"
+            )
+        else:
+            message_service.send_message(
+                chat_id,
+                f"O comando *!{custom_command_name}* não existe",
+            )
+    except Exception as ex:
+        syslog.create_warning("remove_command", ex)
+        message_service.send_message(
+            chat_id, f"Não foi possível remover o comando *{custom_command_name}*"
+        )

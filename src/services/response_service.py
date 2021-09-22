@@ -66,6 +66,9 @@ def resolve_action(message):
         else:
             return
 
+        if not text.startswith("!"):
+            return
+
         if text.lower().startswith("!help"):
             send_help_message(chat_id, from_user_id, message["message_id"])
         elif text.lower().startswith("!mod"):
@@ -90,7 +93,9 @@ def resolve_action(message):
             custom_command_service.insert_command(
                 chat_id, text, from_user_id, file_id, media_type
             )
-        elif text.startswith("!") and len(text) >= 3:
+        elif text.lower().startswith("!del"):
+            custom_command_service.remove_command(chat_id, text, from_user_id)
+        elif len(text) >= 3:
 
             custom_command = text.split(" ", 0)[0]
             custom_command = custom_command.split("!")[1]
