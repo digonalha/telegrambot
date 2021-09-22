@@ -10,6 +10,7 @@ No momento o bot atende os seguintes comandos:
 !mute <username> <tempo em segundos>: adiciona o usuário na lista de silenciados pelo tempo especificado **
 !unmute <username>: remove o usuário da lista de silenciados **
 !add <comando> | <resposta> | <descrição>: adiciona um novo comando (para mídias, enviar o comando na legenda) **
+!del <comando>: remove um comando customizado *
 
 * necessário ser um administrador
 ** necessário ser um administrador ou moderador
