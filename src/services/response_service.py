@@ -29,7 +29,7 @@ def send_help_message(chat_id: int, reply_user: int, message_id: int):
         cc_title = "\n*Comandos Customizados:*\n\n"
 
     help_message = (
-        f"Olá, *{(user['username'])}*!\n"
+        f"Olá, *@{(user['username'])}*!\n"
         "Aqui está a minha lista de comandos disponiveis:\n\n"
         "*!help:* lista de comandos disponíveis\n"
         "*!mod <username>:* adiciona o usuário na lista de moderadores \*\n"
@@ -37,6 +37,7 @@ def send_help_message(chat_id: int, reply_user: int, message_id: int):
         "*!mute <username> <tempo em segundos>:* adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
         "*!unmute <username>:* remove o usuário da lista de silenciados \*\*\n"
         "*!add <comando> | <resposta> | <descrição>:* adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
+        "*!del <comando>:* remove um comando customizado\*\n"
         f"{cc_title}"
         f"{custom_messages}"
         "\n\* _necessário ser um administrador_\n"
