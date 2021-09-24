@@ -52,7 +52,9 @@ def resolve_action(message):
         from_user_id = message["from"]["id"]
         chat_id = message["chat"]["id"]
 
-        if timeout_service.is_user_in_timeout(chat_id, from_user_id):
+        if message["chat"]["type"] != "group" or timeout_service.is_user_in_timeout(
+            chat_id, from_user_id
+        ):
             return
 
         # persistindo usuarios:
