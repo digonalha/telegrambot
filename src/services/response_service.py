@@ -15,6 +15,8 @@ def send_help_message(chat_id: int, reply_user: int, message_id: int):
 
     custom_messages = ""
 
+    custom_command_service.custom_commands.sort(key=lambda x: x.get("command"))
+
     for cc in custom_command_service.custom_commands:
         if cc["chat_id"] == chat_id:
             description = "Nenhuma descrição encontrada."

@@ -1,6 +1,7 @@
 from datetime import datetime
 from src.api import telegram_api
 from src.helpers.logging_helper import SystemLogging
+from random import randint
 
 syslog = SystemLogging(__name__)
 
@@ -22,6 +23,10 @@ def send_video(chat_id: int, file_id: str):
 
 
 def send_message(chat_id: int, message: str):
+    if "$random_percent" in message:
+        perc = randint(0, 100)
+        message = message.replace("$random_percent", str(perc))
+
     telegram_api.send_message(chat_id, message)
 
 
