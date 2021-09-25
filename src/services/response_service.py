@@ -92,6 +92,9 @@ def resolve_action(message):
             elif "photo" in message:
                 file_id = message["photo"][2]["file_id"]
                 media_type = "image"
+            elif "animation" in message:
+                file_id = message["animation"]["file_id"]
+                media_type = "animation"
 
             custom_command_service.insert_command(
                 chat_id, text, from_user_id, file_id, media_type
@@ -118,6 +121,8 @@ def resolve_action(message):
                     message_service.send_image(
                         chat_id, db_command["file_id"], db_command["text"]
                     )
+                elif db_command["media_type"] == "animation":
+                    message_service.send_animation(chat_id, db_command["file_id"])
                 else:
                     message_service.send_message(chat_id, db_command["text"])
 

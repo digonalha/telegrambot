@@ -61,6 +61,17 @@ def send_message(chat_id: int, message: str, reply_id: int = 0):
         syslog.create_warning("send_message", ex)
 
 
+def send_animation(chat_id: int, file_id: str, reply_id: int = 0):
+    try:
+        data = {"chat_id": chat_id, "animation": file_id}
+        if reply_id != None and reply_id > 0:
+            data["reply_to_message_id"] = reply_id
+        res = requests.post(f"{API_URI}/sendAnimation", data=data)
+        create_log_from_response("send_animation", res.json())
+    except Exception as ex:
+        syslog.create_warning("send_animation", ex)
+
+
 def send_video(chat_id: int, video_url: str, reply_id: int = 0):
     try:
         data = {"chat_id": chat_id, "video": video_url}

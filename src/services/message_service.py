@@ -13,6 +13,14 @@ def send_image(chat_id: int, file_id: str, message: str):
     telegram_api.send_image(chat_id, file_id, message)
 
 
+def send_animation(chat_id: int, file_id: str):
+    telegram_api.send_animation(chat_id, file_id)
+
+
+def send_video(chat_id: int, file_id: str):
+    telegram_api.send_video(chat_id, file_id)
+
+
 def send_message(chat_id: int, message: str):
     telegram_api.send_message(chat_id, message)
 
