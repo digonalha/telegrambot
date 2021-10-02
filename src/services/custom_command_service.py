@@ -15,7 +15,7 @@ def get_command(command: str, chat_id: int):
         (
             cc
             for cc in custom_commands
-            if cc["command"] == command and cc["chat_id"] == chat_id
+            if cc["command"].lower() == command and cc["chat_id"] == chat_id
         ),
         None,
     )
@@ -162,7 +162,7 @@ def insert_command(
             "description": description.strip(),
             "chat_id": chat_id,
             "created_by_user_id": user["user_id"],
-            "created_by_username": user["username"],
+            "created_by_user_name": user["user_name"],
             "created_on": now,
             "modified_on": now,
         }

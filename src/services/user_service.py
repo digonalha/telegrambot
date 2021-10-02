@@ -35,7 +35,7 @@ def validate_username_exists(chat_id: int, username: int):
     if username.startswith("@"):
         username = username.split("@")[1]
 
-    user = next((u for u in users if u["username"] == username), None)
+    user = next((u for u in users if u["user_name"] == username), None)
 
     if user == None:
         message_service.send_message(
@@ -62,8 +62,8 @@ def get_all():
         for user in users_db:
             users.append(
                 {
-                    "user_id": user.telegram_user_id,
-                    "username": user.telegram_username,
+                    "user_id": user.user_id,
+                    "user_name": user.user_name,
                     "is_admin": user.is_admin,
                 }
             )
@@ -81,8 +81,8 @@ def add_user_if_not_exists(user_id: int, username: str):
             now = datetime.now()
 
             create_schema = user_schema.UserCreate(
-                telegram_user_id=user_id,
-                telegram_username=username,
+                user_id=user_id,
+                user_name=username,
                 is_admin=False,
                 created_on=now,
                 modified_on=now,
@@ -93,8 +93,8 @@ def add_user_if_not_exists(user_id: int, username: str):
             if db_user:
                 users.append(
                     {
-                        "user_id": db_user.telegram_user_id,
-                        "username": db_user.telegram_username,
+                        "user_id": db_user.user_id,
+                        "user_name": db_user.user_name,
                         "is_admin": db_user.is_admin,
                     }
                 )

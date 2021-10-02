@@ -31,7 +31,7 @@ def send_help_message(chat_id: int, reply_user: int, message_id: int):
         cc_title = "\n*Comandos Customizados:*\n\n"
 
     help_message = (
-        f"Olá, *@{(user['username'])}*!\n"
+        f"Olá, *@{(user['user_name'])}*!\n"
         "Aqui está a minha lista de comandos disponiveis:\n\n"
         "*!help:* lista de comandos disponíveis\n"
         "*!mod username:* adiciona o usuário na lista de moderadores \*\n"
@@ -105,10 +105,8 @@ def resolve_action(message):
             custom_command_service.remove_command(chat_id, text, from_user_id)
         elif len(text) >= 3:
 
-            custom_command = text.split(" ", 0)[0]
-            custom_command = custom_command.split("!")[1]
-
-            db_command = custom_command_service.get_command(custom_command, chat_id)
+            custom_command = text.split(" ", 0)[0].split("!")[1]
+            db_command = custom_command_service.get_command(custom_command.lower(), chat_id)
 
             if db_command:
                 if db_command["media_type"] == "audio":
@@ -117,7 +115,7 @@ def resolve_action(message):
                         chat_id,
                         db_command["file_id"],
                         db_command["text"],
-                        user["username"],
+                        user["user_name"],
                     )
                 elif db_command["media_type"] == "image":
                     message_service.send_image(

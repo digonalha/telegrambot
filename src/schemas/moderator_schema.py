@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class ModeratorBase(BaseModel):
-    telegram_user_id: int
+    user_id: int
     chat_id: int
 
 

@@ -30,7 +30,7 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
         username = username.replace("@", "")
     except Exception as ex:
         message_service.send_message(
-            chat_id, "Para silenciar um usuário, utilize *!mute <username> <30~3600>*"
+            chat_id, "Para silenciar um usuário, utilize *!mute username 30~3600*"
         )
         syslog.create_warning("insert_timeout_user", ex)
         return
@@ -68,7 +68,7 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
             timeout_users.append(
                 {
                     "user_id": user["user_id"],
-                    "username": user["username"],
+                    "user_name": user["user_name"],
                     "timeout_until": timeout_until,
                     "chat_id": chat_id,
                 }
@@ -92,7 +92,7 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para habilitar a fala de um usuário, utilize *!unmute <username>*",
+            "Para habilitar a fala de um usuário, utilize *!unmute username*",
         )
         syslog.create_warning("remove_timeout_user", ex)
         return
@@ -124,7 +124,7 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
             timeout_users.remove(silenced_user)
             message_service.send_message(
                 silenced_user["chat_id"],
-                f"*@{(silenced_user['username'])}* já pode voltar a falar :)",
+                f"*@{(silenced_user['user_name'])}* já pode voltar a falar :)",
             )
     except Exception as ex:
         syslog.create_warning("remove_timeout_user", ex)

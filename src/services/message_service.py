@@ -54,7 +54,7 @@ def delete_messages(updates, timeout_users):
             timeout_users.remove(user_timeout)
             send_message(
                 user_timeout["chat_id"],
-                f"*@{(user_timeout['username'])}* já pode voltar a falar :)",
+                f"*@{(user_timeout['user_name'])}* já pode voltar a falar :)",
             )
             continue
 

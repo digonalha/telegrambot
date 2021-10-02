@@ -10,7 +10,7 @@ class CustomCommandBase(BaseModel):
     text: str = None
     chat_id: int
     created_by_user_id: int
-    created_by_username: str
+    created_by_user_name: str
 
 
 class CustomCommandCreate(CustomCommandBase):

@@ -72,7 +72,9 @@ def insert_moderator(chat_id: int, message_text: str, send_by_user_id: int):
     message = "Não foi possível cadastrar o novo moderador :("
 
     try:
-        if not user_service.validate_user_permission(chat_id, send_by_user_id):
+        if not user_service.validate_user_permission(
+            chat_id, send_by_user_id, validate_admin_only=True
+        ):
             return
 
         user = user_service.validate_username_exists(chat_id, username)
@@ -130,7 +132,9 @@ def remove_moderator(chat_id: int, message_text: str, send_by_user_id: int):
     message = "Não foi possível remover o moderador :("
 
     try:
-        if not user_service.validate_user_permission(chat_id, send_by_user_id):
+        if not user_service.validate_user_permission(
+            chat_id, send_by_user_id, validate_admin_only=True
+        ):
             return
 
         user = user_service.validate_username_exists(chat_id, username)

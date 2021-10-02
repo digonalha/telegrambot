@@ -3,8 +3,8 @@ from datetime import datetime
 
 
 class UserBase(BaseModel):
-    telegram_user_id: int
-    telegram_username: str
+    user_id: int
+    user_name: str
 
 
 class UserCreate(UserBase):

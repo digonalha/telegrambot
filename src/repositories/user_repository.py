@@ -18,7 +18,7 @@ def add(user: user_schema.UserCreate):
 def get_by_id(user_id: int):
     return (
         local_session.query(user_model.User)
-        .filter(user_model.User.telegram_user_id == user_id)
+        .filter(user_model.User.user_id == user_id)
         .first()
     )
 
