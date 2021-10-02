@@ -1,3 +1,4 @@
+from repositories.models.custom_command_model import MediaType
 from src.helpers.logging_helper import SystemLogging
 from src.services import (
     user_service,
@@ -10,29 +11,30 @@ from src.services import (
 syslog = SystemLogging(__name__)
 
 
-def send_help_message(chat_id: int, reply_user: int, message_id: int):
-    user = user_service.get_user(reply_user)
+def send_help_message(chat_id: int, reply_user: int, message_id: int) -> None:
+    """Send help message when asked on chat."""
+    user = user_service.get_user_by_id_if_exists(reply_user)
 
     custom_messages = ""
 
-    custom_command_service.custom_commands.sort(key=lambda x: x.get("command"))
+    custom_command_service.custom_commands.sort(key=lambda x: x.command)
 
     for cc in custom_command_service.custom_commands:
-        if cc["chat_id"] == chat_id:
-            description = "Nenhuma descrição encontrada."
+        if cc.chat_id == chat_id:
+            description = "Nenhuma descrição encontrada"
 
-            if cc["description"] != None and len(cc["description"]) > 0:
-                description = cc["description"]
+            if cc.description and len(cc.description) > 0:
+                description = cc.description
 
-            custom_messages += f"*!{cc['command']}:* {description}\n"
+            custom_messages += f"*!{cc.command}:* {description}\n"
 
     cc_title = ""
     if len(custom_messages) > 0:
         cc_title = "\n*Comandos Customizados:*\n\n"
 
     help_message = (
-        f"Olá, *@{(user['user_name'])}*!\n"
-        "Aqui está a minha lista de comandos disponiveis:\n\n"
+        f"Olá, *@{(user.user_name)}*!\n"
+        "Aqui está a minha lista de comandos disponíveis:\n\n"
         "*!help:* lista de comandos disponíveis\n"
         "*!mod username:* adiciona o usuário na lista de moderadores \*\n"
         "*!unmod username:* remove o usuário da lista de moderadores \*\n"
@@ -49,7 +51,8 @@ def send_help_message(chat_id: int, reply_user: int, message_id: int):
     message_service.send_message(chat_id, help_message)
 
 
-def resolve_action(message):
+def resolve_action(message) -> None:
+    """Select an action to answer a message update."""
     try:
         from_user_id = message["from"]["id"]
         chat_id = message["chat"]["id"]
@@ -86,17 +89,17 @@ def resolve_action(message):
             timeout_service.remove_timeout_user(chat_id, text, from_user_id)
         elif text.lower().startswith("!add"):
             file_id = None
-            media_type = None
+            media_type = MediaType.NONE
 
             if "audio" in message:
                 file_id = message["audio"]["file_id"]
-                media_type = "audio"
+                media_type = MediaType.AUDIO
             elif "photo" in message:
                 file_id = message["photo"][2]["file_id"]
-                media_type = "image"
+                media_type = MediaType.IMAGE
             elif "animation" in message:
                 file_id = message["animation"]["file_id"]
-                media_type = "animation"
+                media_type = MediaType.ANIMATION
 
             custom_command_service.insert_command(
                 chat_id, text, from_user_id, file_id, media_type
@@ -105,26 +108,26 @@ def resolve_action(message):
             custom_command_service.remove_command(chat_id, text, from_user_id)
         elif len(text) >= 3:
 
-            custom_command = text.split(" ", 0)[0].split("!")[1]
-            db_command = custom_command_service.get_command(custom_command.lower(), chat_id)
+            custom_command = text.split(" ", 0)[0].split("!")[1].lower()
+            db_command = custom_command_service.get_command(custom_command, chat_id)
 
             if db_command:
-                if db_command["media_type"] == "audio":
-                    user = user_service.get_user(from_user_id)
+                if db_command.media_type == MediaType.AUDIO:
+                    user = user_service.get_user_by_id_if_exists(from_user_id)
                     message_service.send_audio(
                         chat_id,
-                        db_command["file_id"],
-                        db_command["text"],
-                        user["user_name"],
+                        db_command.file_id,
+                        db_command.text,
+                        user.user_name,
                     )
-                elif db_command["media_type"] == "image":
+                elif db_command.media_type == MediaType.IMAGE:
                     message_service.send_image(
-                        chat_id, db_command["file_id"], db_command["text"]
+                        chat_id, db_command.file_id, db_command.text
                     )
-                elif db_command["media_type"] == "animation":
-                    message_service.send_animation(chat_id, db_command["file_id"])
+                elif db_command.media_type == MediaType.ANIMATION:
+                    message_service.send_animation(chat_id, db_command.file_id)
                 else:
-                    message_service.send_message(chat_id, db_command["text"])
+                    message_service.send_message(chat_id, db_command.text)
 
     except Exception as ex:
         syslog.create_warning("resolve_action", ex)
