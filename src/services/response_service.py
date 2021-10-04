@@ -12,7 +12,7 @@ from src.services import (
 syslog = SystemLogging(__name__)
 
 
-def send_help_message(chat_id: int, reply_user: int, message_id: int) -> None:
+def send_group_help_message(chat_id: int, reply_user: int, message_id: int) -> None:
     """Send help message when asked on chat."""
     user = user_service.get_user_by_id_if_exists(reply_user)
 
@@ -54,6 +54,20 @@ def send_help_message(chat_id: int, reply_user: int, message_id: int) -> None:
     message_service.send_message(chat_id, help_message)
 
 
+def send_private_help_message(chat_id: int, reply_user: int, message_id: int) -> None:
+    user = user_service.get_user_by_id_if_exists(reply_user)
+
+    help_message = (
+        f"Olá, *@{(user.user_name)}*!\n"
+        "Aqui está a minha lista de comandos disponíveis:\n\n"
+        "*!help:* lista de comandos disponíveis\n"
+        "*!track palavra-chave:* monitora e notifica promoções referentes a palavra-chave\n"
+        "*!untrack palavra-chave:* remove a palavra-chve da lista de monitoramento"
+    )
+
+    message_service.send_message(chat_id, help_message)
+
+
 def resolve_action(message) -> None:
     """Select an action to answer a message update."""
     try:
@@ -82,7 +96,7 @@ def resolve_action(message) -> None:
 
         if is_group:
             if text.lower().startswith("!help"):
-                send_help_message(chat_id, from_user_id, message["message_id"])
+                send_group_help_message(chat_id, from_user_id, message["message_id"])
                 return
             elif text.lower().startswith("!mod"):
                 moderator_service.insert_moderator(chat_id, text, from_user_id)
@@ -143,6 +157,10 @@ def resolve_action(message) -> None:
                         message_service.send_animation(chat_id, db_command.file_id)
                     else:
                         message_service.send_message(chat_id, db_command.text)
+                return
+        else:
+            if text.lower().startswith("!help"):
+                send_private_help_message(chat_id, from_user_id, message["message_id"])
                 return
 
         if text.lower().startswith("!track"):
