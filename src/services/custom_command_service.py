@@ -1,6 +1,5 @@
 from datetime import datetime
-
-from sqlalchemy.sql.expression import desc
+from src.repositories.models.custom_command_model import CustomCommand, MediaType
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import custom_command_repository
 from src.schemas import custom_command_schema
@@ -9,52 +8,48 @@ from src.services import user_service, message_service
 custom_commands = []
 syslog = SystemLogging(__name__)
 
+default_commands = [
+    "help",
+    "mod",
+    "unmod",
+    "mute",
+    "unmute",
+    "add",
+    "del" "track",
+    "untrack",
+]
 
-def get_command(command: str, chat_id: int):
+
+def get_command(command: str, chat_id: int) -> CustomCommand:
+    """Get command if exists on global users variable."""
     return next(
         (
             cc
             for cc in custom_commands
-            if cc["command"].lower() == command and cc["chat_id"] == chat_id
+            if cc.command.lower() == command and cc.chat_id == chat_id
         ),
         None,
     )
 
 
-def get_all():
+def get_all_commands() -> None:
+    """Fill the global variable commands with all commands found in database."""
     global custom_commands
-    try:
-        commands = custom_command_repository.get_all()
-        custom_commands = []
-
-        for command in commands:
-            custom_commands.append(
-                {
-                    "command": command.command,
-                    "text": command.text,
-                    "description": command.description,
-                    "chat_id": command.chat_id,
-                    "file_id": command.file_id,
-                    "media_type": command.media_type,
-                }
-            )
-    except:
-        return custom_commands
+    custom_commands = custom_command_repository.get_all()
 
 
-def add_custom_command(new_command):
+def add_custom_command(new_command: dict) -> bool:
+    """Create a new custom_command on database if not exists."""
     if len(custom_commands) > 0 and next(
         (
             cc
             for cc in custom_commands
-            if cc["command"] == new_command["command"]
-            and cc["chat_id"] == new_command["chat_id"]
+            if cc.command == new_command["command"]
+            and cc.chat_id == new_command["chat_id"]
         ),
         None,
     ):
         return False
-
-    db_custom_command = None
 
     custom_command_already_in_db = custom_command_repository.get(
         new_command["command"], new_command["chat_id"]
@@ -64,16 +59,7 @@ def add_custom_command(new_command):
         db_custom_command = custom_command_repository.add(
             custom_command_schema.CustomCommandCreate(**new_command)
         )
-        custom_commands.append(
-            {
-                "command": db_custom_command.command,
-                "text": db_custom_command.text,
-                "description": db_custom_command.description,
-                "chat_id": db_custom_command.chat_id,
-                "file_id": db_custom_command.file_id,
-                "media_type": db_custom_command.media_type,
-            }
-        )
+        custom_commands.append(db_custom_command)
         return True
 
     return False
@@ -84,8 +70,9 @@ def insert_command(
     message_text: str,
     send_by_user_id: int,
     file_id: str = None,
-    media_type: str = None,
-) -> bool:
+    media_type: MediaType = MediaType.NONE,
+) -> None:
+    """Logic and validations to add a new command on database if not exists."""
     try:
         using_pipe = False
         word_list = []
@@ -127,7 +114,7 @@ def insert_command(
                 "O novo comando deve ter entre 2 e 15 caracteres",
             )
             return
-        elif media_type == None and (len(answer) < 5 or len(answer) > 1000):
+        elif not media_type and (len(answer) < 5 or len(answer) > 1000):
             message_service.send_message(
                 chat_id,
                 "A resposta deve ter entre 5 e 1000 caracteres",
@@ -139,21 +126,26 @@ def insert_command(
                 "A descrição deve ter entre 5 e 150 caracteres",
             )
             return
+        elif next((dc for dc in default_commands if dc == new_custom_command), None):
+            message_service.send_message(
+                chat_id,
+                "Já existe um comando com esse nome",
+            )
+            return
+
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para criar um novo comando, utilize:\n*!add <comando> | <resposta> | <descrição>*\nou\n*!add -c <comando> -a <resposta> -d <descrição>*",
+            "Para criar um novo comando, utilize:\n*!add nome_comando | resposta | descrição*\nou\n*!add -c nome_comando -a resposta -d descrição*",
         )
         syslog.create_warning("insert_command", ex)
         return
-
-    message = "Não foi possível cadastrar o novo comando"
 
     try:
         if not user_service.validate_user_permission(chat_id, send_by_user_id):
             return
 
-        user = user_service.get_user(send_by_user_id)
+        user = user_service.get_user_by_id_if_exists(send_by_user_id)
         now = datetime.now()
 
         new_custom_command_obj = {
@@ -161,32 +153,38 @@ def insert_command(
             "text": answer.strip(),
             "description": description.strip(),
             "chat_id": chat_id,
-            "created_by_user_id": user["user_id"],
-            "created_by_user_name": user["user_name"],
+            "created_by_user_id": user.user_id,
+            "created_by_user_name": user.user_name,
             "created_on": now,
             "modified_on": now,
         }
 
-        if file_id != None and media_type != None:
+        if file_id and media_type:
             new_custom_command_obj["file_id"] = file_id
-            new_custom_command_obj["media_type"] = media_type
+            new_custom_command_obj["media_type"] = int(media_type)
 
         if add_custom_command(new_custom_command_obj):
-            message = f"Novo comando *!{new_custom_command}* criado!"
+            message_service.send_message(
+                chat_id, f"Novo comando *!{new_custom_command}* criado!"
+            )
         else:
-            message = f"O comando *!{new_custom_command}* já existe"
+            message_service.send_message(
+                chat_id, f"O comando *!{new_custom_command}* já existe"
+            )
     except Exception as ex:
         syslog.create_warning("insert_command", ex)
-    finally:
-        message_service.send_message(chat_id, message)
+        message_service.send_message(
+            chat_id, "Não foi possível cadastrar o novo comando"
+        )
 
 
 def delete_custom_command(command_name: str, chat_id: int) -> bool:
+    """Remove a command from database if exists."""
     db_custom_command = next(
         (
             cc
             for cc in custom_commands
-            if cc["chat_id"] == chat_id and cc["command"] == command_name
+            if cc.chat_id == chat_id and cc.command == command_name
         ),
         None,
     )
@@ -202,7 +200,8 @@ def delete_custom_command(command_name: str, chat_id: int) -> bool:
     return False
 
 
-def remove_command(chat_id: int, message_text: str, send_by_user_id: int):
+def remove_command(chat_id: int, message_text: str, send_by_user_id: int) -> None:
+    """Logic and validations to remove a command from database if exists."""
     try:
         command, custom_command_name = message_text.split()
 
@@ -214,7 +213,7 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int):
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para remover um comando customizado, utilize *!del <nome comando>*",
+            "Para remover um comando customizado, utilize *!del nome_comando*",
         )
         syslog.create_warning("remove_command", ex)
         return

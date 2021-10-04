@@ -6,11 +6,9 @@ timeout_users = []
 syslog = SystemLogging(__name__)
 
 
-def is_user_in_timeout(chat_id, user_id):
-    if len(timeout_users) == 0:
-        return False
-
-    return next(
+def is_user_in_timeout(chat_id, user_id) -> bool:
+    """Check if user is in timeout chat list"""
+    return len(timeout_users) > 0 and next(
         (
             tu
             for tu in timeout_users
@@ -20,7 +18,8 @@ def is_user_in_timeout(chat_id, user_id):
     )
 
 
-def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
+def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int) -> None:
+    """Insert user in timeout chat list"""
     try:
         command, username, timer = message_text.split()
 
@@ -47,11 +46,11 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
         if not user_service.validate_user_permission(chat_id, send_by_user_id):
             return
 
-        user = user_service.validate_username_exists(chat_id, username)
+        user = user_service.get_user_by_username_if_exists(chat_id, username)
 
         if not user:
             return
-        elif user["is_admin"]:
+        elif user.is_admin:
             message_service.send_message(
                 chat_id, f"*@{username}* é um administrador e não pode ser silenciado"
             )
@@ -60,15 +59,15 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
         if len(timeout_users) > 0 and next(
             tu
             for tu in timeout_users
-            if tu["user_id"] == user["user_id"] and tu["chat_id"] == chat_id
+            if tu["user_id"] == user.user_id and tu["chat_id"] == chat_id
         ):
             message_service.send_message(chat_id, f"*@{username}* já está silenciado!")
         else:
             timeout_until = datetime.now() + timedelta(0, timer)
             timeout_users.append(
                 {
-                    "user_id": user["user_id"],
-                    "user_name": user["user_name"],
+                    "user_id": user.user_id,
+                    "user_name": user.user_name,
                     "timeout_until": timeout_until,
                     "chat_id": chat_id,
                 }
@@ -81,7 +80,8 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int):
         message_service.send_message(chat_id, "Não foi possível silenciar o usuário :(")
 
 
-def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
+def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int) -> None:
+    """Remove user from timeout chat list"""
     try:
         command, username = message_text.split()
 
@@ -101,7 +101,7 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
         if not user_service.validate_user_permission(chat_id, send_by_user_id):
             return
 
-        user = user_service.validate_username_exists(chat_id, username)
+        user = user_service.get_user_by_username_if_exists(chat_id, username)
 
         if not user:
             return
@@ -109,22 +109,22 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int):
         if len(timeout_users) == 0:
             message_service.send_message(chat_id, f"*@{username}* não está silenciado!")
 
-        silenced_user = next(
+        timeout_user = next(
             (
                 tu
                 for tu in timeout_users
-                if tu["user_id"] == user["user_id"] and tu["chat_id"] == chat_id
+                if tu["user_id"] == user.user_id and tu["chat_id"] == chat_id
             ),
             None,
         )
 
-        if not silenced_user:
+        if not timeout_user:
             message_service.send_message(chat_id, f"*@{username}* não está silenciado!")
         else:
-            timeout_users.remove(silenced_user)
+            timeout_users.remove(timeout_user)
             message_service.send_message(
-                silenced_user["chat_id"],
-                f"*@{(silenced_user['user_name'])}* já pode voltar a falar :)",
+                timeout_user["chat_id"],
+                f"*@{(timeout_user['user_name'])}* já pode voltar a falar :)",
             )
     except Exception as ex:
         syslog.create_warning("remove_timeout_user", ex)

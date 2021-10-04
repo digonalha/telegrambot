@@ -105,12 +105,13 @@ def send_image(chat_id: int, file_id: str, caption: str = None, reply_id: int = 
             random_index = randint(0, len(arr_photo) - 1)
             file_id = arr_photo[random_index]
 
-        data = {"chat_id": chat_id, "photo": file_id}
+        data = {"chat_id": chat_id, "photo": file_id, "parse_mode": "markdown"}
 
-        if caption != None:
+        if caption:
             data["caption"] = caption
-        if reply_id != None:
+        if reply_id:
             data["reply_to_message_id"] = reply_id
+
         res = requests.post(f"{API_URI}/sendPhoto", data=data)
         create_log_from_response("send_photo", res.json())
     except Exception as ex:

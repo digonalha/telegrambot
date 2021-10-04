@@ -1,4 +1,5 @@
 from datetime import datetime
+from src.repositories.models.user_model import User
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import user_repository
 from src.schemas import user_schema
@@ -11,18 +12,19 @@ syslog = SystemLogging(__name__)
 def validate_user_permission(
     chat_id: int, user_id: int, validate_admin_only: bool = False
 ) -> bool:
-    user_send = next((u for u in users if u["user_id"] == user_id), None)
+    """Validate if user is admin or moderator."""
+    user_send = next((u for u in users if u.user_id == user_id), None)
 
-    if user_send == None and validate_admin_only == True:
+    if not user_send and validate_admin_only == True:
         return False
-    elif (user_send == None or not user_send["is_admin"]) and next(
+    elif (not user_send or not user_send.is_admin) and not next(
         (
             m
             for m in moderator_service.moderators
-            if m["chat_id"] == chat_id and m["user_id"] == user_id
+            if m.chat_id == chat_id and m.user_id == user_id
         ),
         None,
-    ) == None:
+    ):
         message_service.send_message(
             chat_id, "Você não tem permissão para utilizar esse comando"
         )
@@ -31,72 +33,57 @@ def validate_user_permission(
     return True
 
 
-def validate_username_exists(chat_id: int, username: int):
+def get_user_by_username_if_exists(chat_id: int, username: int) -> User:
+    """Get user by username if exists on global users variable."""
     if username.startswith("@"):
         username = username.split("@")[1]
 
-    user = next((u for u in users if u["user_name"] == username), None)
+    user = next((u for u in users if u.user_name == username), None)
 
     if user == None:
         message_service.send_message(
             chat_id,
-            f"Eu ainda não conheço *{username}* :(",
+            f"Eu ainda não conheço o usuário *{username}* :(",
         )
         return False
 
     return user
 
 
-def get_user(user_id: int):
+def get_user_by_id_if_exists(user_id: int) -> User:
+    """Get user by user_id from  global variable users if exists."""
     return next(
-        (u for u in users if u["user_id"] == user_id),
+        (u for u in users if u.user_id == user_id),
         None,
     )
 
 
-def get_all():
+def get_all_users() -> None:
+    """Fill the global variable users with all users found in database."""
     global users
-    try:
-        users_db = user_repository.get_all()
-        users = []
-        for user in users_db:
-            users.append(
-                {
-                    "user_id": user.user_id,
-                    "user_name": user.user_name,
-                    "is_admin": user.is_admin,
-                }
-            )
-    except:
-        return users
+    users = user_repository.get_all()
 
 
-def add_user_if_not_exists(user_id: int, username: str):
+def add_user_if_not_exists(user_id: int, username: str) -> None:
+    """Create a new user on database if not exists."""
     try:
-        for user in users:
-            if user["user_id"] == user_id:
-                return
+        if next((u for u in users if u.user_id == user_id), None):
+            return
 
         if not user_repository.get_by_id(user_id):
             now = datetime.now()
 
-            create_schema = user_schema.UserCreate(
-                user_id=user_id,
-                user_name=username,
-                is_admin=False,
-                created_on=now,
-                modified_on=now,
+            db_user = user_repository.add(
+                user_schema.UserCreate(
+                    user_id=user_id,
+                    user_name=username,
+                    is_admin=False,
+                    created_on=now,
+                    modified_on=now,
+                )
             )
 
-            db_user = user_repository.add(create_schema)
-
             if db_user:
-                users.append(
-                    {
-                        "user_id": db_user.user_id,
-                        "user_name": db_user.user_name,
-                        "is_admin": db_user.is_admin,
-                    }
-                )
+                users.append(db_user)
     except Exception as ex:
         syslog.create_warning("add_user_if_not_exists", ex)
