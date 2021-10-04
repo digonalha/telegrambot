@@ -47,7 +47,7 @@ def add_sale_tracker_keyword(sale_tracker_keyword: dict) -> bool:
 def insert_sale_tracker_keyword(chat_id: int, message_text: str, send_by_user_id: int):
     """Logic and validations to add a new sale_tracker_keyword on database if not exists."""
     try:
-        command, keyword = message_text.split()
+        command, keyword = message_text.split(" ", 1)
 
         if command != "!track":
             raise Exception("unknow command: " + command)
@@ -130,7 +130,7 @@ def remove_sale_tracker_keyword(
 ) -> None:
     """Logic and validations to remove a sale_tracker_keyword from database if exists."""
     try:
-        command, keyword = message_text.split()
+        command, keyword = message_text.split(" ", 1)
 
         if command != "!untrack":
             raise Exception("unknow command: " + command)

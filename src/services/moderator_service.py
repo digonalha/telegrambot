@@ -41,7 +41,7 @@ def add_moderator(user_id: int, chat_id: int) -> bool:
 def insert_moderator(chat_id: int, message_text: str, send_by_user_id: int):
     """Logic and validations to add a new moderator on database if not exists."""
     try:
-        command, username = message_text.split()
+        command, username = message_text.split(" ", 1)
 
         if command != "!mod":
             raise Exception("unknow command: " + command)
@@ -100,7 +100,7 @@ def delete_moderator(user_id: int, chat_id: int) -> bool:
 def remove_moderator(chat_id: int, message_text: str, send_by_user_id: int) -> None:
     """Logic and validations to remove a moderator from database if exists."""
     try:
-        command, username = message_text.split()
+        command, username = message_text.split(" ", 1)
 
         if command != "!unmod":
             raise Exception("unknow command: " + command)

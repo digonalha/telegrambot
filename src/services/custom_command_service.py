@@ -203,7 +203,7 @@ def delete_custom_command(command_name: str, chat_id: int) -> bool:
 def remove_command(chat_id: int, message_text: str, send_by_user_id: int) -> None:
     """Logic and validations to remove a command from database if exists."""
     try:
-        command, custom_command_name = message_text.split()
+        command, custom_command_name = message_text.split(" ", 1)
 
         if command != "!del":
             raise Exception("unknow command: " + command)
