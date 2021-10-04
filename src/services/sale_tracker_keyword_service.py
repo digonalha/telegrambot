@@ -45,7 +45,9 @@ def add_sale_tracker_keyword(sale_tracker_keyword: dict) -> bool:
     return False
 
 
-def insert_sale_tracker_keyword(chat_id: int, message_text: str, send_by_user_id: int):
+def insert_sale_tracker_keyword(
+    chat_id: int, message_text: str, send_by_user_id: int, is_group: bool
+):
     """Logic and validations to add a new sale_tracker_keyword on database if not exists."""
     try:
         command, keyword = message_text.split(" ", 1)
@@ -62,7 +64,7 @@ def insert_sale_tracker_keyword(chat_id: int, message_text: str, send_by_user_id
         return
 
     try:
-        if not user_service.validate_user_permission(
+        if is_group and not user_service.validate_user_permission(
             chat_id, send_by_user_id, validate_admin_only=False
         ):
             return
@@ -127,7 +129,7 @@ def delete_sale_tracker_keyword(user_id: int, chat_id: int, keyword: str) -> boo
 
 
 def remove_sale_tracker_keyword(
-    chat_id: int, message_text: str, send_by_user_id: int
+    chat_id: int, message_text: str, send_by_user_id: int, is_group: bool
 ) -> None:
     """Logic and validations to remove a sale_tracker_keyword from database if exists."""
     try:
@@ -145,7 +147,7 @@ def remove_sale_tracker_keyword(
         return
 
     try:
-        if not user_service.validate_user_permission(
+        if is_group and not user_service.validate_user_permission(
             chat_id, send_by_user_id, validate_admin_only=False
         ):
             return

@@ -78,7 +78,9 @@ def resolve_action(message) -> None:
         if not text.startswith("!"):
             return
 
-        if message["chat"]["type"] == "group":
+        is_group = message["chat"]["type"] == "group"
+
+        if is_group:
             if text.lower().startswith("!help"):
                 send_help_message(chat_id, from_user_id, message["message_id"])
                 return
@@ -145,11 +147,11 @@ def resolve_action(message) -> None:
 
         if text.lower().startswith("!track"):
             sale_tracker_keyword_service.insert_sale_tracker_keyword(
-                chat_id, text, from_user_id
+                chat_id, text, from_user_id, is_group
             )
         elif text.lower().startswith("!untrack"):
             sale_tracker_keyword_service.remove_sale_tracker_keyword(
-                chat_id, text, from_user_id
+                chat_id, text, from_user_id, is_group
             )
 
     except Exception as ex:
