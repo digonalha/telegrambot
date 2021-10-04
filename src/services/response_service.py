@@ -43,6 +43,7 @@ def send_group_help_message(chat_id: int, reply_user: int, message_id: int) -> N
         "*!unmute username:* remove o usuário da lista de silenciados \*\*\n"
         "*!track palavra-chave:* monitora e notifica promoções referentes a palavra-chave \*\*\n"
         "*!untrack palavra-chave:* remove a palavra-chve da lista de monitoramento \*\*\n"
+        "*!keywords:* lista as palavras-chave cadastradas pelo usuário \*\*\n"
         "*!add comando | resposta | descrição:* adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
         "*!del comando:* remove um comando customizado\*\n"
         f"{cc_title}"
@@ -62,7 +63,8 @@ def send_private_help_message(chat_id: int, reply_user: int, message_id: int) ->
         "Aqui está a minha lista de comandos disponíveis:\n\n"
         "*!help:* lista de comandos disponíveis\n"
         "*!track palavra-chave:* monitora e notifica promoções referentes a palavra-chave\n"
-        "*!untrack palavra-chave:* remove a palavra-chve da lista de monitoramento"
+        "*!untrack palavra-chave:* remove a palavra-chve da lista de monitoramento\n"
+        "*!keywords:* lista as palavras-chave cadastradas pelo usuário"
     )
 
     message_service.send_message(chat_id, help_message)
@@ -95,7 +97,7 @@ def resolve_action(message) -> None:
         is_group = message["chat"]["type"] == "group"
 
         if is_group:
-            if text.lower().startswith("!help"):
+            if text.lower() == "!help":
                 send_group_help_message(chat_id, from_user_id, message["message_id"])
                 return
             elif text.lower().startswith("!mod"):
@@ -136,6 +138,7 @@ def resolve_action(message) -> None:
                 len(text) >= 3
                 and not text.lower().startswith("!track")
                 and not text.lower().startswith("!untrack")
+                and not text.lower() == "!keywords"
             ):
                 custom_command = text.split(" ", 0)[0].split("!")[1].lower()
                 db_command = custom_command_service.get_command(custom_command, chat_id)
@@ -159,11 +162,15 @@ def resolve_action(message) -> None:
                         message_service.send_message(chat_id, db_command.text)
                 return
         else:
-            if text.lower().startswith("!help"):
+            if text.lower() == "!help":
                 send_private_help_message(chat_id, from_user_id, message["message_id"])
                 return
 
-        if text.lower().startswith("!track"):
+        if text.lower() == "!keywords":
+            sale_tracker_keyword_service.get_user_keywords(
+                chat_id, from_user_id, is_group
+            )
+        elif text.lower().startswith("!track"):
             sale_tracker_keyword_service.insert_sale_tracker_keyword(
                 chat_id, text, from_user_id, is_group
             )

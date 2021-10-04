@@ -39,3 +39,13 @@ def get(user_id: int, chat_id: int, keyword: str):
         )
         .first()
     )
+
+
+def get_by_chat_id_and_user_id(user_id: int, chat_id: int):
+    return (
+        local_session.query(SaleTrackerKeyword)
+        .filter(
+            SaleTrackerKeyword.user_id == user_id, SaleTrackerKeyword.chat_id == chat_id
+        )
+        .all()
+    )

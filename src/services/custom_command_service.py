@@ -15,8 +15,10 @@ default_commands = [
     "mute",
     "unmute",
     "add",
-    "del" "track",
+    "del",
+    "track",
     "untrack",
+    "keywords",
 ]
 
 

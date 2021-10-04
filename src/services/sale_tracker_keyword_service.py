@@ -15,6 +15,31 @@ def get_all_sale_tracker_keyword() -> None:
     sale_tracker_keywords = sale_tracker_keyword_repository.get_all()
 
 
+def get_user_keywords(chat_id: int, user_id: int, is_group: bool) -> list:
+    if is_group and not user_service.validate_user_permission(
+        chat_id, user_id, validate_admin_only=False
+    ):
+        return
+
+    sale_tracker_keywords = sale_tracker_keyword_repository.get_by_chat_id_and_user_id(
+        user_id, chat_id
+    )
+
+    user = user_service.get_user_by_id_if_exists(user_id)
+
+    message = f"Nenhuma palavra-chave encontrada para o usuário *@{user.user_name}*"
+
+    if chat_id == user_id:
+        message = f"Nenhuma palavra-chave encontrada"
+
+    if sale_tracker_keywords and len(sale_tracker_keywords) > 0:
+        message = "As palavras-chave abaixo foram encontradas: \n"
+        for stk in sale_tracker_keywords:
+            message += f"\n• {stk.keyword}"
+
+    message_service.send_message(chat_id, message)
+
+
 def add_sale_tracker_keyword(sale_tracker_keyword: dict) -> bool:
     """Create a new sale_tracker_keyword on database if not exists."""
     if len(sale_tracker_keywords) > 0 and next(
