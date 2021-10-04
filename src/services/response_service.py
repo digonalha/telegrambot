@@ -119,7 +119,7 @@ def resolve_action(message) -> None:
             elif (
                 len(text) >= 3
                 and not text.lower().startswith("!track")
-                and text.lower().startswith("!untrack")
+                and not text.lower().startswith("!untrack")
             ):
                 custom_command = text.split(" ", 0)[0].split("!")[1].lower()
                 db_command = custom_command_service.get_command(custom_command, chat_id)
