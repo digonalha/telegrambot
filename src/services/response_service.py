@@ -1,4 +1,4 @@
-from repositories.models.custom_command_model import MediaType
+from src.repositories.models.custom_command_model import MediaType
 from src.helpers.logging_helper import SystemLogging
 from src.services import (
     user_service,
@@ -6,6 +6,7 @@ from src.services import (
     timeout_service,
     custom_command_service,
     message_service,
+    sale_tracker_keyword_service,
 )
 
 syslog = SystemLogging(__name__)
@@ -40,6 +41,8 @@ def send_help_message(chat_id: int, reply_user: int, message_id: int) -> None:
         "*!unmod username:* remove o usuário da lista de moderadores \*\n"
         "*!mute username tempo em segundos:* adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
         "*!unmute username:* remove o usuário da lista de silenciados \*\*\n"
+        "*!track palavra-chave:* monitora e notifica promoções referentes a palavra-chave \*\*\n"
+        "*!untrack palavra-chave:* remove a palavra-chve da lista de monitoramento \*\*\n"
         "*!add comando | resposta | descrição:* adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
         "*!del comando:* remove um comando customizado\*\n"
         f"{cc_title}"
@@ -57,12 +60,10 @@ def resolve_action(message) -> None:
         from_user_id = message["from"]["id"]
         chat_id = message["chat"]["id"]
 
-        if message["chat"]["type"] != "group" or timeout_service.is_user_in_timeout(
-            chat_id, from_user_id
-        ):
+        if timeout_service.is_user_in_timeout(chat_id, from_user_id):
             return
 
-        # persistindo usuarios:
+        # if user who send message not found on users object, add on database:
         user_service.add_user_if_not_exists(from_user_id, message["from"]["username"])
 
         text = ""
@@ -77,57 +78,79 @@ def resolve_action(message) -> None:
         if not text.startswith("!"):
             return
 
-        if text.lower().startswith("!help"):
-            send_help_message(chat_id, from_user_id, message["message_id"])
-        elif text.lower().startswith("!mod"):
-            moderator_service.insert_moderator(chat_id, text, from_user_id)
-        elif text.lower().startswith("!unmod"):
-            moderator_service.remove_moderator(chat_id, text, from_user_id)
-        elif text.lower().startswith("!mute"):
-            timeout_service.insert_timeout_user(chat_id, text, from_user_id)
-        elif text.lower().startswith("!unmute"):
-            timeout_service.remove_timeout_user(chat_id, text, from_user_id)
-        elif text.lower().startswith("!add"):
-            file_id = None
-            media_type = MediaType.NONE
+        if message["chat"]["type"] == "group":
+            if text.lower().startswith("!help"):
+                send_help_message(chat_id, from_user_id, message["message_id"])
+                return
+            elif text.lower().startswith("!mod"):
+                moderator_service.insert_moderator(chat_id, text, from_user_id)
+                return
+            elif text.lower().startswith("!unmod"):
+                moderator_service.remove_moderator(chat_id, text, from_user_id)
+                return
+            elif text.lower().startswith("!mute"):
+                timeout_service.insert_timeout_user(chat_id, text, from_user_id)
+                return
+            elif text.lower().startswith("!unmute"):
+                timeout_service.remove_timeout_user(chat_id, text, from_user_id)
+                return
+            elif text.lower().startswith("!add"):
+                file_id = None
+                media_type = MediaType.NONE
 
-            if "audio" in message:
-                file_id = message["audio"]["file_id"]
-                media_type = MediaType.AUDIO
-            elif "photo" in message:
-                file_id = message["photo"][2]["file_id"]
-                media_type = MediaType.IMAGE
-            elif "animation" in message:
-                file_id = message["animation"]["file_id"]
-                media_type = MediaType.ANIMATION
+                if "audio" in message:
+                    file_id = message["audio"]["file_id"]
+                    media_type = MediaType.AUDIO
+                elif "photo" in message:
+                    file_id = message["photo"][2]["file_id"]
+                    media_type = MediaType.IMAGE
+                elif "animation" in message:
+                    file_id = message["animation"]["file_id"]
+                    media_type = MediaType.ANIMATION
 
-            custom_command_service.insert_command(
-                chat_id, text, from_user_id, file_id, media_type
+                custom_command_service.insert_command(
+                    chat_id, text, from_user_id, file_id, media_type
+                )
+
+                return
+            elif text.lower().startswith("!del"):
+                custom_command_service.remove_command(chat_id, text, from_user_id)
+                return
+            elif (
+                len(text) >= 3
+                and not text.lower().startswith("!track")
+                and text.lower().startswith("!untrack")
+            ):
+                custom_command = text.split(" ", 0)[0].split("!")[1].lower()
+                db_command = custom_command_service.get_command(custom_command, chat_id)
+
+                if db_command:
+                    if db_command.media_type == MediaType.AUDIO:
+                        user = user_service.get_user_by_id_if_exists(from_user_id)
+                        message_service.send_audio(
+                            chat_id,
+                            db_command.file_id,
+                            db_command.text,
+                            user.user_name,
+                        )
+                    elif db_command.media_type == MediaType.IMAGE:
+                        message_service.send_image(
+                            chat_id, db_command.file_id, db_command.text
+                        )
+                    elif db_command.media_type == MediaType.ANIMATION:
+                        message_service.send_animation(chat_id, db_command.file_id)
+                    else:
+                        message_service.send_message(chat_id, db_command.text)
+                return
+
+        if text.lower().startswith("!track"):
+            sale_tracker_keyword_service.insert_sale_tracker_keyword(
+                chat_id, text, from_user_id
             )
-        elif text.lower().startswith("!del"):
-            custom_command_service.remove_command(chat_id, text, from_user_id)
-        elif len(text) >= 3:
-
-            custom_command = text.split(" ", 0)[0].split("!")[1].lower()
-            db_command = custom_command_service.get_command(custom_command, chat_id)
-
-            if db_command:
-                if db_command.media_type == MediaType.AUDIO:
-                    user = user_service.get_user_by_id_if_exists(from_user_id)
-                    message_service.send_audio(
-                        chat_id,
-                        db_command.file_id,
-                        db_command.text,
-                        user.user_name,
-                    )
-                elif db_command.media_type == MediaType.IMAGE:
-                    message_service.send_image(
-                        chat_id, db_command.file_id, db_command.text
-                    )
-                elif db_command.media_type == MediaType.ANIMATION:
-                    message_service.send_animation(chat_id, db_command.file_id)
-                else:
-                    message_service.send_message(chat_id, db_command.text)
+        elif text.lower().startswith("!untrack"):
+            sale_tracker_keyword_service.remove_sale_tracker_keyword(
+                chat_id, text, from_user_id
+            )
 
     except Exception as ex:
         syslog.create_warning("resolve_action", ex)

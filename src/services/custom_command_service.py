@@ -1,5 +1,5 @@
 from datetime import datetime
-from src.repositories.models.custom_command_model import CustomCommand
+from src.repositories.models.custom_command_model import CustomCommand, MediaType
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import custom_command_repository
 from src.schemas import custom_command_schema
@@ -7,6 +7,17 @@ from src.services import user_service, message_service
 
 custom_commands = []
 syslog = SystemLogging(__name__)
+
+default_commands = [
+    "help",
+    "mod",
+    "unmod",
+    "mute",
+    "unmute",
+    "add",
+    "del" "track",
+    "untrack",
+]
 
 
 def get_command(command: str, chat_id: int) -> CustomCommand:
@@ -27,7 +38,7 @@ def get_all_commands() -> None:
     custom_commands = custom_command_repository.get_all()
 
 
-def add_custom_command(new_command) -> bool:
+def add_custom_command(new_command: dict) -> bool:
     """Create a new custom_command on database if not exists."""
     if len(custom_commands) > 0 and next(
         (
@@ -59,7 +70,7 @@ def insert_command(
     message_text: str,
     send_by_user_id: int,
     file_id: str = None,
-    media_type: str = None,
+    media_type: MediaType = MediaType.NONE,
 ) -> None:
     """Logic and validations to add a new command on database if not exists."""
     try:
@@ -103,7 +114,7 @@ def insert_command(
                 "O novo comando deve ter entre 2 e 15 caracteres",
             )
             return
-        elif media_type == None and (len(answer) < 5 or len(answer) > 1000):
+        elif not media_type and (len(answer) < 5 or len(answer) > 1000):
             message_service.send_message(
                 chat_id,
                 "A resposta deve ter entre 5 e 1000 caracteres",
@@ -113,6 +124,12 @@ def insert_command(
             message_service.send_message(
                 chat_id,
                 "A descrição deve ter entre 5 e 150 caracteres",
+            )
+            return
+        elif next((dc for dc in default_commands if dc == new_custom_command), None):
+            message_service.send_message(
+                chat_id,
+                "Já existe um comando com esse nome",
             )
             return
 
@@ -144,7 +161,7 @@ def insert_command(
 
         if file_id and media_type:
             new_custom_command_obj["file_id"] = file_id
-            new_custom_command_obj["media_type"] = media_type
+            new_custom_command_obj["media_type"] = int(media_type)
 
         if add_custom_command(new_custom_command_obj):
             message_service.send_message(

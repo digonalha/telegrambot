@@ -40,10 +40,10 @@ def get_updates(offset: int) -> list:
     return telegram_api.get_updates(offset)
 
 
-def get_last_update_id(updates) -> int:
+def get_update_id_offset(updates) -> int:
     """Return last update_id from chat message updates"""
     total_updates = len(updates)
-    return 0 if total_updates == 0 else updates[total_updates - 1]["update_id"]
+    return 0 if total_updates == 0 else updates[total_updates - 1]["update_id"] + 1
 
 
 def delete_messages(updates, timeout_users) -> None:

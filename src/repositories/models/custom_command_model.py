@@ -1,10 +1,10 @@
 from sqlalchemy import Column, BigInteger, String, DateTime
 from sqlalchemy.sql.sqltypes import Integer
 from src.repositories.database.config import base
-from enum import Enum
+from enum import IntEnum
 
 
-class MediaType(Enum):
+class MediaType(IntEnum):
     NONE = 0
     AUDIO = 1
     IMAGE = 2

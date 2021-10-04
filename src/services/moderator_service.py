@@ -98,7 +98,7 @@ def delete_moderator(user_id: int, chat_id: int) -> bool:
 
 
 def remove_moderator(chat_id: int, message_text: str, send_by_user_id: int) -> None:
-    """Logic and validations to remove a new moderator from database if exists."""
+    """Logic and validations to remove a moderator from database if exists."""
     try:
         command, username = message_text.split()
 

@@ -105,7 +105,7 @@ def send_image(chat_id: int, file_id: str, caption: str = None, reply_id: int = 
             random_index = randint(0, len(arr_photo) - 1)
             file_id = arr_photo[random_index]
 
-        data = {"chat_id": chat_id, "photo": file_id}
+        data = {"chat_id": chat_id, "photo": file_id, "parse_mode": "markdown"}
 
         if caption:
             data["caption"] = caption

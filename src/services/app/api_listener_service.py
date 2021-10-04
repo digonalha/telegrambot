@@ -4,7 +4,7 @@ from src.services import timeout_service, message_service, response_service
 def run_api_listener() -> None:
     """Loop for make requests to telegram api."""
     updates = message_service.get_updates(0)
-    offset = 0 if len(updates) == 0 else message_service.get_last_update_id(updates) + 1
+    offset = message_service.get_update_id_offset(updates)
 
     print("→ listening for updates...")
 
@@ -13,7 +13,7 @@ def run_api_listener() -> None:
         try:
             message_service.delete_messages(updates, timeout_service.timeout_users)
 
-            if updates != None and len(updates) > 0:
+            if updates and len(updates) > 0:
                 for update in updates:
                     try:
                         message = update["message"]
@@ -23,4 +23,4 @@ def run_api_listener() -> None:
                     except Exception:
                         continue
         finally:
-            offset = message_service.get_last_update_id(updates) + 1
+            offset = message_service.get_update_id_offset(updates)
