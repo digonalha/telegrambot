@@ -22,6 +22,7 @@ def add_sale_tracker_keyword(sale_tracker_keyword: dict) -> bool:
             stk
             for stk in sale_tracker_keywords
             if stk.user_id == sale_tracker_keyword["user_id"]
+            and stk.chat_id == sale_tracker_keyword["chat_id"]
             and stk.keyword == sale_tracker_keyword["keyword"]
         ),
         None,
