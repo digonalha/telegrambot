@@ -11,6 +11,7 @@ No momento o bot atende os seguintes comandos:
 !unmute <username>: remove o usuário da lista de silenciados **
 !track palavra-chave: monitora e notifica promoções referentes a palavra-chave **
 !untrack palavra-chave: remove a palavra-chve da lista de monitoramento **
+!keywords: lista as palavras-chave cadastradas pelo usuário **
 !add <comando> | <resposta> | <descrição>: adiciona um novo comando (para mídias, enviar o comando na legenda) **
 !del <comando>: remove um comando customizado *
 
