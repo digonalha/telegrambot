@@ -49,9 +49,11 @@ def run_sale_tracker() -> None:
             product_name = name_tag.text
 
             users_keyword_to_answer = []
+            lower_product_name = product_name.lower()
 
             for stk in sale_tracker_keyword_service.sale_tracker_keywords:
-                if stk.keyword.lower() in product_name.lower():
+                lower_keywords = stk.keyword.lower().split()
+                if all(k in lower_product_name for k in lower_keywords):
                     users_keyword_to_answer.append(stk)
 
             if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
@@ -80,43 +82,34 @@ def run_sale_tracker() -> None:
                 continue
 
             messages_to_send = []
+
             for user_keyword in users_keyword_to_answer:
                 message_with_same_chat_id = next(
                     (
                         m
                         for m in messages_to_send
-                        if m["chat_id"] == user_keyword.chat_id
+                        if m["user_id"] == user_keyword.user_id
                     ),
                     None,
                 )
 
                 if not message_with_same_chat_id:
                     new_message = {
-                        "chat_id": user_keyword.chat_id,
-                        "usernames": "@" + user_keyword.user_name,
+                        "user_id": user_keyword.user_id,
                         "text": (
                             f"*{db_tracked_sale.product_name}*\n"
                             f"Valor: {db_tracked_sale.price}\n\n"
                             f"[Link promoção]({db_tracked_sale.sale_url}) - [Link Gatry]({db_tracked_sale.aggregator_url})\n\n"
-                            f"$usernames"
                         ),
                     }
 
                     messages_to_send.append(new_message)
-                elif (
-                    user_keyword.user_name not in message_with_same_chat_id["usernames"]
-                ):
-                    message_with_same_chat_id["usernames"].append(
-                        ", @" + user_keyword.user_name
-                    )
 
             for message in messages_to_send:
-                message_text = message["text"].replace(
-                    "$usernames", message["usernames"]
-                )
-
                 message_service.send_image(
-                    message["chat_id"], db_tracked_sale.product_image_url, message_text
+                    message["user_id"],
+                    db_tracked_sale.product_image_url,
+                    message["text"],
                 )
 
         time.sleep(60)

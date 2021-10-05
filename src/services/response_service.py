@@ -39,7 +39,7 @@ def send_group_help_message(chat_id: int, reply_user: int, message_id: int) -> N
         "*!help:* lista de comandos disponíveis\n"
         "*!mod username:* adiciona o usuário na lista de moderadores \*\n"
         "*!unmod username:* remove o usuário da lista de moderadores \*\n"
-        "*!mute username tempo em segundos:* adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
+        "*!mute username tempo_em_segundos:* adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
         "*!unmute username:* remove o usuário da lista de silenciados \*\*\n"
         "*!track palavra-chave:* monitora e notifica promoções referentes a palavra-chave \*\*\n"
         "*!untrack palavra-chave:* remove a palavra-chve da lista de monitoramento \*\*\n"
@@ -168,15 +168,15 @@ def resolve_action(message) -> None:
 
         if text.lower() == "!keywords":
             sale_tracker_keyword_service.get_user_keywords(
-                chat_id, from_user_id, is_group
+                chat_id, from_user_id, message["message_id"]
             )
         elif text.lower().startswith("!track"):
             sale_tracker_keyword_service.insert_sale_tracker_keyword(
-                chat_id, text, from_user_id, is_group
+                chat_id, text, from_user_id, message["message_id"]
             )
         elif text.lower().startswith("!untrack"):
             sale_tracker_keyword_service.remove_sale_tracker_keyword(
-                chat_id, text, from_user_id, is_group
+                chat_id, text, from_user_id, message["message_id"]
             )
 
     except Exception as ex:

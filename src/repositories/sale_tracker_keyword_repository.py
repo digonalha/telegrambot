@@ -15,10 +15,9 @@ def add(sale_tracker_keyword: sale_tracker_keyword_schema.SaleTrackerKeywordCrea
     return new_sale_tracker_keyword
 
 
-def delete(user_id: int, chat_id: int, keyword: str):
+def delete(user_id: int, keyword: str):
     local_session.query(SaleTrackerKeyword).filter(
         SaleTrackerKeyword.user_id == user_id,
-        SaleTrackerKeyword.chat_id == chat_id,
         SaleTrackerKeyword.keyword == keyword,
     ).delete()
 
@@ -29,23 +28,20 @@ def get_all():
     return local_session.query(SaleTrackerKeyword).all()
 
 
-def get(user_id: int, chat_id: int, keyword: str):
+def get(user_id: int, keyword: str):
     return (
         local_session.query(SaleTrackerKeyword)
         .filter(
             SaleTrackerKeyword.user_id == user_id,
-            SaleTrackerKeyword.chat_id == chat_id,
             SaleTrackerKeyword.keyword == keyword,
         )
         .first()
     )
 
 
-def get_by_chat_id_and_user_id(user_id: int, chat_id: int):
+def get_by_user_id(user_id: int):
     return (
         local_session.query(SaleTrackerKeyword)
-        .filter(
-            SaleTrackerKeyword.user_id == user_id, SaleTrackerKeyword.chat_id == chat_id
-        )
+        .filter(SaleTrackerKeyword.user_id == user_id)
         .all()
     )

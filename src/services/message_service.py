@@ -72,3 +72,7 @@ def delete_messages(updates, timeout_users) -> None:
                     )
             except:
                 continue
+
+
+def delete_message(chat_id: int, message_id: int) -> None:
+    telegram_api.delete_message(chat_id, message_id)
