@@ -7,13 +7,13 @@ No momento o bot atende os seguintes comandos:
 !help: lista de comandos disponíveis
 !mod <username>: adiciona o usuário na lista de moderadores *
 !unmod <username>: remove o usuário da lista de moderadores *
-!mute <username> <tempo em segundos>: adiciona o usuário na lista de silenciados pelo tempo especificado **
+!mute <username> <tempo_em_segundos>: adiciona o usuário na lista de silenciados pelo tempo especificado **
 !unmute <username>: remove o usuário da lista de silenciados **
-!track palavra-chave: monitora e notifica promoções referentes a palavra-chave
-!untrack palavra-chave: remove a palavra-chve da lista de monitoramento
+!addkeyword <palavra-chave>: monitora e notifica promoções referentes a palavra-chave
+!delkeyword <palavra-chave>: remove a palavra-chave da lista de monitoramento
 !keywords: lista as palavras-chave cadastradas pelo usuário
-!add <comando> | <resposta> | <descrição>: adiciona um novo comando (para mídias, enviar o comando na legenda) **
-!del <comando>: remove um comando customizado *
+!addcommand <comando> | <resposta> | <descrição>: adiciona um novo comando (para mídias, enviar o comando na legenda) **
+!delcommand <comando>: remove um comando customizado*
 
 * necessário ser um administrador
 ** necessário ser um administrador ou moderador
