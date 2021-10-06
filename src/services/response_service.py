@@ -43,6 +43,7 @@ def send_group_help_message(chat_id: int, reply_user: int, message_id: int) -> N
         "*!unmute <username>:* remove o usuário da lista de silenciados \*\*\n"
         "*!addkeyword <palavra-chave>:* monitora e notifica promoções referentes a palavra-chave\n"
         "*!delkeyword <palavra-chave>:* remove a palavra-chave da lista de monitoramento\n"
+        "*!purgekeywords:* remove todas as palavras-chave da lista de monitoramento\n"
         "*!keywords:* lista as palavras-chave cadastradas pelo usuário\n"
         "*!addcommand <comando> | <resposta> | <descrição>:* adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
         "*!delcommand <comando>:* remove um comando customizado\*\n"
@@ -64,6 +65,7 @@ def send_private_help_message(chat_id: int, reply_user: int, message_id: int) ->
         "*!help:* lista de comandos disponíveis\n"
         "*!addkeyword <palavra-chave>:* monitora e notifica promoções referentes a palavra-chave\n"
         "*!delkeyword <palavra-chave>:* remove a palavra-chave da lista de monitoramento\n"
+        "*!purgekeywords:* remove todas as palavras-chave da lista de monitoramento\n"
         "*!keywords:* lista as palavras-chave cadastradas pelo usuário"
     )
 
@@ -139,6 +141,7 @@ def resolve_action(message) -> None:
                 and not text.lower().startswith("!addkeyword")
                 and not text.lower().startswith("!delkeyword")
                 and not text.lower() == "!keywords"
+                and not text.lower() == "!purgekeywords"
             ):
                 custom_command = text.split(" ", 0)[0].split("!")[1].lower()
                 db_command = custom_command_service.get_command(custom_command, chat_id)
@@ -168,6 +171,10 @@ def resolve_action(message) -> None:
 
         if text.lower() == "!keywords":
             keyword_service.get_user_keywords(
+                chat_id, from_user_id, message["message_id"]
+            )
+        elif text.lower() == "!purgekeywords":
+            keyword_service.remove_all_keywords(
                 chat_id, from_user_id, message["message_id"]
             )
         elif text.lower().startswith("!addkeyword"):

@@ -18,6 +18,7 @@ default_commands = [
     "delcommand",
     "addkeyword",
     "delkeyword",
+    "purgekeywords",
     "keywords",
 ]
 

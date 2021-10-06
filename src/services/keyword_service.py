@@ -218,3 +218,38 @@ def remove_keyword(
     finally:
         if chat_id != send_by_user_id:
             message_service.delete_message(chat_id, message_id)
+
+
+def remove_all_keywords(chat_id: int, send_by_user_id: int, message_id: int) -> None:
+    """Logic and validations to remove all keywords from database if exists."""
+    try:
+        keywords = keyword_repository.get_by_user_id(send_by_user_id)
+
+        if len(keywords) == 0:
+            message_service.send_message(
+                send_by_user_id,
+                f"Não existem palavras-chave para serem removidas da lista de monitoramento",
+            )
+            return
+
+        keyword_repository.delete_all_by_user_id(send_by_user_id)
+        keywords = keyword_repository.get_by_user_id(send_by_user_id)
+
+        if len(keywords) == 0:
+            message_service.send_message(
+                send_by_user_id,
+                f"Todas as palavras-chave foram removidas da lista de monitoramento",
+            )
+        else:
+            message_service.send_message(
+                send_by_user_id,
+                f"Não foi possível remover as palavras-chave da lista de monitoramento",
+            )
+    except Exception as ex:
+        syslog.create_warning("remove_all_keywords", ex)
+        message_service.send_message(
+            send_by_user_id, f"Não foi possível remover as palavras-chave"
+        )
+    finally:
+        if chat_id != send_by_user_id:
+            message_service.delete_message(chat_id, message_id)
