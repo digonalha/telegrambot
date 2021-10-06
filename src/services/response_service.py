@@ -6,7 +6,7 @@ from src.services import (
     timeout_service,
     custom_command_service,
     message_service,
-    sale_tracker_keyword_service,
+    keyword_service,
 )
 
 syslog = SystemLogging(__name__)
@@ -37,15 +37,15 @@ def send_group_help_message(chat_id: int, reply_user: int, message_id: int) -> N
         f"Olá, *@{(user.user_name)}*!\n"
         "Aqui está a minha lista de comandos disponíveis:\n\n"
         "*!help:* lista de comandos disponíveis\n"
-        "*!mod username:* adiciona o usuário na lista de moderadores \*\n"
-        "*!unmod username:* remove o usuário da lista de moderadores \*\n"
-        "*!mute username tempo_em_segundos:* adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
-        "*!unmute username:* remove o usuário da lista de silenciados \*\*\n"
-        "*!track palavra-chave:* monitora e notifica promoções referentes a palavra-chave\n"
-        "*!untrack palavra-chave:* remove a palavra-chve da lista de monitoramento\n"
+        "*!mod <username>:* adiciona o usuário na lista de moderadores \*\n"
+        "*!unmod <username>:* remove o usuário da lista de moderadores \*\n"
+        "*!mute <username> <tempo_em_segundos>:* adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
+        "*!unmute <username>:* remove o usuário da lista de silenciados \*\*\n"
+        "*!addkeyword <palavra-chave>:* monitora e notifica promoções referentes a palavra-chave\n"
+        "*!delkeyword <palavra-chave>:* remove a palavra-chave da lista de monitoramento\n"
         "*!keywords:* lista as palavras-chave cadastradas pelo usuário\n"
-        "*!add comando | resposta | descrição:* adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
-        "*!del comando:* remove um comando customizado\*\n"
+        "*!addcommand <comando> | <resposta> | <descrição>:* adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
+        "*!delcommand <comando>:* remove um comando customizado\*\n"
         f"{cc_title}"
         f"{custom_messages}"
         "\n\* _necessário ser um administrador_\n"
@@ -62,8 +62,8 @@ def send_private_help_message(chat_id: int, reply_user: int, message_id: int) ->
         f"Olá, *@{(user.user_name)}*!\n"
         "Aqui está a minha lista de comandos disponíveis:\n\n"
         "*!help:* lista de comandos disponíveis\n"
-        "*!track palavra-chave:* monitora e notifica promoções referentes a palavra-chave\n"
-        "*!untrack palavra-chave:* remove a palavra-chve da lista de monitoramento\n"
+        "*!addkeyword <palavra-chave>:* monitora e notifica promoções referentes a palavra-chave\n"
+        "*!delkeyword <palavra-chave>:* remove a palavra-chave da lista de monitoramento\n"
         "*!keywords:* lista as palavras-chave cadastradas pelo usuário"
     )
 
@@ -112,7 +112,7 @@ def resolve_action(message) -> None:
             elif text.lower().startswith("!unmute"):
                 timeout_service.remove_timeout_user(chat_id, text, from_user_id)
                 return
-            elif text.lower().startswith("!add"):
+            elif text.lower().startswith("!addcommand"):
                 file_id = None
                 media_type = MediaType.NONE
 
@@ -131,13 +131,13 @@ def resolve_action(message) -> None:
                 )
 
                 return
-            elif text.lower().startswith("!del"):
+            elif text.lower().startswith("!delcommand"):
                 custom_command_service.remove_command(chat_id, text, from_user_id)
                 return
             elif (
                 len(text) >= 3
-                and not text.lower().startswith("!track")
-                and not text.lower().startswith("!untrack")
+                and not text.lower().startswith("!addkeyword")
+                and not text.lower().startswith("!delkeyword")
                 and not text.lower() == "!keywords"
             ):
                 custom_command = text.split(" ", 0)[0].split("!")[1].lower()
@@ -167,15 +167,15 @@ def resolve_action(message) -> None:
                 return
 
         if text.lower() == "!keywords":
-            sale_tracker_keyword_service.get_user_keywords(
+            keyword_service.get_user_keywords(
                 chat_id, from_user_id, message["message_id"]
             )
-        elif text.lower().startswith("!track"):
-            sale_tracker_keyword_service.insert_sale_tracker_keyword(
+        elif text.lower().startswith("!addkeyword"):
+            keyword_service.insert_keyword(
                 chat_id, text, from_user_id, message["message_id"]
             )
-        elif text.lower().startswith("!untrack"):
-            sale_tracker_keyword_service.remove_sale_tracker_keyword(
+        elif text.lower().startswith("!delkeyword"):
+            keyword_service.remove_keyword(
                 chat_id, text, from_user_id, message["message_id"]
             )
 

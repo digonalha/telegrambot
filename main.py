@@ -6,7 +6,7 @@ from src.services import (
     moderator_service,
     custom_command_service,
     tracked_sale_service,
-    sale_tracker_keyword_service,
+    keyword_service,
 )
 
 print("→ starting telegrambot")
@@ -22,7 +22,7 @@ user_service.get_all_users()
 moderator_service.get_all_moderators()
 custom_command_service.get_all_commands()
 tracked_sale_service.get_all_tracked_sales()
-sale_tracker_keyword_service.get_all_sale_tracker_keyword()
+keyword_service.get_all_keywords()
 print("done!")
 
 

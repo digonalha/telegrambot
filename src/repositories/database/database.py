@@ -7,7 +7,7 @@ from src.repositories.models import (
     moderator_model,
     custom_command_model,
     tracked_sale_model,
-    sale_tracker_keyword_model,
+    keyword_model,
 )
 
 

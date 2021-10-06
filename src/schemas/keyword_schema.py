@@ -2,18 +2,18 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class SaleTrackerKeywordBase(BaseModel):
+class KeywordBase(BaseModel):
     user_id: int
     user_name: str
     keyword: str
 
 
-class SaleTrackerKeywordCreate(SaleTrackerKeywordBase):
+class KeywordCreate(KeywordBase):
     created_on: datetime
     modified_on: datetime
 
 
-class SaleTrackerKeyword(SaleTrackerKeywordBase):
+class Keyword(KeywordBase):
     class Config:
         orm_mode = True
         validate_assignment = True

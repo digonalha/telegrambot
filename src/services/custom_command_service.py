@@ -14,10 +14,10 @@ default_commands = [
     "unmod",
     "mute",
     "unmute",
-    "add",
-    "del",
-    "track",
-    "untrack",
+    "addcommand",
+    "delcommand",
+    "addkeyword",
+    "delkeyword",
     "keywords",
 ]
 
@@ -108,7 +108,7 @@ def insert_command(
 
         new_custom_command = new_custom_command.replace("!", "")
 
-        if command != "!add":
+        if command != "!addcommand":
             raise Exception("unknow command: " + command)
         elif len(new_custom_command) < 2 or len(new_custom_command) > 15:
             message_service.send_message(
@@ -138,7 +138,7 @@ def insert_command(
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para criar um novo comando, utilize:\n*!add nome_comando | resposta | descrição*\nou\n*!add -c nome_comando -a resposta -d descrição*",
+            "Para criar um novo comando, utilize:\n*!addcommand <nome_comando> | <resposta> | <descrição>*\nou\n*!addcommand -c <nome_comando> -a <resposta> -d <descrição>*",
         )
         syslog.create_warning("insert_command", ex)
         return
@@ -207,7 +207,7 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int) -> Non
     try:
         command, custom_command_name = message_text.split(" ", 1)
 
-        if command != "!del":
+        if command != "!delcommand":
             raise Exception("unknow command: " + command)
 
         custom_command_name = custom_command_name.replace("!", "")
@@ -215,7 +215,7 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int) -> Non
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para remover um comando customizado, utilize *!del nome_comando*",
+            "Para remover um comando customizado, utilize *!delcommand <nome_comando>*",
         )
         syslog.create_warning("remove_command", ex)
         return

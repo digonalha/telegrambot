@@ -6,7 +6,7 @@ from sqlalchemy.sql.functions import user
 from src.services import (
     message_service,
     tracked_sale_service,
-    sale_tracker_keyword_service,
+    keyword_service,
 )
 
 
@@ -18,7 +18,7 @@ def run_sale_tracker() -> None:
 
     """Loop for sale's tracker sites web scraping."""
     while True:
-        if len(sale_tracker_keyword_service.sale_tracker_keywords) == 0:
+        if len(keyword_service.keywords) == 0:
             time.sleep(30)
             continue
 
@@ -51,10 +51,10 @@ def run_sale_tracker() -> None:
             users_keyword_to_answer = []
             lower_product_name = product_name.lower()
 
-            for stk in sale_tracker_keyword_service.sale_tracker_keywords:
-                lower_keywords = stk.keyword.lower().split()
+            for keyword in keyword_service.keywords:
+                lower_keywords = keyword.keyword.lower().split()
                 if all(k in lower_product_name for k in lower_keywords):
-                    users_keyword_to_answer.append(stk)
+                    users_keyword_to_answer.append(keyword)
 
             if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
                 continue
