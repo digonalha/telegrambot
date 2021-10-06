@@ -83,6 +83,19 @@ def insert_sale_tracker_keyword(
         if command != "!track":
             raise Exception("unknow command: " + command)
 
+    except ValueError as ve:
+        command = message_text.split(" ", 1)[0]
+
+        if command == "!track":
+            message_service.send_message(
+                send_by_user_id,
+                "Para monitorar uma palavra-chave nas promoções, utilize *!track palavra-chave*",
+            )
+            syslog.create_warning("insert_sale_tracker_keyword", ve)
+
+            if chat_id != send_by_user_id:
+                message_service.delete_message(chat_id, message_id)
+        return
     except Exception as ex:
         message_service.send_message(
             send_by_user_id,
@@ -170,11 +183,23 @@ def remove_sale_tracker_keyword(
 
         if command != "!untrack":
             raise Exception("unknow command: " + command)
+    except ValueError as ve:
+        command = message_text.split(" ", 1)[0]
 
+        if command == "!untrack":
+            message_service.send_message(
+                send_by_user_id,
+                "Para remover uma palavra-chave, utilize *!untrack palavra-chave*",
+            )
+            syslog.create_warning("remove_sale_tracker_keyword", ve)
+
+            if chat_id != send_by_user_id:
+                message_service.delete_message(chat_id, message_id)
+        return
     except Exception as ex:
         message_service.send_message(
             send_by_user_id,
-            "Para parar de monitorar uma palavra-chave nas promoções, utilize *!untrack palavra-chave*",
+            "Para remover uma palavra-chave, utilize *!untrack palavra-chave*",
         )
         syslog.create_warning("remove_sale_tracker_keyword", ex)
         return
