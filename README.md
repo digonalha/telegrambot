@@ -11,6 +11,7 @@ No momento o bot atende os seguintes comandos:
 !unmute <username>: remove o usuário da lista de silenciados **
 !addkeyword <palavra-chave>: monitora e notifica promoções referentes a palavra-chave
 !delkeyword <palavra-chave>: remove a palavra-chave da lista de monitoramento
+!purgekeywords: remove todas as palavras-chave da lista de monitoramento
 !keywords: lista as palavras-chave cadastradas pelo usuário
 !addcommand <comando> | <resposta> | <descrição>: adiciona um novo comando (para mídias, enviar o comando na legenda) **
 !delcommand <comando>: remove um comando customizado*
