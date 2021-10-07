@@ -1,13 +1,13 @@
 from src.schemas import tracked_sale_schema
 from src.repositories.database import database
-from src.repositories.models import tracked_sale_model
+from src.repositories.models.tracked_sale_model import TrackedSale
 from datetime import datetime, date, time, timedelta
 
 local_session = database.get()
 
 
 def add(tracked_sale: tracked_sale_schema.TrackedSaleCreate):
-    new_tracked_sale = tracked_sale_model.TrackedSale(**tracked_sale.dict())
+    new_tracked_sale = TrackedSale(**tracked_sale.dict())
 
     local_session.add(new_tracked_sale)
     local_session.commit()
@@ -21,17 +21,11 @@ def get_all():
         1
     )  # date today - 1h:30
     return (
-        local_session.query(tracked_sale_model.TrackedSale)
-        .filter(tracked_sale_model.TrackedSale.sale_date >= greater_than_date)
+        local_session.query(TrackedSale)
+        .filter(TrackedSale.sale_date >= greater_than_date)
         .all()
     )
 
 
 def get_by_id(id: int):
-    return (
-        local_session.query(tracked_sale_model.TrackedSale)
-        .filter(
-            tracked_sale_model.TrackedSale.sale_id == id,
-        )
-        .first()
-    )
+    return local_session.query(TrackedSale).filter(TrackedSale.sale_id == id).first()

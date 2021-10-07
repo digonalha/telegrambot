@@ -57,8 +57,6 @@ def run_sale_tracker() -> None:
             if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
                 continue
 
-            now = datetime.now()
-
             sale = {
                 "sale_id": sale_id,
                 "product_name": product_name,
@@ -70,8 +68,7 @@ def run_sale_tracker() -> None:
                     info.find(class_="data_postado")["title"].replace(" às ", " "),
                     "%d/%m/%Y %H:%M",
                 ),
-                "created_on": now,
-                "modified_on": now,
+                "created_on": datetime.now(),
             }
 
             db_tracked_sale = tracked_sale_service.add_tracked_sale_if_not_exists(sale)

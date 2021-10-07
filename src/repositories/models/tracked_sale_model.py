@@ -13,4 +13,3 @@ class TrackedSale(base):
     sale_date = Column(DateTime, nullable=False)
     aggregator_url = Column(String, nullable=False)
     created_on = Column(DateTime, nullable=False)
-    modified_on = Column(DateTime, nullable=False)

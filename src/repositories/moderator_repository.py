@@ -1,12 +1,12 @@
 from src.schemas import moderator_schema
 from src.repositories.database import database
-from src.repositories.models import moderator_model
+from src.repositories.models.moderator_model import Moderator
 
 local_session = database.get()
 
 
 def add(moderator: moderator_schema.ModeratorCreate):
-    new_moderator = moderator_model.Moderator(**moderator.dict())
+    new_moderator = Moderator(**moderator.dict())
 
     local_session.add(new_moderator)
     local_session.commit()
@@ -16,24 +16,20 @@ def add(moderator: moderator_schema.ModeratorCreate):
 
 
 def delete(user_id: int, chat_id: int):
-    local_session.query(moderator_model.Moderator).filter(
-        moderator_model.Moderator.user_id == user_id,
-        moderator_model.Moderator.chat_id == chat_id,
+    local_session.query(Moderator).filter(
+        Moderator.user_id == user_id, Moderator.chat_id == chat_id
     ).delete()
 
     local_session.commit()
 
 
 def get_all():
-    return local_session.query(moderator_model.Moderator).all()
+    return local_session.query(Moderator).all()
 
 
 def get(user_id: int, chat_id: int):
     return (
-        local_session.query(moderator_model.Moderator)
-        .filter(
-            moderator_model.Moderator.user_id == user_id,
-            moderator_model.Moderator.chat_id == chat_id,
-        )
+        local_session.query(Moderator)
+        .filter(Moderator.user_id == user_id, Moderator.chat_id == chat_id)
         .first()
     )

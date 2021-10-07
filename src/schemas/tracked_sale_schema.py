@@ -14,7 +14,6 @@ class TrackedSaleBase(BaseModel):
 
 class TrackedSaleCreate(TrackedSaleBase):
     created_on: datetime
-    modified_on: datetime
 
 
 class TrackedSale(TrackedSaleBase):

@@ -108,8 +108,6 @@ def insert_keyword(
         return
 
     try:
-        now = datetime.now()
-
         send_by_user = user_service.get_user_by_id_if_exists(send_by_user_id)
 
         if not send_by_user:
@@ -122,14 +120,13 @@ def insert_keyword(
             message_service.send_message(send_by_user.user_id, message)
             return
 
-        tracker_keyword = {
+        new_keyword = {
             "user_id": send_by_user.user_id,
             "keyword": keyword,
-            "created_on": now,
-            "modified_on": now,
+            "created_on": datetime.now(),
         }
 
-        if add_keyword(tracker_keyword):
+        if add_keyword(new_keyword):
             message_service.send_message(
                 send_by_user.user_id,
                 f'A palavra-chave *"{keyword}"* agora está sendo monitorada',

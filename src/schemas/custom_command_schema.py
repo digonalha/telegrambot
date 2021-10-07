@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from datetime import datetime
-
 from src.repositories.models.custom_command_model import MediaType
 
 
