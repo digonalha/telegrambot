@@ -10,10 +10,8 @@ from src.services import (
 )
 
 
-site_url = "https://gatry.com"
-
-
 def run_sale_tracker() -> None:
+    site_url = "https://gatry.com"
     today = date.today()
 
     """Loop for sale's tracker sites web scraping."""

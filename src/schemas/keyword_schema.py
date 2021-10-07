@@ -4,7 +4,6 @@ from datetime import datetime
 
 class KeywordBase(BaseModel):
     user_id: int
-    user_name: str
     keyword: str
 
 

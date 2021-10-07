@@ -79,6 +79,12 @@ def insert_keyword(
 
         if command != "!addkeyword":
             raise Exception("unknow command: " + command)
+        elif len(keyword) < 4:
+            message_service.send_message(
+                send_by_user_id,
+                "Palavra-chave não pode ter menos de 4 caracteres",
+            )
+            return
 
     except ValueError as ve:
         command = message_text.split(" ", 1)[0]
@@ -118,7 +124,6 @@ def insert_keyword(
 
         tracker_keyword = {
             "user_id": send_by_user.user_id,
-            "user_name": send_by_user.user_name,
             "keyword": keyword,
             "created_on": now,
             "modified_on": now,
