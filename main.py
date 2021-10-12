@@ -54,10 +54,7 @@ def start_bot(attempts: int = 0):
 
 
 def main():
-    try:
-        start_bot()
-    except:
-        time.sleep(10)
+    start_bot()
 
     print("→ starting sale tracker thread... ", end="")
     t1 = threading.Thread(target=sale_tracker_service.run_sale_tracker)
