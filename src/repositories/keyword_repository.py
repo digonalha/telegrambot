@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from src.schemas import keyword_schema
 from src.repositories.database import database
 from src.repositories.models.keyword_model import Keyword
@@ -18,15 +19,14 @@ def add(keyword: keyword_schema.KeywordCreate):
 def delete(user_id: int, keyword: str):
     local_session.query(Keyword).filter(
         Keyword.user_id == user_id,
-        Keyword.keyword == keyword,
-    ).delete()
+        func.lower(Keyword.keyword) == keyword.lower(),
+    ).delete(synchronize_session="fetch")
 
     local_session.commit()
 
 
 def delete_all_by_user_id(user_id: int):
     local_session.query(Keyword).filter(Keyword.user_id == user_id).delete()
-
     local_session.commit()
 
 
@@ -39,7 +39,7 @@ def get(user_id: int, keyword: str):
         local_session.query(Keyword)
         .filter(
             Keyword.user_id == user_id,
-            Keyword.keyword == keyword,
+            func.lower(Keyword.keyword) == keyword.lower(),
         )
         .first()
     )

@@ -152,7 +152,7 @@ def insert_command(
         now = datetime.now()
 
         new_custom_command_obj = {
-            "command": new_custom_command,
+            "command": new_custom_command.lower(),
             "text": answer.strip(),
             "description": description.strip(),
             "chat_id": chat_id,

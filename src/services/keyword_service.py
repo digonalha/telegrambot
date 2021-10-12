@@ -122,7 +122,7 @@ def insert_keyword(
 
         new_keyword = {
             "user_id": send_by_user.user_id,
-            "keyword": keyword,
+            "keyword": keyword.lower(),
             "created_on": datetime.now(),
         }
 
@@ -154,7 +154,7 @@ def delete_keyword(user_id: int, keyword: str) -> bool:
             (
                 stk
                 for stk in keywords
-                if stk.user_id == user_id and stk.keyword == keyword
+                if stk.user_id == user_id and stk.keyword.lower() == keyword.lower()
             ),
             None,
         )
