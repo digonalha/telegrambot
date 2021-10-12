@@ -2,7 +2,6 @@ import requests
 import time
 from datetime import datetime, date
 from bs4 import BeautifulSoup
-from sqlalchemy.sql.functions import user
 from src.services import (
     message_service,
     tracked_sale_service,
