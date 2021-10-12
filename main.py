@@ -19,7 +19,7 @@ def cls():
     os.system("cls" if os.name == "nt" else "clear")
 
 
-def start_bot(attempts: int = 0):
+def load_prerequisites(attempts: int = 0):
     total_attempts = attempts
     try:
         cls()
@@ -46,7 +46,7 @@ def start_bot(attempts: int = 0):
                 f"an error occurred. waiting {time_in_seconds} seconds to try again..."
             )
             time.sleep(time_in_seconds)
-            start_bot(total_attempts)
+            load_prerequisites(total_attempts)
         else:
             main_syslog.create_warning("start_bot", ex)
             print("could not start application. please check the log file")
@@ -54,7 +54,7 @@ def start_bot(attempts: int = 0):
 
 
 def main():
-    start_bot()
+    load_prerequisites()
 
     print("→ starting sale tracker thread... ", end="")
     t1 = threading.Thread(target=sale_tracker_service.run_sale_tracker)
