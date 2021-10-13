@@ -1,6 +1,7 @@
 from datetime import datetime
 from src.repositories.models.custom_command_model import CustomCommand, MediaType
 from src.helpers.logging_helper import SystemLogging
+from src.helpers import string_helper
 from src.repositories import custom_command_repository
 from src.schemas import custom_command_schema
 from src.services import user_service, message_service
@@ -133,6 +134,18 @@ def insert_command(
             message_service.send_message(
                 chat_id,
                 "Já existe um comando com esse nome",
+            )
+            return
+        elif not string_helper.random_number_validation(answer):
+            message_service.send_message(
+                chat_id,
+                "Verifique a função $random_number. Sintaxe: *$random_number\[min,máx]* (máx. 2 números)",
+            )
+            return
+        elif not string_helper.random_word_validation(answer):
+            message_service.send_message(
+                chat_id,
+                "Verifique a função *$random_word*. Sintaxe: *$random_word*\[word1,word2,...,word10] (máx. 10 palavras)",
             )
             return
 

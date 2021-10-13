@@ -50,9 +50,12 @@ def delete_message(chat_id: int, message_id: int):
         syslog.create_warning("delete_message", ex)
 
 
-def send_message(chat_id: int, message: str, reply_id: int = 0):
+def send_message(
+    chat_id: int, message: str, reply_id: int = 0, parse_mode: str = "markdown"
+):
     try:
-        data = {"chat_id": chat_id, "text": message, "parse_mode": "markdown"}
+        data = {"chat_id": chat_id, "text": message, "parse_mode": parse_mode}
+
         if reply_id != None and reply_id > 0:
             data["reply_to_message_id"] = reply_id
         res = requests.post(f"{API_URI}/sendMessage", data=data)

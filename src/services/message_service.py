@@ -26,13 +26,42 @@ def send_video(chat_id: int, file_id: str) -> None:
     telegram_api.send_video(chat_id, file_id)
 
 
-def send_message(chat_id: int, message: str) -> None:
+def send_message(chat_id: int, message: str, parse_mode: str = "markdown") -> None:
     """Send a request for send message to telegram api"""
-    if "$random_percent" in message:
-        perc = randint(0, 100)
-        message = message.replace("$random_percent", str(perc))
+    if "$random_number[" in message:
+        str_numbers = message.split("$random_number[")[1].split("]", 1)[0]
+        first_number, second_number = str_numbers.split(",")
 
-    telegram_api.send_message(chat_id, message)
+        first_number = int(first_number)
+        second_number = int(second_number)
+
+        if first_number < 0 or first_number > 1000:
+            return
+        elif second_number < 0 or second_number > 1000:
+            return
+
+        perc = randint(first_number, second_number)
+        string_to_replace = f"$random_number[{str_numbers}]"
+
+        message = message.replace(string_to_replace, str(perc))
+    if "$random_word[" in message:
+        str_words = message.split("$random_word[")[1].split("]", 1)[0]
+        words = str_words.split(",")
+
+        total_words = len(words)
+
+        if total_words < 2 or total_words > 10:
+            return
+
+        rand_index = randint(0, total_words - 1)
+
+        selected_word = words[rand_index]
+
+        string_to_replace = f"$random_word[{str_words}]"
+
+        message = message.replace(string_to_replace, selected_word)
+
+    telegram_api.send_message(chat_id, message, parse_mode=parse_mode)
 
 
 def get_updates(offset: int) -> list:
