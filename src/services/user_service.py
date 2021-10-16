@@ -64,19 +64,31 @@ def get_all_users() -> None:
     users = user_repository.get_all()
 
 
-def add_user_if_not_exists(user_id: int, username: str) -> None:
-    """Create a new user on database if not exists."""
+def add_or_update_user(user_id: int, first_name: str, user_name: str) -> None:
+    """Create a new user on database if not exists, or update if necessary."""
     try:
-        if next((u for u in users if u.user_id == user_id), None):
+        if next(
+            (
+                u
+                for u in users
+                if u.user_id == user_id
+                and u.first_name == first_name
+                and u.user_name == user_name
+            ),
+            None,
+        ):
             return
 
-        if not user_repository.get_by_id(user_id):
+        db_user = user_repository.get_by_id(user_id)
+
+        if not db_user:
             now = datetime.now()
 
             db_user = user_repository.add(
                 user_schema.UserCreate(
                     user_id=user_id,
-                    user_name=username,
+                    user_name=user_name,
+                    first_name=first_name,
                     is_admin=False,
                     created_on=now,
                     modified_on=now,
@@ -85,5 +97,24 @@ def add_user_if_not_exists(user_id: int, username: str) -> None:
 
             if db_user:
                 users.append(db_user)
+        elif db_user.user_name != user_name or db_user.first_name != first_name:
+            now = datetime.now()
+
+            updated_user = user_repository.update(
+                user_schema.UserUpdate(
+                    user_id=user_id,
+                    user_name=user_name,
+                    first_name=first_name,
+                    modified_on=now,
+                )
+            )
+
+            if updated_user:
+                try:
+                    users.remove(db_user)
+                    users.append(updated_user)
+                except:
+                    get_all_users()
+
     except Exception as ex:
         syslog.create_warning("add_user_if_not_exists", ex)

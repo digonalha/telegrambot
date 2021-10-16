@@ -82,10 +82,10 @@ def send_private_help_message(chat_id: int, name: str, message_id: int) -> None:
         f"Olá, *{(name)}*!\n"
         "Aqui estão os meus comandos disponíveis:\n\n"
         "*/help:* lista os comandos disponíveis\n"
+        "*/promo:* lista as promoções cadastradas pelo usuário"
         "*/addpromo <palavra-chave>:* monitora e notifica promoções referentes a palavra-chave\n"
         "*/delpromo <palavra-chave>:* remove a palavra-chave da lista de monitoramento de promoções\n"
         "*/clearpromo:* remove todas as palavras-chave da lista de monitoramento de promoções\n"
-        "*/promo:* lista as promoções cadastradas pelo usuário"
     )
 
     message_service.send_message(chat_id, help_message)
@@ -100,11 +100,14 @@ def resolve_action(message) -> None:
         if timeout_service.is_user_in_timeout(chat_id, from_user_id):
             return
 
-        # if user who send message not found on users object, add on database:
+        username = ""
+
         if "username" in message["from"]:
-            user_service.add_user_if_not_exists(
-                from_user_id, message["from"]["username"]
-            )
+            username = message["from"]["username"]
+        # if user who send message not found on users object, add on database:
+        user_service.add_or_update_user(
+            from_user_id, message["from"]["first_name"], username
+        )
 
         text = ""
 
