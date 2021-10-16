@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from src.repositories.models.custom_command_model import MediaType
 from src.helpers.logging_helper import SystemLogging
 from src.services import (
@@ -9,13 +11,15 @@ from src.services import (
     keyword_service,
 )
 
+load_dotenv()
+
+BOT_NAME = os.getenv("BOT_NAME")
+
 syslog = SystemLogging(__name__)
 
 
-def send_group_help_message(chat_id: int, reply_user: int, message_id: int) -> None:
-    """Send help message when asked on chat."""
-    user = user_service.get_user_by_id_if_exists(reply_user)
-
+def send_custom_commands_message(chat_id: int, name: str, message_id: int):
+    """Send a list of custom commands when asked on chat."""
     custom_messages = ""
 
     custom_command_service.custom_commands.sort(key=lambda x: x.command)
@@ -27,46 +31,61 @@ def send_group_help_message(chat_id: int, reply_user: int, message_id: int) -> N
             if cc.description and len(cc.description) > 0:
                 description = cc.description
 
-            custom_messages += f"*!{cc.command}:* {description}\n"
+            custom_messages += f"*/{cc.command}:* {description}\n"
 
-    cc_title = ""
-    if len(custom_messages) > 0:
-        cc_title = "\n*Comandos Customizados:*\n\n"
+    if len(custom_messages) == 0:
+        message_service.send_message(
+            chat_id,
+            "Nenhum comando customizado encontrado para o grupo. Utilize o comando /addcmd para cadastrar novos comandos",
+        )
+        return
 
     help_message = (
-        f"Olá, *@{(user.user_name)}*!\n"
-        "Aqui está a minha lista de comandos disponíveis:\n\n"
-        "*!help:* lista de comandos disponíveis\n"
-        "*!mod <username>:* adiciona o usuário na lista de moderadores \*\n"
-        "*!unmod <username>:* remove o usuário da lista de moderadores \*\n"
-        "*!mute <username> <tempo_em_segundos>:* adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
-        "*!unmute <username>:* remove o usuário da lista de silenciados \*\*\n"
-        "*!addkeyword <palavra-chave>:* monitora e notifica promoções referentes a palavra-chave\n"
-        "*!delkeyword <palavra-chave>:* remove a palavra-chave da lista de monitoramento\n"
-        "*!purgekeywords:* remove todas as palavras-chave da lista de monitoramento\n"
-        "*!keywords:* lista as palavras-chave cadastradas pelo usuário\n"
-        "*!addcommand <comando> | <resposta> | <descrição>:* adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
-        "*!delcommand <comando>:* remove um comando customizado\*\n"
-        f"{cc_title}"
+        f"Olá, *{(name)}*!\n"
+        "Aqui estão os comandos customizados disponíveis no grupo:\n\n"
         f"{custom_messages}"
-        "\n\* _necessário ser um administrador_\n"
-        "\*\* _necessário ser um administrador ou moderador_"
     )
 
     message_service.send_message(chat_id, help_message)
 
 
-def send_private_help_message(chat_id: int, reply_user: int, message_id: int) -> None:
-    user = user_service.get_user_by_id_if_exists(reply_user)
+def send_group_help_message(chat_id: int, name: str, message_id: int) -> None:
+    """Send help message when asked on chat."""
 
     help_message = (
-        f"Olá, *@{(user.user_name)}*!\n"
-        "Aqui está a minha lista de comandos disponíveis:\n\n"
-        "*!help:* lista de comandos disponíveis\n"
-        "*!addkeyword <palavra-chave>:* monitora e notifica promoções referentes a palavra-chave\n"
-        "*!delkeyword <palavra-chave>:* remove a palavra-chave da lista de monitoramento\n"
-        "*!purgekeywords:* remove todas as palavras-chave da lista de monitoramento\n"
-        "*!keywords:* lista as palavras-chave cadastradas pelo usuário"
+        f"Olá, *{(name)}*!\n"
+        "Aqui estão os meus comandos disponíveis:\n\n"
+        "*/help:* lista os comandos disponíveis\n"
+        "*/mod <username>:* promove o usuário ao cargo de moderador \*\n"
+        "*/unmod <username>:* rebaixa o usuário do cargo de moderador \*\n"
+        "*/mute <username> <tempo em segundos>:* adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
+        "*/unmute <username>:* remove o usuário da lista de silenciados \*\*\n"
+        "*/cmd:* lista os comandos customizados disponíveis no grupo\n"
+        "*/addcmd <comando> | <resposta> | <descrição>:* adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
+        "*/delcmd <comando>:* remove um comando customizado \*\n"
+        "\n\* _necessário ser um administrador_\n"
+        "\*\* _necessário ser um administrador ou moderador_\n"
+    )
+
+    if BOT_NAME:
+        help_message += (
+            f"\nPara monitorar promoções, enviar /help no privado para @{BOT_NAME}"
+        )
+    else:
+        help_message += "\nPara monitorar promoções, enviar /help no privado"
+
+    message_service.send_message(chat_id, help_message)
+
+
+def send_private_help_message(chat_id: int, name: str, message_id: int) -> None:
+    help_message = (
+        f"Olá, *{(name)}*!\n"
+        "Aqui estão os meus comandos disponíveis:\n\n"
+        "*/help:* lista os comandos disponíveis\n"
+        "*/addpromo <palavra-chave>:* monitora e notifica promoções referentes a palavra-chave\n"
+        "*/delpromo <palavra-chave>:* remove a palavra-chave da lista de monitoramento de promoções\n"
+        "*/clearpromo:* remove todas as palavras-chave da lista de monitoramento de promoções\n"
+        "*/promo:* lista as promoções cadastradas pelo usuário"
     )
 
     message_service.send_message(chat_id, help_message)
@@ -82,7 +101,10 @@ def resolve_action(message) -> None:
             return
 
         # if user who send message not found on users object, add on database:
-        user_service.add_user_if_not_exists(from_user_id, message["from"]["username"])
+        if "username" in message["from"]:
+            user_service.add_user_if_not_exists(
+                from_user_id, message["from"]["username"]
+            )
 
         text = ""
 
@@ -93,28 +115,39 @@ def resolve_action(message) -> None:
         else:
             return
 
-        if not text.startswith("!"):
+        if not text.startswith("/"):
             return
 
         is_group = message["chat"]["type"] == "group"
 
         if is_group:
-            if text.lower() == "!help":
-                send_group_help_message(chat_id, from_user_id, message["message_id"])
+            if text.lower() == "/help" or (
+                BOT_NAME and text.lower() == f"/help@{BOT_NAME}"
+            ):
+                send_group_help_message(
+                    chat_id, message["from"]["first_name"], message["message_id"]
+                )
                 return
-            elif text.lower().startswith("!mod"):
+            elif text.lower() == "/cmd" or (
+                BOT_NAME and text.lower() == f"/cmd@{BOT_NAME}"
+            ):
+                send_custom_commands_message(
+                    chat_id, message["from"]["first_name"], message["message_id"]
+                )
+                return
+            elif text.lower().startswith("/mod"):
                 moderator_service.insert_moderator(chat_id, text, from_user_id)
                 return
-            elif text.lower().startswith("!unmod"):
+            elif text.lower().startswith("/unmod"):
                 moderator_service.remove_moderator(chat_id, text, from_user_id)
                 return
-            elif text.lower().startswith("!mute"):
+            elif text.lower().startswith("/mute"):
                 timeout_service.insert_timeout_user(chat_id, text, from_user_id)
                 return
-            elif text.lower().startswith("!unmute"):
+            elif text.lower().startswith("/unmute"):
                 timeout_service.remove_timeout_user(chat_id, text, from_user_id)
                 return
-            elif text.lower().startswith("!addcommand"):
+            elif text.lower().startswith("/addcmd"):
                 file_id = None
                 media_type = MediaType.NONE
 
@@ -133,17 +166,11 @@ def resolve_action(message) -> None:
                 )
 
                 return
-            elif text.lower().startswith("!delcommand"):
+            elif text.lower().startswith("/delcmd"):
                 custom_command_service.remove_command(chat_id, text, from_user_id)
                 return
-            elif (
-                len(text) >= 3
-                and not text.lower().startswith("!addkeyword")
-                and not text.lower().startswith("!delkeyword")
-                and not text.lower() == "!keywords"
-                and not text.lower() == "!purgekeywords"
-            ):
-                custom_command = text.split(" ", 0)[0].split("!")[1].lower()
+            elif len(text) >= 3:
+                custom_command = text.split(" ", 0)[0].split("/")[1].lower()
                 db_command = custom_command_service.get_command(custom_command, chat_id)
 
                 if db_command:
@@ -165,26 +192,26 @@ def resolve_action(message) -> None:
                         message_service.send_message(chat_id, db_command.text)
                 return
         else:
-            if text.lower() == "!help":
-                send_private_help_message(chat_id, from_user_id, message["message_id"])
-                return
-
-        if text.lower() == "!keywords":
-            keyword_service.get_user_keywords(
-                chat_id, from_user_id, message["message_id"]
-            )
-        elif text.lower() == "!purgekeywords":
-            keyword_service.remove_all_keywords(
-                chat_id, from_user_id, message["message_id"]
-            )
-        elif text.lower().startswith("!addkeyword"):
-            keyword_service.insert_keyword(
-                chat_id, text, from_user_id, message["message_id"]
-            )
-        elif text.lower().startswith("!delkeyword"):
-            keyword_service.remove_keyword(
-                chat_id, text, from_user_id, message["message_id"]
-            )
+            if text.lower() == "/help" or text.lower() == "/start":
+                send_private_help_message(
+                    chat_id, message["from"]["first_name"], message["message_id"]
+                )
+            elif text.lower() == "/promo":
+                keyword_service.get_user_keywords(
+                    chat_id, from_user_id, message["message_id"]
+                )
+            elif text.lower() == "/clearpromo":
+                keyword_service.remove_all_keywords(
+                    chat_id, from_user_id, message["message_id"]
+                )
+            elif text.lower().startswith("/addpromo"):
+                keyword_service.insert_keyword(
+                    chat_id, text, from_user_id, message["message_id"]
+                )
+            elif text.lower().startswith("/delpromo"):
+                keyword_service.remove_keyword(
+                    chat_id, text, from_user_id, message["message_id"]
+                )
 
     except Exception as ex:
         syslog.create_warning("resolve_action", ex)

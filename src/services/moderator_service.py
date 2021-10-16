@@ -43,14 +43,14 @@ def insert_moderator(chat_id: int, message_text: str, send_by_user_id: int):
     try:
         command, username = message_text.split(" ", 1)
 
-        if command != "!mod":
+        if command != "/mod":
             raise Exception("unknow command: " + command)
 
         username = username.replace("@", "")
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para tornar um usuário moderador, utilize *!mod <username>*",
+            "Para tornar um usuário moderador, utilize */mod <username>*",
         )
         syslog.create_warning("insert_moderator", ex)
         return
@@ -102,14 +102,14 @@ def remove_moderator(chat_id: int, message_text: str, send_by_user_id: int) -> N
     try:
         command, username = message_text.split(" ", 1)
 
-        if command != "!unmod":
+        if command != "/unmod":
             raise Exception("unknow command: " + command)
 
         username = username.replace("@", "")
     except Exception as ex:
         message_service.send_message(
             chat_id,
-            "Para remover o status de moderador de um usuário, utilize *!unmod <username>*",
+            "Para remover o status de moderador de um usuário, utilize */unmod <username>*",
         )
         syslog.create_warning("remove_moderator", ex)
         return

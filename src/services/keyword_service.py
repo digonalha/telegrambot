@@ -77,7 +77,7 @@ def insert_keyword(
     try:
         command, keyword = message_text.split(" ", 1)
 
-        if command != "!addkeyword":
+        if command != "/addpromo":
             raise Exception("unknow command: " + command)
         elif len(keyword) < 4:
             message_service.send_message(
@@ -89,10 +89,10 @@ def insert_keyword(
     except ValueError as ve:
         command = message_text.split(" ", 1)[0]
 
-        if command == "!addkeyword":
+        if command == "/addpromo":
             message_service.send_message(
                 send_by_user_id,
-                "Para monitorar uma palavra-chave nas promoções, utilize *!addkeyword <palavra-chave>*",
+                "Para monitorar uma palavra-chave nas promoções, utilize */addpromo <palavra-chave>*",
             )
             syslog.create_warning("insert_keyword", ve)
 
@@ -102,7 +102,7 @@ def insert_keyword(
     except Exception as ex:
         message_service.send_message(
             send_by_user_id,
-            "Para monitorar uma palavra-chave nas promoções, utilize *!addkeyword <palavra-chave>*",
+            "Para monitorar uma palavra-chave nas promoções, utilize */addpromo <palavra-chave>*",
         )
         syslog.create_warning("insert_keyword", ex)
         return
@@ -116,7 +116,7 @@ def insert_keyword(
         user_keywords = keyword_repository.get_by_user_id(send_by_user.user_id)
 
         if len(user_keywords) >= 10 and not send_by_user.is_admin:
-            message = f"Você atingiu o seu limite de 10 palavras-chave. Para remover, utilize *!untrack palavra-chave*"
+            message = f"Você atingiu o seu limite de 10 palavras-chave. Para remover, utilize */delpromo <palavra-chave>*"
             message_service.send_message(send_by_user.user_id, message)
             return
 
@@ -178,15 +178,15 @@ def remove_keyword(
     try:
         command, keyword = message_text.split(" ", 1)
 
-        if command != "!delkeyword":
+        if command != "/delpromo":
             raise Exception("unknow command: " + command)
     except ValueError as ve:
         command = message_text.split(" ", 1)[0]
 
-        if command == "!delkeyword":
+        if command == "/delpromo":
             message_service.send_message(
                 send_by_user_id,
-                "Para remover uma palavra-chave, utilize *!delkeyword <palavra-chave>*",
+                "Para remover uma palavra-chave, utilize */delpromo <palavra-chave>*",
             )
             syslog.create_warning("remove_keyword", ve)
 
@@ -196,7 +196,7 @@ def remove_keyword(
     except Exception as ex:
         message_service.send_message(
             send_by_user_id,
-            "Para remover uma palavra-chave, utilize *!delkeyword <palavra-chave>*",
+            "Para remover uma palavra-chave, utilize */delpromo <palavra-chave>*",
         )
         syslog.create_warning("remove_keyword", ex)
         return
