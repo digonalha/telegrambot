@@ -15,12 +15,13 @@ default_commands = [
     "unmod",
     "mute",
     "unmute",
-    "addcommand",
-    "delcommand",
-    "addkeyword",
-    "delkeyword",
-    "purgekeywords",
-    "keywords",
+    "cmd",
+    "addcmd",
+    "delcmd",
+    "promo",
+    "addpromo",
+    "delpromo",
+    "clearpromo"
 ]
 
 
