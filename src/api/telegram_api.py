@@ -1,16 +1,12 @@
 import requests
-import os
-from dotenv import load_dotenv
-from src.helpers.logging_helper import SystemLogging
 from ast import literal_eval
 from random import randint
+from src.helpers.logging_helper import SystemLogging
+from src.configs import settings
 
 syslog = SystemLogging(__name__)
 
-load_dotenv()
-
-API_TOKEN = os.getenv("API_TOKEN")
-API_URI = f"https://api.telegram.org/bot{API_TOKEN}"
+API_URI = f"https://api.telegram.org/bot{settings.api_token}"
 
 
 def create_log_from_response(function_name, response):

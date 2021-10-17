@@ -1,7 +1,6 @@
-import os
-from dotenv import load_dotenv
 from src.repositories.models.custom_command_model import MediaType
 from src.helpers.logging_helper import SystemLogging
+from src.configs import settings
 from src.services import (
     user_service,
     moderator_service,
@@ -11,10 +10,6 @@ from src.services import (
     keyword_service,
 )
 
-load_dotenv()
-
-BOT_NAME = os.getenv("BOT_NAME")
-MAX_COMMANDS = os.getenv("MAX_COMMANDS")
 
 syslog = SystemLogging(__name__)
 
@@ -44,13 +39,11 @@ def send_custom_commands_message(chat_id: int, name: str, message_id: int):
         )
         return
 
-    max_cmd = MAX_COMMANDS if MAX_COMMANDS else 10
-
     help_message = (
         f"Olá, *{(name)}*!\n"
         "Aqui estão os comandos customizados disponíveis no grupo:\n\n"
         f"{custom_messages}"
-        f"\n*Total: {str(total_commands)}/{str(max_cmd)}*"
+        f"\n*Total: {str(total_commands)}/{str(settings.max_commands)}*"
     )
 
     message_service.send_message(chat_id, help_message)
@@ -74,10 +67,8 @@ def send_group_help_message(chat_id: int, name: str, message_id: int) -> None:
         "\*\* _necessário ser um administrador ou moderador_\n"
     )
 
-    if BOT_NAME:
-        help_message += (
-            f"\nPara monitorar promoções, enviar /help no privado para @{BOT_NAME}"
-        )
+    if settings.bot_name:
+        help_message += f"\nPara monitorar promoções, enviar /help no privado para @{settings.bot_name}"
     else:
         help_message += "\nPara monitorar promoções, enviar /help no privado"
 
@@ -132,14 +123,14 @@ def resolve_action(message) -> None:
 
         if is_group:
             if text.lower() == "/help" or (
-                BOT_NAME and text.lower() == f"/help@{BOT_NAME}"
+                settings.bot_name and text.lower() == f"/help@{settings.bot_name}"
             ):
                 send_group_help_message(
                     chat_id, message["from"]["first_name"], message["message_id"]
                 )
                 return
             elif text.lower() == "/cmd" or (
-                BOT_NAME and text.lower() == f"/cmd@{BOT_NAME}"
+                settings.bot_name and text.lower() == f"/cmd@{settings.bot_name}"
             ):
                 send_custom_commands_message(
                     chat_id, message["from"]["first_name"], message["message_id"]

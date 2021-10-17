@@ -1,6 +1,7 @@
 import threading
 import time
 import os
+from src.configs import settings
 from src.helpers.logging_helper import SystemLogging
 from src.repositories.database import database
 from src.services.app import api_listener_service, sale_tracker_service
