@@ -50,7 +50,7 @@ def send_message(
     chat_id: int, message: str, reply_id: int = 0, parse_mode: str = "markdown"
 ):
     try:
-        data = {"chat_id": chat_id, "text": message, "parse_mode": parse_mode}
+        data = {"chat_id": chat_id, "text": message, "parse_mode": parse_mode, "disable_web_page_preview": True}
 
         if reply_id != None and reply_id > 0:
             data["reply_to_message_id"] = reply_id

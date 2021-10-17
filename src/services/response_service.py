@@ -80,7 +80,7 @@ def send_private_help_message(chat_id: int, name: str, message_id: int) -> None:
         f"Olá, *{(name)}*!\n"
         "Aqui estão os meus comandos disponíveis:\n\n"
         "*/help:* lista os comandos disponíveis\n"
-        "*/promo:* lista as promoções cadastradas pelo usuário"
+        "*/promo:* lista as promoções cadastradas pelo usuário\n"
         "*/addpromo <palavra-chave>:* monitora e notifica promoções referentes a palavra-chave\n"
         "*/delpromo <palavra-chave>:* remove a palavra-chave da lista de monitoramento de promoções\n"
         "*/clearpromo:* remove todas as palavras-chave da lista de monitoramento de promoções\n"

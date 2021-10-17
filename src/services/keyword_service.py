@@ -1,8 +1,9 @@
 from datetime import datetime
+import time
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import keyword_repository
 from src.schemas import keyword_schema
-from src.services import message_service, user_service
+from src.services import message_service, user_service, tracked_sale_service
 from src.configs import settings
 
 keywords = []
@@ -133,6 +134,8 @@ def insert_keyword(
                 send_by_user.user_id,
                 f'A palavra-chave *"{keyword}"* agora está sendo monitorada',
             )
+
+            tracked_sale_service.check_last_tracked_sales(send_by_user.user_id, keyword)
         else:
             message_service.send_message(
                 send_by_user.user_id,
