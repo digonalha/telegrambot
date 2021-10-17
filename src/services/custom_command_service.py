@@ -13,7 +13,7 @@ syslog = SystemLogging(__name__)
 
 load_dotenv()
 
-MAX_COMMANDS = os.getenv("TOTAL_COMMANDS")
+MAX_COMMANDS = os.getenv("MAX_COMMANDS")
 
 default_commands = [
     "help",
