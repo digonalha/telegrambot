@@ -29,7 +29,7 @@ def get_user_keywords(chat_id: int, user_id: int, message_id: int) -> list:
         if not user:
             raise Exception("user not found. id: " + user_id)
 
-        message = f"Nenhuma palavra-chave encontrada para o usuário *@{user.user_name}*"
+        message = f"Nenhuma palavra-chave encontrada"
 
         if keywords and len(keywords) > 0:
             message = "As palavras-chave abaixo foram encontradas: \n"
