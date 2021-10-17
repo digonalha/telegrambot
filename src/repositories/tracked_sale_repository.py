@@ -37,7 +37,7 @@ def get_last_tracked_sales(arr_keyword: str) -> list():
 
     result = local_session.execute(
         text(
-            """SELECT ts.product_name, ts.product_image_url, ts.sale_url, ts.aggregator_url, ts.price
+            """SELECT ts.product_name, ts.product_image_url, ts.sale_url, ts.aggregator_url, ts.price, ts.sale_date
                FROM tracked_sale ts 
                WHERE lower(ts.product_name) LIKE ALL (:arr_keyword) 
                AND ts.sale_date >= :greater_than_date;"""

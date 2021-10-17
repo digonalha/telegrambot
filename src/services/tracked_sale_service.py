@@ -39,16 +39,18 @@ def check_last_tracked_sales(chat_id: int, keyword: str):
         total_sales = len(last_sales)
         if last_sales and total_sales > 0:
             last_sales_message = f'Encontrei essas {total_sales} promoções relacionadas a palavra-chave *"{keyword}"* nas ultimas 8 horas:\n\n'
-            index = 1
+
             # send sales from last 8 hours if exists
             for sale in last_sales:
                 last_sales_message += f"*{sale['product_name']}*\n"
-                last_sales_message += f"Valor: {sale['price']}\n\n"
+                last_sales_message += f"Valor: {sale['price']}\n"
+                last_sales_message += (
+                    f"Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}\n\n"
+                )
                 last_sales_message += f"[Link promoção]({sale['sale_url']}) - [Link Gatry]({sale['aggregator_url']})\n\n"
-                if index < total_sales:
-                    last_sales_message += f"--------\n\n"
+                last_sales_message += f"--------\n\n"
 
-                index += 1
+            last_sales_message += f"_Daqui pra frente você será notificado todas as vezes que uma promoção do seu produto monitorado aparecer! Para remover esse item do monitor, utilize o comando /delpromo {keyword}_"
 
             message_service.send_message(chat_id, last_sales_message)
     except Exception as ex:

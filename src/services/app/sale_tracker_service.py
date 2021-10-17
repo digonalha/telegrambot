@@ -92,7 +92,8 @@ def run_sale_tracker() -> None:
                         "user_id": user_keyword.user_id,
                         "text": (
                             f"*{db_tracked_sale.product_name}*\n"
-                            f"Valor: {db_tracked_sale.price}\n\n"
+                            f"Valor: {db_tracked_sale.price}\n"
+                            f"Data: {db_tracked_sale.sale_date.strftime('%d/%m -  %H:%M')}\n\n"
                             f"[Link promoção]({db_tracked_sale.sale_url}) - [Link Gatry]({db_tracked_sale.aggregator_url})\n\n"
                         ),
                     }
