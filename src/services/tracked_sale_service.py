@@ -47,7 +47,7 @@ def check_last_tracked_sales(chat_id: int, keyword: str):
                 last_sales_message += (
                     f"Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}\n\n"
                 )
-                last_sales_message += f"[Link promoção]({sale['sale_url']}) - [Link Gatry]({sale['aggregator_url']})\n\n"
+                last_sales_message += f"[Ver promoção]({sale['aggregator_url']})\n\n"
                 last_sales_message += f"--------\n\n"
 
             last_sales_message += f"_Daqui pra frente você será notificado todas as vezes que uma promoção do seu produto monitorado aparecer! Para remover esse item do monitor, utilize o comando /delpromo {keyword}_"

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, String, DateTime, Numeric
+from sqlalchemy import Column, BigInteger, String, DateTime
 from src.repositories.database.config import base
 
 
@@ -10,6 +10,6 @@ class TrackedSale(base):
     product_image_url = Column(String, nullable=True)
     price = Column(String, nullable=False)
     sale_url = Column(String, nullable=False)
-    sale_date = Column(DateTime, nullable=False)
+    sale_date = Column(DateTime(timezone=True), nullable=False)
     aggregator_url = Column(String, nullable=False)
     created_on = Column(DateTime, nullable=False)
