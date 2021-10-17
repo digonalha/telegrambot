@@ -24,8 +24,11 @@ def send_custom_commands_message(chat_id: int, name: str, message_id: int):
 
     custom_command_service.custom_commands.sort(key=lambda x: x.command)
 
+    total_commands = 0
+
     for cc in custom_command_service.custom_commands:
         if cc.chat_id == chat_id:
+            total_commands += 1
             description = "Nenhuma descrição encontrada"
 
             if cc.description and len(cc.description) > 0:
@@ -44,6 +47,7 @@ def send_custom_commands_message(chat_id: int, name: str, message_id: int):
         f"Olá, *{(name)}*!\n"
         "Aqui estão os comandos customizados disponíveis no grupo:\n\n"
         f"{custom_messages}"
+        f"\n\n*Total: {str(total_commands)}*"
     )
 
     message_service.send_message(chat_id, help_message)
