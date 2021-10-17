@@ -62,8 +62,8 @@ def send_group_help_message(chat_id: int, name: str, message_id: int) -> None:
         "*/unmute <username>:* remove o usuário da lista de silenciados \*\*\n"
         "*/cmd:* lista os comandos customizados disponíveis no grupo\n"
         "*/addcmd <comando> | <resposta> | <descrição>:* adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
-        "*/delcmd <comando>:* remove um comando customizado \*\n"
-        "\n\* _necessário ser um administrador_\n"
+        "*/delcmd <comando>:* remove um comando customizado \*\n\n"
+        "\* _necessário ser um administrador_\n"
         "\*\* _necessário ser um administrador ou moderador_\n"
     )
 
