@@ -4,7 +4,7 @@ Criei esse bot para gerenciar alguns canais de telegram que sou administrador. P
 
 No momento o bot atende os seguintes comandos 
 
-Grupo:
+## Gerenciador de Grupo:
 ```
 /help: lista os comandos disponíveis no grupo
 /mod <username>: promove o usuário ao cargo de moderador *
@@ -19,7 +19,11 @@ Grupo:
 ** necessário ser um administrador ou moderador
 ```
 
-Privado:
+Para o bot identificar o usuário pelo username, ele precisa indexar esse usuario no banco. Pra fazer isso, sempre que vai verificar as novas mensagens do canal, ele valida se o usuario que enviou a mensagem já está na lista de usuários conhecidos, e quando o usuário nao é encontrado ele adiciona ao banco e insere na lista de usuários conhecidos.
+
+## Monitor de Promoções
+
+Com o tempo, adicionei uma funcionalidade para que ele monitore promoçoes e notifique os usuários. Para utilizar essa funcionalidade veja os comandos abaixo:
 ```
 /help: lista os comandos disponíveis no chat privado
 /promo: lista as promoções cadastradas pelo usuário
@@ -29,7 +33,7 @@ Privado:
 ```
 
 
-Para o bot identificar o usuário pelo username, ele precisa indexar esse usuario no banco. Pra fazer isso, sempre que vai verificar as novas mensagens do canal, ele valida se o usuario que enviou a mensagem já está na lista de usuários conhecidos, e quando o usuário nao é encontrado ele adiciona ao banco e insere na lista de usuários conhecidos.
+
 
 
 Qualquer duvida, report de bugs, sugestões de melhorias pode entrar em contato comigo por issue. :)
