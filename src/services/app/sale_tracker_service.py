@@ -39,7 +39,7 @@ def check_promobit_sales():
             "aggregator_url": f"https://www.promobit.com.br/oferta/{psale['offer_slug']}",
             "sale_date": datetime.strptime(
                 psale["offer_published"], "%Y-%m-%dT%H:%M:%S%z"
-            ),
+            ).replace(tzinfo=None),
             "created_on": datetime.now(),
         }
 
