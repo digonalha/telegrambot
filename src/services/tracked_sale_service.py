@@ -39,7 +39,7 @@ def check_last_tracked_sales(chat_id: int, keyword: str):
         last_sales = get_last_tracked_sales(keyword)
         total_sales = len(last_sales)
         if last_sales and total_sales > 0:
-            last_sales_message = f'Encontrei {total_sales} promoções relacionadas a palavra-chave *"{keyword}"* nas últimas 8 horas:\n\n'
+            last_sales_message = f'Encontrei {total_sales} {"promoções relacionadas" if total_sales > 1 else "promoção relacionada" } a palavra-chave *"{keyword}"* nas últimas 8 horas:\n\n'
 
             # send sales from last 8 hours if exists
             for sale in last_sales:
