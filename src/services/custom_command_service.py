@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from datetime import datetime
 from src.repositories.models.custom_command_model import CustomCommand, MediaType
 from src.helpers.logging_helper import SystemLogging
@@ -8,6 +10,10 @@ from src.services import user_service, message_service
 
 custom_commands = []
 syslog = SystemLogging(__name__)
+
+load_dotenv()
+
+MAX_COMMANDS = os.getenv("TOTAL_COMMANDS")
 
 default_commands = [
     "help",
@@ -160,6 +166,17 @@ def insert_command(
 
     try:
         if not user_service.validate_user_permission(chat_id, send_by_user_id):
+            return
+
+        total_commands = custom_command_repository.count_by_chat_id(chat_id)
+
+        max_cmd = MAX_COMMANDS if MAX_COMMANDS else 10
+
+        if total_commands >= int(max_cmd):
+            message_service.send_message(
+                chat_id,
+                f"O grupo atingiu o limite de {max_cmd} comandos customizados. Remova comandos utilizando */delcmd <comando>*",
+            )
             return
 
         user = user_service.get_user_by_id_if_exists(send_by_user_id)

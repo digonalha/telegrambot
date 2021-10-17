@@ -14,6 +14,7 @@ from src.services import (
 load_dotenv()
 
 BOT_NAME = os.getenv("BOT_NAME")
+MAX_COMMANDS = os.getenv("TOTAL_COMMANDS")
 
 syslog = SystemLogging(__name__)
 
@@ -43,11 +44,13 @@ def send_custom_commands_message(chat_id: int, name: str, message_id: int):
         )
         return
 
+    max_cmd = MAX_COMMANDS if MAX_COMMANDS else 10
+
     help_message = (
         f"Olá, *{(name)}*!\n"
         "Aqui estão os comandos customizados disponíveis no grupo:\n\n"
         f"{custom_messages}"
-        f"\n\n*Total: {str(total_commands)}*"
+        f"\n*Total: {str(total_commands)}/{str(max_cmd)}*"
     )
 
     message_service.send_message(chat_id, help_message)

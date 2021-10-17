@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, text
 from src.schemas import custom_command_schema
 from src.repositories.database import database
 from src.repositories.models.custom_command_model import CustomCommand
@@ -38,3 +38,12 @@ def get(command: str, chat_id: int):
         )
         .first()
     )
+
+
+def count_by_chat_id(chat_id: int) -> int:
+    result = local_session.execute(
+        text("SELECT COUNT(*) FROM custom_command WHERE chat_id = :id"),
+        {"id": chat_id},
+    ).scalar()
+
+    return result

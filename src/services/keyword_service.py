@@ -1,5 +1,6 @@
+import os
+from dotenv import load_dotenv
 from datetime import datetime
-
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import keyword_repository
 from src.schemas import keyword_schema
@@ -7,6 +8,10 @@ from src.services import message_service, user_service
 
 keywords = []
 syslog = SystemLogging(__name__)
+
+load_dotenv()
+
+MAX_KEYWORDS = os.getenv("MAX_KEYWORDS")
 
 
 def get_all_keywords() -> None:
@@ -31,7 +36,13 @@ def get_user_keywords(chat_id: int, user_id: int, message_id: int) -> list:
             for stk in keywords:
                 message += f"\n• {stk.keyword}"
 
-            message += f"\n\n*Total: {len(keywords)}*"
+            str_max_keywords = (
+                f"/{MAX_KEYWORDS if MAX_KEYWORDS else str(10)}"
+                if not user.is_admin
+                else ""
+            )
+
+            message += f"\n\n*Total: {len(keywords)}{str_max_keywords}*"
 
         message_service.send_message(user_id, message)
     except Exception as ex:
@@ -115,8 +126,10 @@ def insert_keyword(
 
         user_keywords = keyword_repository.get_by_user_id(send_by_user.user_id)
 
-        if len(user_keywords) >= 10 and not send_by_user.is_admin:
-            message = f"Você atingiu o seu limite de 10 palavras-chave. Para remover, utilize */delpromo <palavra-chave>*"
+        max_kwd = MAX_KEYWORDS if MAX_KEYWORDS else 10
+
+        if len(user_keywords) >= int(max_kwd) and not send_by_user.is_admin:
+            message = f"Você atingiu o seu limite de {max_kwd} palavras-chave. Remova palavras-chave utilizando */delpromo <palavra-chave>*"
             message_service.send_message(send_by_user.user_id, message)
             return
 
