@@ -14,7 +14,7 @@ from src.services import (
 load_dotenv()
 
 BOT_NAME = os.getenv("BOT_NAME")
-MAX_COMMANDS = os.getenv("TOTAL_COMMANDS")
+MAX_COMMANDS = os.getenv("MAX_COMMANDS")
 
 syslog = SystemLogging(__name__)
 
