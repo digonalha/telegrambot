@@ -1,6 +1,6 @@
 import requests
-import time
-from datetime import datetime, date
+from time import sleep
+from datetime import datetime, date, timedelta
 from bs4 import BeautifulSoup
 from src.services import (
     message_service,
@@ -14,6 +14,15 @@ def check_promobit_sales():
     promobit_sales = promobit_api.get_last_sales(100)
 
     for psale in promobit_sales:
+        sale_date = datetime.strptime(
+            psale["offer_published"], "%Y-%m-%dT%H:%M:%S%z"
+        ).replace(tzinfo=None)
+
+        greater_than_date = datetime.now() - timedelta(1)
+
+        if sale_date <= greater_than_date:
+            return
+
         users_keyword_to_answer = []
         lower_product_name = psale["offer_title"].lower()
 
@@ -37,9 +46,7 @@ def check_promobit_sales():
             "price": price,
             "sale_url": "",
             "aggregator_url": f"https://www.promobit.com.br/oferta/{psale['offer_slug']}",
-            "sale_date": datetime.strptime(
-                psale["offer_published"], "%Y-%m-%dT%H:%M:%S%z"
-            ).replace(tzinfo=None),
+            "sale_date": sale_date,
             "created_on": datetime.now(),
         }
 
@@ -59,7 +66,8 @@ def check_promobit_sales():
                     "user_id": user_keyword.user_id,
                     "text": (
                         f"*{db_tracked_sale.product_name}*\n"
-                        f"Valor: {db_tracked_sale.price}\n\n"
+                        f"Valor: {db_tracked_sale.price}\n"
+                        f"_Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}_\n\n"
                         f"[Ver promoção]({db_tracked_sale.aggregator_url})\n\n"
                     ),
                 }
@@ -143,7 +151,7 @@ def run_sale_tracker() -> None:
     """Loop for sale's tracker sites web scraping."""
     while True:
         if len(keyword_service.keywords) == 0:
-            time.sleep(120)
+            sleep(120)
             continue
 
         if today != date.today():
@@ -152,4 +160,4 @@ def run_sale_tracker() -> None:
 
         check_promobit_sales()
 
-        time.sleep(60)
+        sleep(60)

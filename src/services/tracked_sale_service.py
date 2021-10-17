@@ -46,7 +46,7 @@ def check_last_tracked_sales(chat_id: int, keyword: str):
                 last_sales_message += f"*{sale['product_name']}*\n"
                 last_sales_message += f"Valor: {sale['price']}\n"
                 last_sales_message += (
-                    f"Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}\n\n"
+                    f"_Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}_\n\n"
                 )
                 last_sales_message += f"[Ver promoção]({sale['aggregator_url']})\n\n"
                 last_sales_message += f"--------\n\n"
