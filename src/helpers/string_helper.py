@@ -46,3 +46,13 @@ def random_word_validation(text: str):
             return False
     else:
         return True
+
+
+def format_currency(str_currency):
+    fixed_currency = "R${:,.2f}".format(str_currency)
+    main_currency, fractional_currency = (
+        fixed_currency.split(".")[0],
+        fixed_currency.split(".")[1],
+    )
+    new_main_currency = main_currency.replace(",", ".")
+    return new_main_currency + "," + fractional_currency

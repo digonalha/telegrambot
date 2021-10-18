@@ -2,13 +2,15 @@ import requests
 from time import sleep
 from datetime import datetime, date, timedelta
 from bs4 import BeautifulSoup
+from random import randint
+
 from src.services import (
     message_service,
     tracked_sale_service,
     keyword_service,
 )
 from src.api import promobit_api
-from random import randint
+from src.helpers import string_helper
 
 
 def check_promobit_sales() -> bool:
@@ -43,12 +45,24 @@ def check_promobit_sales() -> bool:
         new_main_currency = main_currency.replace(",", ".")
         price = new_main_currency + "," + fractional_currency
 
+        old_price = ""
+
+        if psale["offer_old_price"] != 0:
+            psale["offer_old_price"]
+            old_price = (
+                f'<s>{string_helper.format_currency(psale["offer_old_price"])}</s>  '
+            )
+
+        old_new_price = (
+            f'{old_price}{string_helper.format_currency(psale["offer_price"])}'
+        )
+
         sale = {
             "sale_id": psale["offer_id"],
             "product_name": psale["offer_title"],
             "product_image_url": f"https://i.promobit.com.br/268{psale['offer_photo']}",
-            "price": price,
-            "sale_url": "",
+            "price": old_new_price,
+            "sale_url": f"https://www.promobit.com.br/Redirect/to/{psale['offer_id']}",
             "aggregator_url": f"https://www.promobit.com.br/oferta/{psale['offer_slug']}",
             "sale_date": sale_date,
             "created_on": datetime.now(),
@@ -69,15 +83,18 @@ def check_promobit_sales() -> bool:
                 new_message = {
                     "user_id": user_keyword.user_id,
                     "text": (
-                        f"*{db_tracked_sale.product_name}*\n"
-                        f"Valor: {db_tracked_sale.price}\n"
-                        f"Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}"
+                        f"<b>{db_tracked_sale.product_name}</b>\n\n"
+                        f"<b>Valor: {db_tracked_sale.price}</b>\n"
+                        f"<b>Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}</b>\n\n"
+                        f"<i>Vendido por {psale['store_name']}</i>"
                     ),
                 }
                 messages_to_send.append(new_message)
 
         reply_markup = (
-            '{"inline_keyboard": [[{"text":"Ver promoção (Promobit)", "url": "'
+            '{"inline_keyboard": [[{"text":"Ir para promoção", "url": "'
+            + db_tracked_sale.sale_url
+            + '"}],[{"text":"Ver oferta no Promobit", "url": "'
             + db_tracked_sale.aggregator_url
             + '"}]]}'
         )
@@ -88,6 +105,7 @@ def check_promobit_sales() -> bool:
                 db_tracked_sale.product_image_url,
                 message["text"],
                 reply_markup,
+                parse_mode="HTML",
             )
 
     return True
@@ -111,17 +129,20 @@ def check_gatry_sales():
         product_name = name_tag.text
         users_keyword_to_answer = []
         lower_product_name = product_name.lower()
+
         for keyword in keyword_service.keywords:
             lower_keywords = keyword.keyword.lower().split()
             if all(k in lower_product_name for k in lower_keywords):
                 users_keyword_to_answer.append(keyword)
+
         if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
             continue
+
         sale = {
             "sale_id": sale_id,
             "product_name": product_name,
             "product_image_url": imagem.find("img")["src"],
-            "price": "R$ " + info.find("span", itemprop="price").text,
+            "price": "R$" + info.find("span", itemprop="price").text,
             "sale_url": info.find(class_="link_loja")["href"],
             "aggregator_url": site_url + info.find(class_="mais")["href"],
             "sale_date": datetime.strptime(
@@ -134,6 +155,14 @@ def check_gatry_sales():
         if not db_tracked_sale:
             continue
 
+        store_name = info.find(class_="link_loja").text
+
+        if store_name:
+            try:
+                store_name = store_name.split("Ir para ")[1]
+            except:
+                store_name = "Não informado"
+
         messages_to_send = []
         for user_keyword in users_keyword_to_answer:
             message_with_same_chat_id = next(
@@ -144,15 +173,18 @@ def check_gatry_sales():
                 new_message = {
                     "user_id": user_keyword.user_id,
                     "text": (
-                        f"*{db_tracked_sale.product_name}*\n"
-                        f"Valor: {db_tracked_sale.price}\n"
-                        f"Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}"
+                        f"*{db_tracked_sale.product_name}*\n\n"
+                        f"*Valor: {db_tracked_sale.price}*\n"
+                        f"*Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}*\n\n"
+                        f"_Vendido por {store_name}_"
                     ),
                 }
                 messages_to_send.append(new_message)
 
         reply_markup = (
-            '{"inline_keyboard": [[{"text":"Ver promoção (Gatry)", "url": "'
+            '{"inline_keyboard": [[{"text":"Ir para promoção", "url": "'
+            + db_tracked_sale.sale_url
+            + '"}],[{"text":"Ver oferta no Gatry", "url": "'
             + db_tracked_sale.aggregator_url
             + '"}]]}'
         )

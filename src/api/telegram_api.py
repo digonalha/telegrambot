@@ -50,7 +50,12 @@ def send_message(
     chat_id: int, message: str, reply_id: int = 0, parse_mode: str = "markdown"
 ):
     try:
-        data = {"chat_id": chat_id, "text": message, "parse_mode": parse_mode, "disable_web_page_preview": True}
+        data = {
+            "chat_id": chat_id,
+            "text": message,
+            "parse_mode": parse_mode,
+            "disable_web_page_preview": True,
+        }
 
         if reply_id != None and reply_id > 0:
             data["reply_to_message_id"] = reply_id
@@ -97,14 +102,21 @@ def send_audio(chat_id: int, file_id: str, title: str, username: str):
         syslog.create_warning("send_audio", ex)
 
 
-def send_image(chat_id: int, file_id: str, caption: str = None, reply_id: int = None, reply_markup: str = None):
+def send_image(
+    chat_id: int,
+    file_id: str,
+    caption: str = None,
+    reply_id: int = None,
+    reply_markup: str = None,
+    parse_mode: str = 'markdown',
+):
     try:
         if file_id.startswith("[") and file_id.endswith("]"):
             arr_photo = literal_eval(file_id)
             random_index = randint(0, len(arr_photo) - 1)
             file_id = arr_photo[random_index]
 
-        data = {"chat_id": chat_id, "photo": file_id, "parse_mode": "markdown"}
+        data = {"chat_id": chat_id, "photo": file_id, "parse_mode": parse_mode}
 
         if caption:
             data["caption"] = caption

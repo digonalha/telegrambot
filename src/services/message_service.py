@@ -12,10 +12,16 @@ def send_audio(chat_id: int, file_id: str, file_name: str, username: str) -> Non
 
 
 def send_image(
-    chat_id: int, file_id: str, message: str, reply_markup: str = None
+    chat_id: int,
+    file_id: str,
+    message: str,
+    reply_markup: str = None,
+    parse_mode: str = "markdown",
 ) -> None:
     """Send a request for send a image to telegram api"""
-    telegram_api.send_image(chat_id, file_id, message, reply_markup=reply_markup)
+    telegram_api.send_image(
+        chat_id, file_id, message, reply_markup=reply_markup, parse_mode=parse_mode
+    )
 
 
 def send_animation(chat_id: int, file_id: str) -> None:
