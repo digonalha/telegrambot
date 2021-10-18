@@ -71,7 +71,7 @@ def check_promobit_sales() -> bool:
                     "text": (
                         f"*{db_tracked_sale.product_name}*\n"
                         f"Valor: {db_tracked_sale.price}\n"
-                        f"Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}"
+                        f"Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}"
                     ),
                 }
                 messages_to_send.append(new_message)
@@ -179,10 +179,10 @@ def run_sale_tracker() -> None:
             tracked_sale_service.get_all_tracked_sales()
             today = date.today()
 
-        request_success = check_promobit_sales()
+        check_gatry_sales()
+        check_promobit_sales()
 
-        if not request_success:
-            check_gatry_sales()
-            sleep(randint(62, 124))
-        else:
-            sleep(randint(62, 323))
+        # if not request_success:
+        # sleep(randint(62, 124))
+
+        sleep(randint(62, 126))
