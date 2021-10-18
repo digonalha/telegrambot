@@ -48,7 +48,7 @@ def random_word_validation(text: str):
         return True
 
 
-def format_currency(str_currency):
+def format_currency(str_currency) -> str:
     fixed_currency = "R${:,.2f}".format(str_currency)
     main_currency, fractional_currency = (
         fixed_currency.split(".")[0],
@@ -56,3 +56,14 @@ def format_currency(str_currency):
     )
     new_main_currency = main_currency.replace(",", ".")
     return new_main_currency + "," + fractional_currency
+
+
+def html_sanitize(str_html: str) -> str:
+    html_sanitized = str_html.replace("<br>", "\n")
+
+    html_sanitized = html_sanitized.replace("<br >", "\n")
+    html_sanitized = html_sanitized.replace("<br/>", "\n")
+    html_sanitized = html_sanitized.replace("<br />", "\n")
+    html_sanitized = html_sanitized.replace("&nbsp;", " ")
+
+    return html_sanitized

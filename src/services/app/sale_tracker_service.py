@@ -1,4 +1,5 @@
 import requests
+import json
 from time import sleep
 from datetime import datetime, date, timedelta
 from bs4 import BeautifulSoup
@@ -11,6 +12,26 @@ from src.services import (
 )
 from src.api import promobit_api
 from src.helpers import string_helper
+
+
+def get_promobit_sale_info(aggregator_url: str) -> str:
+    try:
+        page = requests.get(aggregator_url)
+        parsed_page = BeautifulSoup(page.content, "html.parser")
+
+        scripts_result = parsed_page.find("script", id="__NEXT_DATA__").text
+        js = json.loads(scripts_result)
+
+        more_info = js["props"]["pageProps"]["offer"]["offerInstructions"]
+        more_info = string_helper.html_sanitize(more_info)
+
+        if more_info:
+            return f"<u>Informações adicionais</u>\n{more_info}\n\n"
+
+        return ""
+        return str_more_info
+    except:
+        return ""
 
 
 def check_promobit_sales() -> bool:
@@ -86,6 +107,7 @@ def check_promobit_sales() -> bool:
                         f"<b>{db_tracked_sale.product_name}</b>\n\n"
                         f"<b>Valor: {db_tracked_sale.price}</b>\n"
                         f"<b>Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}</b>\n\n"
+                        f"{get_promobit_sale_info(db_tracked_sale.aggregator_url)}"
                         f"<i>Vendido por {psale['store_name']}</i>"
                     ),
                 }
