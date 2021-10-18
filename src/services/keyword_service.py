@@ -28,13 +28,13 @@ def get_user_keywords(chat_id: int, user_id: int, message_id: int) -> list:
         message = f"Nenhuma palavra-chave encontrada"
 
         if keywords and len(keywords) > 0:
-            message = "As palavras-chave abaixo foram encontradas: \n"
+            message = "Essas são as palavras-chave monitoradas para você: \n"
             for stk in keywords:
                 message += f"\n• {stk.keyword}"
 
             str_max_keywords = f"/{settings.max_keywords}" if not user.is_admin else ""
 
-            message += f"\n\n*Total: {len(keywords)}{str_max_keywords}*"
+            message += f"\n\n*Total: {len(keywords)}{str_max_keywords}*\n\n _Para remover palavras-chave, utilize o comando /delpromo_"
 
         message_service.send_message(user_id, message)
     except Exception as ex:

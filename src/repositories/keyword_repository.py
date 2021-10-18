@@ -46,4 +46,9 @@ def get(user_id: int, keyword: str):
 
 
 def get_by_user_id(user_id: int):
-    return local_session.query(Keyword).filter(Keyword.user_id == user_id).all()
+    return (
+        local_session.query(Keyword)
+        .filter(Keyword.user_id == user_id)
+        .order_by(Keyword.keyword)
+        .all()
+    )
