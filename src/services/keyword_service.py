@@ -34,7 +34,7 @@ def get_user_keywords(chat_id: int, user_id: int, message_id: int) -> list:
 
             str_max_keywords = f"/{settings.max_keywords}" if not user.is_admin else ""
 
-            message += f"\n\n*Total: {len(keywords)}{str_max_keywords}*\n\n _Para remover palavras-chave, utilize o comando /delpromo_"
+            message += f"\n\n*Total: {len(keywords)}{str_max_keywords}*\n\n_Para remover palavras-chave, utilize o comando /delpromo_"
 
         message_service.send_message(user_id, message)
     except Exception as ex:
