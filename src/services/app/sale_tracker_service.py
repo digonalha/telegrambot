@@ -8,10 +8,14 @@ from src.services import (
     keyword_service,
 )
 from src.api import promobit_api
+from random import randint
 
 
-def check_promobit_sales():
+def check_promobit_sales() -> bool:
     promobit_sales = promobit_api.get_last_sales(100)
+
+    if not promobit_sales or len(promobit_sales) == 0:
+        return False
 
     for psale in promobit_sales:
         sale_date = datetime.strptime(
@@ -67,17 +71,26 @@ def check_promobit_sales():
                     "text": (
                         f"*{db_tracked_sale.product_name}*\n"
                         f"Valor: {db_tracked_sale.price}\n"
-                        f"Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}\n\n"
-                        f"[Ver promoção]({db_tracked_sale.aggregator_url})\n\n"
+                        f"Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}"
                     ),
                 }
                 messages_to_send.append(new_message)
+
+        reply_markup = (
+            '{"inline_keyboard": [[{"text":"Ver promoção (Promobit)", "url": "'
+            + db_tracked_sale.aggregator_url
+            + '"}]]}'
+        )
+
         for message in messages_to_send:
             message_service.send_image(
                 message["user_id"],
                 db_tracked_sale.product_image_url,
                 message["text"],
+                reply_markup,
             )
+
+    return True
 
 
 def check_gatry_sales():
@@ -120,6 +133,7 @@ def check_gatry_sales():
         db_tracked_sale = tracked_sale_service.add_tracked_sale_if_not_exists(sale)
         if not db_tracked_sale:
             continue
+
         messages_to_send = []
         for user_keyword in users_keyword_to_answer:
             message_with_same_chat_id = next(
@@ -132,16 +146,23 @@ def check_gatry_sales():
                     "text": (
                         f"*{db_tracked_sale.product_name}*\n"
                         f"Valor: {db_tracked_sale.price}\n"
-                        f"Data: {db_tracked_sale.sale_date.strftime('%d/%m -  %H:%M')}\n\n"
-                        f"[Link promoção]({db_tracked_sale.sale_url}) - [Link Gatry]({db_tracked_sale.aggregator_url})\n\n"
+                        f"Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}"
                     ),
                 }
                 messages_to_send.append(new_message)
+
+        reply_markup = (
+            '{"inline_keyboard": [[{"text":"Ver promoção (Gatry)", "url": "'
+            + db_tracked_sale.aggregator_url
+            + '"}]]}'
+        )
+
         for message in messages_to_send:
             message_service.send_image(
                 message["user_id"],
                 db_tracked_sale.product_image_url,
                 message["text"],
+                reply_markup,
             )
 
 
@@ -158,6 +179,10 @@ def run_sale_tracker() -> None:
             tracked_sale_service.get_all_tracked_sales()
             today = date.today()
 
-        check_promobit_sales()
+        request_success = check_promobit_sales()
 
-        sleep(60)
+        if not request_success:
+            check_gatry_sales()
+            sleep(randint(62, 124))
+        else:
+            sleep(randint(62, 323))

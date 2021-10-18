@@ -97,7 +97,7 @@ def send_audio(chat_id: int, file_id: str, title: str, username: str):
         syslog.create_warning("send_audio", ex)
 
 
-def send_image(chat_id: int, file_id: str, caption: str = None, reply_id: int = None):
+def send_image(chat_id: int, file_id: str, caption: str = None, reply_id: int = None, reply_markup: str = None):
     try:
         if file_id.startswith("[") and file_id.endswith("]"):
             arr_photo = literal_eval(file_id)
@@ -110,6 +110,8 @@ def send_image(chat_id: int, file_id: str, caption: str = None, reply_id: int = 
             data["caption"] = caption
         if reply_id:
             data["reply_to_message_id"] = reply_id
+        if reply_markup:
+            data["reply_markup"] = reply_markup
 
         res = requests.post(f"{API_URI}/sendPhoto", data=data)
         create_log_from_response("send_photo", res.json())
