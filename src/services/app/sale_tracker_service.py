@@ -67,7 +67,7 @@ def check_promobit_sales():
                     "text": (
                         f"*{db_tracked_sale.product_name}*\n"
                         f"Valor: {db_tracked_sale.price}\n"
-                        f"_Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}_\n\n"
+                        f"Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}\n\n"
                         f"[Ver promoção]({db_tracked_sale.aggregator_url})\n\n"
                     ),
                 }
