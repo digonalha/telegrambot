@@ -50,14 +50,14 @@ def get_user_keywords(chat_id: int, user_id: int, message_id: int) -> list:
                         ]
                     )
             else:
-                message += "<code>Palavra-chave • Valor máx. (R$)</code>\n"
+                message += "<b>Palavra-chave * Valor máx. (R$)</b>\n"
                 for stk in keywords:
-                    plain_str += f"\n- {stk.keyword}{'' if not stk.max_price else ' • ' + string_helper.format_decimal(stk.max_price)}"
+                    plain_str += f"\n• <code>{stk.keyword}</code>{'' if not stk.max_price else ' * ' + string_helper.format_decimal(stk.max_price)}"
                 plain_str += "\n"
 
             str_max_keywords = f"/{settings.max_keywords}" if not user.is_admin else ""
 
-            message += f"<code>{table if table else plain_str}\nTotal: {len(keywords)}{str_max_keywords}</code>\n\n<i>Comandos disponíveis: /addpromo, /delpromo, /clearpromo, /promotbl</i>"
+            message += f"{table if table else plain_str}\n<code>Total: {len(keywords)}{str_max_keywords}</code>\n\n<i>/addpromo  /delpromo  /clearpromo</i>"
 
             message_service.send_message(user_id, message, parse_mode="HTML")
         else:

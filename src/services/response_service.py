@@ -84,7 +84,6 @@ def send_private_help_message(chat_id: int, name: str, message_id: int) -> None:
         "*/addpromo* `<palavra-chave> | <valor-máx>` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário\n"
         "*/delpromo* `<palavra-chave>` - remove a palavra-chave da lista de monitoramento de promoções do usuário\n"
         "*/clearpromo* - remove todas as palavras-chave da lista de monitoramento de promoções\n"
-        "*/promotbl* - altera o layout da tabela retornada na lista de promoções\n"
     )
 
     message_service.send_message(chat_id, help_message, parse_mode="markdown")
@@ -214,7 +213,7 @@ def resolve_action(message) -> None:
                 keyword_service.remove_keyword(
                     chat_id, text, from_user_id, message["message_id"]
                 )
-            elif text.lower().startswith("/promotbl"):
+            elif text.lower().startswith("/promotbl") and chat_id == 1041919298:
                 user_service.update_width(chat_id, text)
 
     except Exception as ex:
