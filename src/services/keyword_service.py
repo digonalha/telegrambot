@@ -280,7 +280,7 @@ def remove_all_keywords(
         if command == "/clearpromo":
             message_service.send_message(
                 send_by_user_id,
-                "Para remover todas as palavras-chave, utilize:\n`/clearpromo yes-baby`\n\n_Clique no comando para copiá-lo_",
+                "Para remover todas as palavras-chave, utilize:\n\n`/clearpromo yes-baby`\n\n_Clique no comando para copiá-lo_",
             )
             syslog.create_warning("remove_all_keywords", ve)
 
@@ -290,7 +290,7 @@ def remove_all_keywords(
     except Exception as ex:
         message_service.send_message(
             send_by_user_id,
-            "Para remover todas as palavras-chave, utilize:\n`/clearpromo yes-baby`\n\n_Clique no comando para copiá-lo_",
+            "Para remover todas as palavras-chave, utilize:\n\n`/clearpromo yes-baby`\n\n_Clique no comando para copiá-lo_",
         )
         syslog.create_warning("remove_all_keywords", ex)
         return
