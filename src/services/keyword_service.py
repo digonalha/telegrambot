@@ -1,5 +1,3 @@
-import prettytable as pt
-from textwrap import fill
 from datetime import datetime
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import keyword_repository
@@ -30,34 +28,17 @@ def get_user_keywords(chat_id: int, user_id: int, message_id: int) -> list:
         message = f"Nenhuma palavra-chave encontrada. Você pode adicionar palavras-chave utilizando: \n\n*/addpromo <palavra-chave> | <valor-máx>*\n\n_parâmetro valor-máx opcional_"
 
         if keywords and len(keywords) > 0:
-            width = 0 if not user.table_width else user.table_width
-            message = f"<b>Promobot 🤖</b>\n\nAqui está uma lista com suas palavras-chave monitoradas. Palavras-chave sem preço máximo serão sempre notificadas, independente do valor da promoção.\n\n"
-            table = None
-            plain_str = ""
-            if width >= 10:
-                table = pt.PrettyTable(["Palavra-chave", "R$"])
-                table.align["Palavra-chave"] = "l"
-                table.align["R$"] = "r"
-
-                for stk in keywords:
-                    table.add_row(
-                        [
-                            fill(
-                                stk.keyword,
-                                width=width,
-                            ),
-                            f"{'--' if not stk.max_price else string_helper.format_decimal(stk.max_price)}",
-                        ]
-                    )
-            else:
-                message += "<b>Palavra-chave * Valor máx. (R$)</b>\n"
-                for stk in keywords:
-                    plain_str += f"\n• <code>{stk.keyword}</code>{'' if not stk.max_price else ' * ' + string_helper.format_decimal(stk.max_price)}"
-                plain_str += "\n"
+            message = f"<b>🤖 Promobot 🤖</b>\n\nAqui está uma lista com suas palavras-chave monitoradas. Fique atento pois palavras-chave sem valor máximo serão sempre notificadas, independente do valor da promoção.\n\n"
+            message += "<u><b>[Valor máx] Palavra-chave</b></u>\n"
 
             str_max_keywords = f"/{settings.max_keywords}" if not user.is_admin else ""
 
-            message += f"{table if table else plain_str}\n<code>Total: {len(keywords)}{str_max_keywords}</code>\n\n<i>/addpromo  /delpromo  /clearpromo</i>"
+            message += f"<b>Total: {len(keywords)}{str_max_keywords}</b>\n"
+
+            for stk in keywords:
+                message += f"\n<b>📌</b>{'' if not stk.max_price else ' [R$' + string_helper.format_decimal(stk.max_price) + ']'} <code>{stk.keyword}</code>"
+
+            message += f"\n\n<i>Clique na palavra-chave para copiá-la</i>\n\n<i>/addpromo  /delpromo  /clearpromo</i>"
 
             message_service.send_message(user_id, message, parse_mode="HTML")
         else:
@@ -299,7 +280,7 @@ def remove_all_keywords(
         if command == "/clearpromo":
             message_service.send_message(
                 send_by_user_id,
-                "Para remover todas as palavras-chave, utilize: \n\n*/clearpromo yes-baby*",
+                "Para remover todas as palavras-chave, utilize:\n`/clearpromo yes-baby`\n\n_Clique no comando para copiá-lo_",
             )
             syslog.create_warning("remove_all_keywords", ve)
 
@@ -309,7 +290,7 @@ def remove_all_keywords(
     except Exception as ex:
         message_service.send_message(
             send_by_user_id,
-            "Para remover todas as palavras-chave, utilize: \n\n*/clearpromo yes-baby*",
+            "Para remover todas as palavras-chave, utilize:\n`/clearpromo yes-baby`\n\n_Clique no comando para copiá-lo_",
         )
         syslog.create_warning("remove_all_keywords", ex)
         return
