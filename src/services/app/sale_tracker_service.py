@@ -1,5 +1,6 @@
 import requests
 import json
+import math
 from time import sleep
 from datetime import datetime, date, timedelta
 from bs4 import BeautifulSoup
@@ -29,7 +30,6 @@ def get_promobit_sale_info(aggregator_url: str) -> str:
             return f"<u>Informações adicionais</u>\n{more_info}\n\n"
 
         return ""
-        return str_more_info
     except:
         return ""
 
@@ -56,33 +56,22 @@ def check_promobit_sales() -> bool:
         for keyword in keyword_service.keywords:
             lower_keywords = keyword.keyword.lower().split()
             if all(k in lower_product_name for k in lower_keywords):
+                if keyword.max_price and keyword.max_price < math.trunc(
+                    psale["offer_price"]
+                ):
+                    continue
+
                 users_keyword_to_answer.append(keyword)
 
         if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
             continue
 
-        price = "R${:,.2f}".format(psale["offer_price"])
-        main_currency, fractional_currency = price.split(".")[0], price.split(".")[1]
-        new_main_currency = main_currency.replace(",", ".")
-        price = new_main_currency + "," + fractional_currency
-
-        old_price = ""
-
-        if psale["offer_old_price"] != 0:
-            psale["offer_old_price"]
-            old_price = (
-                f'<s>{string_helper.format_currency(psale["offer_old_price"])}</s>  '
-            )
-
-        old_new_price = (
-            f'{old_price}{string_helper.format_currency(psale["offer_price"])}'
-        )
-
         sale = {
             "sale_id": psale["offer_id"],
             "product_name": psale["offer_title"],
             "product_image_url": f"https://i.promobit.com.br/268{psale['offer_photo']}",
-            "price": old_new_price,
+            "old_price": psale["offer_old_price"],
+            "price": psale["offer_price"],
             "sale_url": f"https://www.promobit.com.br/Redirect/to/{psale['offer_id']}",
             "aggregator_url": f"https://www.promobit.com.br/oferta/{psale['offer_slug']}",
             "sale_date": sale_date,
@@ -105,10 +94,10 @@ def check_promobit_sales() -> bool:
                     "user_id": user_keyword.user_id,
                     "text": (
                         f"<b>{db_tracked_sale.product_name}</b>\n\n"
-                        f"<b>Valor: {db_tracked_sale.price}</b>\n"
+                        f"<b>Valor: {string_helper.get_old_new_price_str(db_tracked_sale.price, db_tracked_sale.old_price)}</b>\n"
                         f"<b>Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}</b>\n\n"
                         f"{get_promobit_sale_info(db_tracked_sale.aggregator_url)}"
-                        f"<i>Vendido por {psale['store_name']}</i>"
+                        f"<i>Vendido por {psale['store_name'] if psale['store_name'] else psale['store_domain']}</i>"
                     ),
                 }
                 messages_to_send.append(new_message)
@@ -152,9 +141,21 @@ def check_gatry_sales():
         users_keyword_to_answer = []
         lower_product_name = product_name.lower()
 
+        sale_price = None
+
+        try:
+            sale_price = info.find("span", itemprop="price").text
+            sale_price = sale_price.replace(".", "")
+            sale_price = sale_price.replace(",", ".")
+            sale_price = float(sale_price)
+        except:
+            continue
+
         for keyword in keyword_service.keywords:
             lower_keywords = keyword.keyword.lower().split()
             if all(k in lower_product_name for k in lower_keywords):
+                if keyword.max_price and keyword.max_price < math.trunc(sale_price):
+                    continue
                 users_keyword_to_answer.append(keyword)
 
         if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
@@ -164,7 +165,7 @@ def check_gatry_sales():
             "sale_id": sale_id,
             "product_name": product_name,
             "product_image_url": imagem.find("img")["src"],
-            "price": "R$" + info.find("span", itemprop="price").text,
+            "price": sale_price,
             "sale_url": info.find(class_="link_loja")["href"],
             "aggregator_url": site_url + info.find(class_="mais")["href"],
             "sale_date": datetime.strptime(
@@ -196,7 +197,7 @@ def check_gatry_sales():
                     "user_id": user_keyword.user_id,
                     "text": (
                         f"*{db_tracked_sale.product_name}*\n\n"
-                        f"*Valor: {db_tracked_sale.price}*\n"
+                        f"*Valor: {string_helper.get_old_new_price_str(db_tracked_sale.price)}*\n"
                         f"*Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}*\n\n"
                         f"_Vendido por {store_name}_"
                     ),

@@ -55,14 +55,14 @@ def send_group_help_message(chat_id: int, name: str, message_id: int) -> None:
     help_message = (
         f"Olá, *{(name)}*!\n"
         "Aqui estão os meus comandos disponíveis:\n\n"
-        "*/help:* lista os comandos disponíveis\n"
-        "*/mod <username>:* promove o usuário ao cargo de moderador \*\n"
-        "*/unmod <username>:* rebaixa o usuário do cargo de moderador \*\n"
-        "*/mute <username> <tempo em segundos>:* adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
-        "*/unmute <username>:* remove o usuário da lista de silenciados \*\*\n"
-        "*/cmd:* lista os comandos customizados disponíveis no grupo\n"
-        "*/addcmd <comando> | <resposta> | <descrição>:* adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
-        "*/delcmd <comando>:* remove um comando customizado \*\n\n"
+        "*/help* - lista os comandos disponíveis\n"
+        "*/mod* `<username>` - promove o usuário ao cargo de moderador \*\n"
+        "*/unmod* `<username>` - rebaixa o usuário do cargo de moderador \*\n"
+        "*/mute* `<username> <tempo em segundos>` - adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
+        "*/unmute* `<username>` - remove o usuário da lista de silenciados \*\*\n"
+        "*/cmd* - lista os comandos customizados disponíveis no grupo\n"
+        "*/addcmd* `<comando> | <resposta> | <descrição>` - adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
+        "*/delcmd* `<comando>` - remove um comando customizado \*\n\n"
         "\* _necessário ser um administrador_\n"
         "\*\* _necessário ser um administrador ou moderador_\n"
     )
@@ -79,14 +79,14 @@ def send_private_help_message(chat_id: int, name: str, message_id: int) -> None:
     help_message = (
         f"Olá, *{(name)}*!\n"
         "Aqui estão os meus comandos disponíveis:\n\n"
-        "*/help:* lista os comandos disponíveis\n"
-        "*/promo:* lista as promoções cadastradas pelo usuário\n"
-        "*/addpromo <palavra-chave>:* monitora e notifica promoções referentes a palavra-chave\n"
-        "*/delpromo <palavra-chave>:* remove a palavra-chave da lista de monitoramento de promoções\n"
-        "*/clearpromo:* remove todas as palavras-chave da lista de monitoramento de promoções\n"
+        "*/help* - lista os comandos disponíveis\n"
+        "*/promo* - lista as promoções monitoradas pelo usuário\n"
+        "*/addpromo* `<palavra-chave> | <valor-máx>` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário\n"
+        "*/delpromo* `<palavra-chave>` - remove a palavra-chave da lista de monitoramento de promoções do usuário\n"
+        "*/clearpromo* - remove todas as palavras-chave da lista de monitoramento de promoções\n"
     )
 
-    message_service.send_message(chat_id, help_message)
+    message_service.send_message(chat_id, help_message, parse_mode="markdown")
 
 
 def resolve_action(message) -> None:
@@ -201,9 +201,9 @@ def resolve_action(message) -> None:
                 keyword_service.get_user_keywords(
                     chat_id, from_user_id, message["message_id"]
                 )
-            elif text.lower() == "/clearpromo":
+            elif text.lower().startswith("/clearpromo"):
                 keyword_service.remove_all_keywords(
-                    chat_id, from_user_id, message["message_id"]
+                    chat_id, text, from_user_id, message["message_id"]
                 )
             elif text.lower().startswith("/addpromo"):
                 keyword_service.insert_keyword(

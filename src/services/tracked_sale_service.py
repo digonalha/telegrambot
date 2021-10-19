@@ -4,6 +4,7 @@ from src.helpers.logging_helper import SystemLogging
 from src.repositories import tracked_sale_repository
 from src.schemas import tracked_sale_schema
 from src.services import message_service
+from src.helpers import string_helper
 
 tracked_sales = []
 syslog = SystemLogging(__name__)
@@ -15,13 +16,15 @@ def get_all_tracked_sales() -> None:
     tracked_sales = tracked_sale_repository.get_all()
 
 
-def get_last_tracked_sales(keyword: str) -> list():
+def get_last_tracked_sales(keyword: dict) -> list():
     keyword_to_search = ""
 
-    if len(keyword) == 0:
+    str_keyword = keyword["keyword"]
+
+    if len(str_keyword) == 0:
         return
 
-    for k_splitted in keyword.split():
+    for k_splitted in str_keyword.split():
         if len(keyword_to_search) > 0:
             keyword_to_search += ","
         else:
@@ -31,10 +34,12 @@ def get_last_tracked_sales(keyword: str) -> list():
 
     keyword_to_search += "}"
 
-    return tracked_sale_repository.get_last_tracked_sales(keyword_to_search)
+    return tracked_sale_repository.get_last_tracked_sales(
+        keyword_to_search, keyword["max_price"]
+    )
 
 
-def check_last_tracked_sales(chat_id: int, keyword: str):
+def check_last_tracked_sales(chat_id: int, keyword: dict):
     try:
         last_sales = get_last_tracked_sales(keyword)
 
@@ -43,19 +48,22 @@ def check_last_tracked_sales(chat_id: int, keyword: str):
 
         total_sales = len(last_sales)
         if last_sales and total_sales > 0:
-            last_sales_message = f'Encontrei {total_sales} {"promoções relacionadas" if total_sales > 1 else "promoção relacionada" } a palavra-chave *"{keyword}"* nas últimas 8 horas:\n\n'
+            last_sales_message = f'Encontrei {total_sales} {"promoções relacionadas" if total_sales > 1 else "promoção relacionada" } a palavra-chave *"{keyword["keyword"]}"* nas últimas 8 horas:\n\n'
 
             # send sales from last 8 hours if exists
             for sale in last_sales:
+
                 last_sales_message += f"*{sale['product_name']}*\n"
-                last_sales_message += f"Valor: {sale['price']}\n"
+                last_sales_message += (
+                    f"Valor: {string_helper.format_currency(sale['price'])}\n"
+                )
                 last_sales_message += (
                     f"Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}\n\n"
                 )
                 last_sales_message += f"[Ver promoção]({sale['aggregator_url']})\n\n"
                 last_sales_message += f"--------\n\n"
 
-            last_sales_message += f"_Daqui pra frente você será notificado todas as vezes que uma promoção do seu produto monitorado aparecer! Para remover esse item do monitor, utilize o comando /delpromo {keyword}_"
+            last_sales_message += f'_Daqui pra frente você será notificado todas as vezes que uma promoção do seu produto monitorado aparecer! Para remover esse item do monitor, utilize o comando /delpromo {keyword["keyword"]}_'
 
             message_service.send_message(chat_id, last_sales_message)
     except Exception as ex:

@@ -32,17 +32,24 @@ def get_by_id(id: int):
     return local_session.query(TrackedSale).filter(TrackedSale.sale_id == id).first()
 
 
-def get_last_tracked_sales(arr_keyword: str) -> list():
+def get_last_tracked_sales(arr_keyword: str, max_price: int = None) -> list():
     greater_than_date = datetime.combine(date.today(), time()) - timedelta(hours=8)
 
-    result = local_session.execute(
-        text(
-            """SELECT ts.product_name, ts.product_image_url, ts.sale_url, ts.aggregator_url, ts.price, ts.sale_date
+    str_SQL = """SELECT ts.product_name, ts.product_image_url, ts.sale_url, ts.aggregator_url, ts.price, ts.old_price,ts.sale_date
                FROM tracked_sale ts 
                WHERE lower(ts.product_name) LIKE ALL (:arr_keyword) 
-               AND ts.sale_date >= :greater_than_date;"""
-        ),
-        {"arr_keyword": arr_keyword, "greater_than_date": greater_than_date},
+               AND ts.sale_date >= :greater_than_date"""
+
+    if max_price:
+        str_SQL += " AND trunc(ts.price) <= :max_price;"
+
+    result = local_session.execute(
+        text(str_SQL),
+        {
+            "arr_keyword": arr_keyword,
+            "greater_than_date": greater_than_date,
+            "max_price": max_price,
+        },
     )
 
     if result.rowcount == 0:

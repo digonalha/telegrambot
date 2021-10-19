@@ -49,7 +49,11 @@ def random_word_validation(text: str):
 
 
 def format_currency(str_currency) -> str:
-    fixed_currency = "R${:,.2f}".format(str_currency)
+    return "R$" + format_decimal(str_currency)
+
+
+def format_decimal(str_currency) -> str:
+    fixed_currency = "{:,.2f}".format(str_currency)
     main_currency, fractional_currency = (
         fixed_currency.split(".")[0],
         fixed_currency.split(".")[1],
@@ -70,3 +74,10 @@ def html_sanitize(str_html: str) -> str:
     html_sanitized = html_sanitized.replace("\n\n\n\n\n", "\n\n")
 
     return html_sanitized
+
+
+def get_old_new_price_str(new_price: float, old_price: float = None):
+    old_price_str = ""
+    if old_price and old_price > 0:
+        old_price_str = f"<s>{format_currency(old_price)}</s>  "
+    return f"{old_price_str}{format_currency(new_price)}"

@@ -5,6 +5,7 @@ from datetime import datetime
 class KeywordBase(BaseModel):
     user_id: int
     keyword: str
+    max_price: int = None
 
 
 class KeywordCreate(KeywordBase):
