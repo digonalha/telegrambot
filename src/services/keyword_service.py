@@ -1,4 +1,5 @@
 import prettytable as pt
+from textwrap import fill
 from datetime import datetime
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import keyword_repository
@@ -29,22 +30,34 @@ def get_user_keywords(chat_id: int, user_id: int, message_id: int) -> list:
         message = f"Nenhuma palavra-chave encontrada. Você pode adicionar palavras-chave utilizando: \n\n*/addpromo <palavra-chave> | <valor-máx>*\n\n_parâmetro valor-máx opcional_"
 
         if keywords and len(keywords) > 0:
-            table = pt.PrettyTable(["Palavra-chave", "Preço máx. (R$)"])
-            table.align["Palavra-chave"] = "l"
-            table.align["Preço máx. (R$)"] = "r"
-
+            width = 0 if not user.table_width else user.table_width
             message = f"<b>Promobot 🤖</b>\n\nAqui está uma lista com suas palavras-chave monitoradas. Palavras-chave sem preço máximo serão sempre notificadas, independente do valor da promoção.\n\n"
-            for stk in keywords:
-                table.add_row(
-                    [
-                        stk.keyword,
-                        f"{'-' if not stk.max_price else string_helper.format_decimal(stk.max_price)}",
-                    ]
-                )
+            table = None
+            plain_str = ""
+            if width >= 10:
+                table = pt.PrettyTable(["Palavra-chave", "R$"])
+                table.align["Palavra-chave"] = "l"
+                table.align["R$"] = "r"
+
+                for stk in keywords:
+                    table.add_row(
+                        [
+                            fill(
+                                stk.keyword,
+                                width=width,
+                            ),
+                            f"{'--' if not stk.max_price else string_helper.format_decimal(stk.max_price)}",
+                        ]
+                    )
+            else:
+                message += "<code>Palavra-chave • Valor máx. (R$)</code>\n"
+                for stk in keywords:
+                    plain_str += f"\n- {stk.keyword}{'' if not stk.max_price else ' • ' + string_helper.format_decimal(stk.max_price)}"
+                plain_str += "\n"
 
             str_max_keywords = f"/{settings.max_keywords}" if not user.is_admin else ""
 
-            message += f"<pre>{table}\nTotal: {len(keywords)}{str_max_keywords}</pre>\n\n<i>Comandos disponíveis: /addpromo, /delpromo, /clearpromo</i>"
+            message += f"<code>{table if table else plain_str}\nTotal: {len(keywords)}{str_max_keywords}</code>\n\n<i>Comandos disponíveis: /addpromo, /delpromo, /clearpromo, /promotbl</i>"
 
             message_service.send_message(user_id, message, parse_mode="HTML")
         else:
@@ -101,12 +114,12 @@ def insert_keyword(
             try:
                 max_price = int(max_price.strip())
 
-                if max_price < 10 or max_price > 99999:
+                if max_price < 10 or max_price > 9999:
                     raise
             except:
                 message_service.send_message(
                     send_by_user_id,
-                    "Valor inserido para preço máximo inválido.\n\n*Valor mín: 10 - Valor máx: 99999*\n\n_Não utilize separador para milhares_\n_Não utilize separador para decimais_",
+                    "Valor inserido para preço máximo inválido.\n\n*Valor mín: 10 - Valor máx: 9999*\n\n_Não utilize separador para milhares_\n_Não utilize separador para decimais_",
                 )
                 return
 
@@ -119,6 +132,12 @@ def insert_keyword(
             message_service.send_message(
                 send_by_user_id,
                 "Palavra-chave não pode ter menos de 4 caracteres",
+            )
+            return
+        elif len(keyword) > 40:
+            message_service.send_message(
+                send_by_user_id,
+                "Palavra-chave não pode ter mais de 40 caracteres",
             )
             return
 

@@ -29,8 +29,26 @@ def update(user: user_schema.UserUpdate) -> User:
     if not db_user:
         return None
 
-    db_user.first_name = user.first_name
-    db_user.user_name = user.user_name
+    if user.first_name:
+        db_user.first_name = user.first_name
+    if user.user_name:
+        db_user.user_name = user.user_name
+
     db_user.modified_on = user.modified_on
+
+    local_session.commit()
+    return db_user
+
+
+def update_width(user: user_schema.UserUpdateWidth) -> User:
+    db_user = local_session.query(User).filter(User.user_id == user.user_id).first()
+
+    if not db_user:
+        return None
+
+    db_user.table_width = user.table_width
+
+    db_user.modified_on = user.modified_on
+
     local_session.commit()
     return db_user
