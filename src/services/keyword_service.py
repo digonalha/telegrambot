@@ -351,7 +351,7 @@ def get_last_sales_by_keyword(
     except Exception as ex:
         message_service.send_message(
             send_by_user_id,
-            "Para verificar as últimas promoções por palavra-chave, utilize: \n\n*/lastpromo <palavra-chave>",
+            "Para verificar as últimas promoções por palavra-chave, utilize: \n\n*/lastpromo <palavra-chave>*",
         )
         syslog.create_warning("insert_keyword", ex)
         return
