@@ -59,7 +59,7 @@ def check_last_tracked_sales(
                 last_sales_message += (
                     f"<b>Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}</b>\n\n"
                 )
-                last_sales_message += f"<b>🚀 <a href='{sale['aggregator_url']}'>Ir para a promoção</a></b>\n"
+                last_sales_message += f"<b><a href='{sale['aggregator_url']}'>Ir para a promoção 🚀</a></b>\n"
                 last_sales_message += f"______________________\n"
 
             if is_add_keyword:
