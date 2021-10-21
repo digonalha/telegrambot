@@ -52,7 +52,7 @@ def check_promobit_sales() -> bool:
 
         sale = {
             "sale_id": psale["offer_id"],
-            "product_name": psale["offer_title"],
+            "product_name": psale["offer_title"].strip(),
             "product_image_url": f"https://i.promobit.com.br/268{psale['offer_photo']}",
             "old_price": psale["offer_old_price"],
             "price": psale["offer_price"],
@@ -161,7 +161,7 @@ def check_gatry_sales():
 
         sale = {
             "sale_id": sale_id,
-            "product_name": product_name,
+            "product_name": product_name.strip(),
             "product_image_url": imagem.find("img")["src"],
             "price": sale_price,
             "sale_url": info.find(class_="link_loja")["href"],
