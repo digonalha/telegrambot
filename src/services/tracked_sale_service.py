@@ -1,4 +1,3 @@
-from datetime import timezone
 from src.repositories.models.tracked_sale_model import TrackedSale
 from src.helpers.logging_helper import SystemLogging
 from src.repositories import tracked_sale_repository
@@ -16,15 +15,13 @@ def get_past_day_sales() -> None:
     tracked_sales = tracked_sale_repository.get_past_day_sales()
 
 
-def get_last_day_sales_by_keyword(keyword: dict) -> list():
+def get_last_day_sales_by_keyword(keyword: str, max_price: float = None) -> list:
     keyword_to_search = ""
 
-    str_keyword = keyword["keyword"]
-
-    if len(str_keyword) == 0:
+    if len(keyword) == 0:
         return
 
-    for k_splitted in str_keyword.split():
+    for k_splitted in keyword.split():
         if len(keyword_to_search) > 0:
             keyword_to_search += ","
         else:
@@ -35,16 +32,20 @@ def get_last_day_sales_by_keyword(keyword: dict) -> list():
     keyword_to_search += "}"
 
     return tracked_sale_repository.get_last_day_sales_by_keyword(
-        keyword_to_search, keyword["max_price"]
+        keyword_to_search, max_price
     )
 
 
-def check_last_tracked_sales(chat_id: int, keyword: dict):
+def check_last_tracked_sales(
+    chat_id: int, keyword: dict, is_add_keyword: bool = False
+) -> bool:
     try:
-        last_sales = get_last_day_sales_by_keyword(keyword)
+        last_sales = get_last_day_sales_by_keyword(
+            keyword["keyword"], keyword["max_price"]
+        )
 
         if not last_sales:
-            return
+            return False
 
         total_sales = len(last_sales)
         if last_sales and total_sales > 0:
@@ -61,9 +62,13 @@ def check_last_tracked_sales(chat_id: int, keyword: dict):
                 last_sales_message += f"<b><a href='{sale['aggregator_url']}'>Ir para a promoção</a></b>  🔗\n"
                 last_sales_message += f"______________________\n"
 
-            last_sales_message += f'\n\nDaqui pra frente você receberá uma notificação todas as vezes que uma promoção relacionada a essa palavra-chave monitorada aparecer! Para remover essa palavra-chave do monitor, utilize o comando:\n\n<code>/delpromo {keyword["keyword"]}</code>\n\n<i>Clique no comando para copiá-lo</i>'
+            if is_add_keyword:
+                last_sales_message += f'\n\nDaqui pra frente você receberá uma notificação todas as vezes que uma promoção relacionada a essa palavra-chave monitorada aparecer! Para remover essa palavra-chave do monitor, utilize o comando:\n\n<code>/delpromo {keyword["keyword"]}</code>\n\n<i>Clique no comando para copiá-lo</i>'
+            else:
+                last_sales_message += f'\n\nVocê pode inserir a palavra-chave <b>"{keyword["keyword"]}"</b> na sua lista de monitoramento e ser notificado sempre que uma nova promoção aparecer! Para adicionar uma nova palavra-chave, utilize o comando:\n\n<code>/addpromo {keyword["keyword"]}</code>\n\n<i>Clique no comando para copiá-lo</i>'
 
             message_service.send_message(chat_id, last_sales_message, parse_mode="HTML")
+            return True
     except Exception as ex:
         syslog.create_warning("check_last_tracked_sales", ex)
 

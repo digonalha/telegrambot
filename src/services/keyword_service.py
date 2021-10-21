@@ -170,7 +170,7 @@ def insert_keyword(
             )
 
             tracked_sale_service.check_last_tracked_sales(
-                send_by_user.user_id, new_keyword
+                send_by_user.user_id, new_keyword, is_add_keyword=True
             )
         else:
             message_service.send_message(
@@ -321,6 +321,62 @@ def remove_all_keywords(
         syslog.create_warning("remove_all_keywords", ex)
         message_service.send_message(
             send_by_user_id, f"Não foi possível remover as palavras-chave"
+        )
+    finally:
+        if chat_id != send_by_user_id:
+            message_service.delete_message(chat_id, message_id)
+
+
+def get_last_sales_by_keyword(
+    chat_id: int, message_text: str, send_by_user_id: int, message_id: int
+):
+    """Logic and validations to search last sales in database if not exists."""
+    try:
+        command, keyword = message_text.split(" ", 1)
+
+        if command != "/lastpromo":
+            raise Exception("unknow command: " + command)
+        elif len(keyword) < 4:
+            message_service.send_message(
+                send_by_user_id,
+                "Palavra-chave não pode ter menos de 4 caracteres",
+            )
+            return
+        elif len(keyword) > 40:
+            message_service.send_message(
+                send_by_user_id,
+                "Palavra-chave não pode ter mais de 40 caracteres",
+            )
+            return
+    except Exception as ex:
+        message_service.send_message(
+            send_by_user_id,
+            "Para verificar as últimas promoções por palavra-chave, utilize: \n\n*/lastpromo <palavra-chave>",
+        )
+        syslog.create_warning("insert_keyword", ex)
+        return
+
+    try:
+        keyword_to_search = {
+            "keyword": keyword.lower(),
+            "max_price": None,
+        }
+
+        any_sale_found = tracked_sale_service.check_last_tracked_sales(
+            chat_id, keyword_to_search
+        )
+
+        if not (any_sale_found):
+            message_service.send_message(
+                chat_id,
+                f'Não foi possível encontrar promoções utilizando a palavra-chave *"{keyword}"*',
+            )
+
+    except Exception as ex:
+        syslog.create_warning("insert_keyword", ex)
+        message_service.send_message(
+            chat_id,
+            f'Ocorreu um erro ao buscar promoções que contenham a palavra-chave *"{keyword}"*',
         )
     finally:
         if chat_id != send_by_user_id:

@@ -8,6 +8,7 @@ from src.services import (
     custom_command_service,
     message_service,
     keyword_service,
+    tracked_sale_service,
 )
 
 
@@ -81,6 +82,7 @@ def send_private_help_message(chat_id: int, name: str, message_id: int) -> None:
         "Aqui estão os meus comandos disponíveis:\n\n"
         "*/help* - lista os comandos disponíveis\n"
         "*/promo* - lista as promoções monitoradas pelo usuário\n"
+        "*/lastpromo* `<palavra-chave>` - retorna as promoções das últimas 24 horas relacionadas à palavra-chave\n"
         "*/addpromo* `<palavra-chave> | <valor-máx>` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário\n"
         "*/delpromo* `<palavra-chave>` - remove a palavra-chave da lista de monitoramento de promoções do usuário\n"
         "*/clearpromo* - remove todas as palavras-chave da lista de monitoramento de promoções\n"
@@ -201,6 +203,10 @@ def resolve_action(message) -> None:
                 keyword_service.get_user_keywords(
                     chat_id, from_user_id, message["message_id"]
                 )
+            elif text.lower().startswith("/lastpromo"):
+                keyword_service.get_last_sales_by_keyword(
+                    chat_id, text, from_user_id, message["message_id"]
+                )
             elif text.lower().startswith("/clearpromo"):
                 keyword_service.remove_all_keywords(
                     chat_id, text, from_user_id, message["message_id"]
@@ -213,8 +219,6 @@ def resolve_action(message) -> None:
                 keyword_service.remove_keyword(
                     chat_id, text, from_user_id, message["message_id"]
                 )
-            elif text.lower().startswith("/promotbl") and chat_id == 1041919298:
-                user_service.update_width(chat_id, text)
 
     except Exception as ex:
         syslog.create_warning("resolve_action", ex)
