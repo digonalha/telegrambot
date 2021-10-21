@@ -50,22 +50,6 @@ def check_promobit_sales() -> bool:
         if sale_date <= greater_than_date:
             return
 
-        users_keyword_to_answer = []
-        lower_product_name = psale["offer_title"].lower()
-
-        for keyword in keyword_service.keywords:
-            lower_keywords = keyword.keyword.lower().split()
-            if all(k in lower_product_name for k in lower_keywords):
-                if keyword.max_price and keyword.max_price < math.trunc(
-                    psale["offer_price"]
-                ):
-                    continue
-
-                users_keyword_to_answer.append(keyword)
-
-        if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
-            continue
-
         sale = {
             "sale_id": psale["offer_id"],
             "product_name": psale["offer_title"],
@@ -81,6 +65,22 @@ def check_promobit_sales() -> bool:
         db_tracked_sale = tracked_sale_service.add_tracked_sale_if_not_exists(sale)
 
         if not db_tracked_sale:
+            return
+
+        users_keyword_to_answer = []
+        lower_product_name = psale["offer_title"].lower()
+
+        for keyword in keyword_service.keywords:
+            lower_keywords = keyword.keyword.lower().split()
+            if all(k in lower_product_name for k in lower_keywords):
+                if keyword.max_price and keyword.max_price < math.trunc(
+                    psale["offer_price"]
+                ):
+                    continue
+
+                users_keyword_to_answer.append(keyword)
+
+        if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
             continue
 
         messages_to_send = []
@@ -151,16 +151,6 @@ def check_gatry_sales():
         except:
             continue
 
-        for keyword in keyword_service.keywords:
-            lower_keywords = keyword.keyword.lower().split()
-            if all(k in lower_product_name for k in lower_keywords):
-                if keyword.max_price and keyword.max_price < math.trunc(sale_price):
-                    continue
-                users_keyword_to_answer.append(keyword)
-
-        if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
-            continue
-
         sale_date = datetime.strptime(
             info.find(class_="data_postado")["title"].replace(" às ", " "),
             "%d/%m/%Y %H:%M",
@@ -180,7 +170,18 @@ def check_gatry_sales():
             "created_on": datetime.now(),
         }
         db_tracked_sale = tracked_sale_service.add_tracked_sale_if_not_exists(sale)
+
         if not db_tracked_sale:
+            return
+
+        for keyword in keyword_service.keywords:
+            lower_keywords = keyword.keyword.lower().split()
+            if all(k in lower_product_name for k in lower_keywords):
+                if keyword.max_price and keyword.max_price < math.trunc(sale_price):
+                    continue
+                users_keyword_to_answer.append(keyword)
+
+        if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
             continue
 
         store_name = info.find(class_="link_loja").text
@@ -236,7 +237,7 @@ def run_sale_tracker() -> None:
             continue
 
         if today != date.today():
-            tracked_sale_service.get_all_tracked_sales()
+            tracked_sale_service.get_past_day_sales()
             today = date.today()
 
         check_gatry_sales()

@@ -35,7 +35,7 @@ def load_prerequisites(attempts: int = 0):
         user_service.get_all_users()
         moderator_service.get_all_moderators()
         custom_command_service.get_all_commands()
-        tracked_sale_service.get_all_tracked_sales()
+        tracked_sale_service.get_past_day_sales()
         keyword_service.get_all_keywords()
         print("done!")
     except Exception as ex:

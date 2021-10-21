@@ -166,7 +166,7 @@ def insert_keyword(
         if add_keyword(new_keyword):
             message_service.send_message(
                 send_by_user.user_id,
-                f'A palavra-chave *"{keyword}"* agora está sendo monitorada.\n\n_Envie /promo para ver sua lista palavras-chave_',
+                f'A palavra-chave *"{keyword}"* agora está sendo monitorada.\n\n_Envie /promo para ver sua lista de palavras-chave_',
             )
 
             tracked_sale_service.check_last_tracked_sales(
@@ -246,7 +246,7 @@ def remove_keyword(
         if delete_keyword(send_by_user_id, keyword):
             message_service.send_message(
                 send_by_user_id,
-                f'A palavra-chave *"{keyword}"* foi removida da lista de monitoramento.\n\n_Envie /promo para ver sua lista palavras-chave_',
+                f'A palavra-chave *"{keyword}"* foi removida da lista de monitoramento.\n\n_Envie /promo para ver sua lista de palavras-chave_',
             )
         else:
             message_service.send_message(
