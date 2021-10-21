@@ -35,7 +35,7 @@ def get_by_id(id: int):
 def get_last_day_sales_by_keyword(arr_keyword: str, max_price: int = None) -> list():
     greater_than_date = datetime.combine(date.today(), time()) - timedelta(1)
 
-    str_SQL = """SELECT ts.product_name, ts.product_image_url, ts.sale_url, ts.aggregator_url, ts.price, ts.old_price,ts.sale_date
+    str_SQL = """SELECT ts.product_name, ts.product_image_url, ts.sale_url, ts.aggregator_url, ts.price, ts.old_price, ts.sale_date
                FROM tracked_sale ts 
                WHERE lower(ts.product_name) LIKE ALL (:arr_keyword) 
                AND ts.sale_date >= :greater_than_date"""
