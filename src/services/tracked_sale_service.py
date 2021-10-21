@@ -55,11 +55,11 @@ def check_last_tracked_sales(
             # send sales from last 8 hours if exists
             for sale in last_sales:
                 last_sales_message += f"\n<b>{sale['product_name']}</b>\n\n"
-                last_sales_message += f"Valor: {string_helper.get_old_new_price_str(sale['price'], sale['old_price'])}\n"
+                last_sales_message += f"<b>Valor: {string_helper.get_old_new_price_str(sale['price'], sale['old_price'])}</b>\n"
                 last_sales_message += (
-                    f"Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}\n\n"
+                    f"<b>Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}</b>\n\n"
                 )
-                last_sales_message += f"<b><a href='{sale['aggregator_url']}'>Ir para a promoção</a></b>  🔗\n"
+                last_sales_message += f"<b>🚀 <a href='{sale['aggregator_url']}'>Ir para a promoção</a></b>\n"
                 last_sales_message += f"______________________\n"
 
             if is_add_keyword:
