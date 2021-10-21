@@ -161,6 +161,14 @@ def check_gatry_sales():
         if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
             continue
 
+        sale_date = datetime.strptime(
+            info.find(class_="data_postado")["title"].replace(" às ", " "),
+            "%d/%m/%Y %H:%M",
+        )
+
+        if sale_date > datetime.now():
+            sale_date = sale_date - timedelta(hours=1)
+
         sale = {
             "sale_id": sale_id,
             "product_name": product_name,
@@ -168,10 +176,7 @@ def check_gatry_sales():
             "price": sale_price,
             "sale_url": info.find(class_="link_loja")["href"],
             "aggregator_url": site_url + info.find(class_="mais")["href"],
-            "sale_date": datetime.strptime(
-                info.find(class_="data_postado")["title"].replace(" às ", " "),
-                "%d/%m/%Y %H:%M",
-            ),
+            "sale_date": sale_date,
             "created_on": datetime.now(),
         }
         db_tracked_sale = tracked_sale_service.add_tracked_sale_if_not_exists(sale)
@@ -198,7 +203,7 @@ def check_gatry_sales():
                     "text": (
                         f"*{db_tracked_sale.product_name}*\n\n"
                         f"*Valor: {string_helper.get_old_new_price_str(db_tracked_sale.price)}*\n"
-                        f"*Data: {sale['sale_date'].strftime('%d/%m -  %H:%M')}*\n\n"
+                        f"*Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}*\n\n"
                         f"_Vendido por {store_name}_"
                     ),
                 }

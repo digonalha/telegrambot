@@ -273,7 +273,7 @@ def remove_all_keywords(
         if command != "/clearpromo":
             raise Exception("unknow command: " + command)
         if confirmation != "yes-baby":
-            raise Exception("unknow command: " + command)
+            raise Exception("wrong confirmation word: " + confirmation)
     except ValueError as ve:
         command = message_text.split(" ", 1)[0]
 
