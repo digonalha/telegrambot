@@ -113,8 +113,8 @@ def insert_command(
 
         new_custom_command = new_custom_command.replace("/", "")
 
-        if command != "/addcmd":
-            raise Exception("unknow command: " + command)
+        if command != "/addcmd" and command != f"/addcmd@{settings.bot_name}":
+            return
         elif len(new_custom_command) < 2 or len(new_custom_command) > 15:
             message_service.send_message(
                 chat_id,
@@ -152,15 +152,6 @@ def insert_command(
             )
             return
 
-    except Exception as ex:
-        message_service.send_message(
-            chat_id,
-            "Para criar um novo comando, utilize:\n*/addcmd <comando> | <resposta> | <descrição>*\nou\n*/addcmd -c <comando> -a <resposta> -d <descrição>*",
-        )
-        syslog.create_warning("insert_command", ex)
-        return
-
-    try:
         if not user_service.validate_user_permission(chat_id, send_by_user_id):
             return
 
@@ -169,7 +160,7 @@ def insert_command(
         if total_commands >= settings.max_commands:
             message_service.send_message(
                 chat_id,
-                f"O grupo atingiu o limite de {settings.max_commands} comandos customizados. Remova comandos utilizando */delcmd <comando>*",
+                f"O grupo atingiu o limite de {settings.max_commands} comandos customizados. Remova comandos utilizando `/delcmd comando`",
             )
             return
 
@@ -199,8 +190,13 @@ def insert_command(
             message_service.send_message(
                 chat_id, f"O comando */{new_custom_command}* já existe"
             )
+    except ValueError as ve:
+        message_service.send_message(
+            chat_id,
+            "Para criar um novo comando, utilize:\n`/addcmd comando | resposta | descrição`\nou\n`/addcmd -c comando -a resposta -d descrição`",
+        )
     except Exception as ex:
-        syslog.create_warning("insert_command", ex)
+        syslog.create_warning("insert_command", ex, send_by_user_id, message_text)
         message_service.send_message(
             chat_id, "Não foi possível cadastrar o novo comando"
         )
@@ -233,20 +229,11 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int) -> Non
     try:
         command, custom_command_name = message_text.split(" ", 1)
 
-        if command != "/delcmd":
-            raise Exception("unknow command: " + command)
+        if command != "/delcmd" and command != f"/delcmd@{settings.bot_name}":
+            return
 
         custom_command_name = custom_command_name.replace("/", "")
 
-    except Exception as ex:
-        message_service.send_message(
-            chat_id,
-            "Para remover um comando customizado, utilize */delcmd <comando>*",
-        )
-        syslog.create_warning("remove_command", ex)
-        return
-
-    try:
         if not user_service.validate_user_permission(
             chat_id, send_by_user_id, validate_admin_only=True
         ):
@@ -261,8 +248,13 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int) -> Non
                 chat_id,
                 f"O comando */{custom_command_name}* não existe",
             )
+    except ValueError as ve:
+        message_service.send_message(
+            chat_id,
+            "Para remover um comando customizado, utilize `/delcmd comando`",
+        )
     except Exception as ex:
-        syslog.create_warning("remove_command", ex)
+        syslog.create_warning("remove_command", ex, send_by_user_id, message_text)
         message_service.send_message(
             chat_id, f"Não foi possível remover o comando */{custom_command_name}*"
         )

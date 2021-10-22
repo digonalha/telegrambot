@@ -38,7 +38,8 @@ def get_last_day_sales_by_keyword(arr_keyword: str, max_price: int = None) -> li
     str_SQL = """SELECT ts.product_name, ts.product_image_url, ts.sale_url, ts.aggregator_url, ts.price, ts.old_price, ts.sale_date
                FROM tracked_sale ts 
                WHERE lower(ts.product_name) LIKE ALL (:arr_keyword) 
-               AND ts.sale_date >= :greater_than_date"""
+               AND ts.sale_date >= :greater_than_date 
+               ORDER BY ts.sale_date desc"""
 
     if max_price:
         str_SQL += " AND trunc(ts.price) <= :max_price;"

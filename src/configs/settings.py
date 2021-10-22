@@ -1,8 +1,5 @@
 import os
 from dotenv import load_dotenv
-from src.helpers.logging_helper import SystemLogging
-
-syslog = SystemLogging(__name__)
 
 connection_string = None
 api_token = None
@@ -10,13 +7,14 @@ bot_name = None
 max_commands = 10
 max_keywords = 10
 promo_version = None
+error_log_channel = None
 
 
 def load():
     try:
         load_dotenv()
 
-        global connection_string, api_token, bot_name, max_commands, max_keywords, promo_version
+        global connection_string, api_token, bot_name, max_commands, max_keywords, promo_version, error_log_channel
 
         connection_string = os.getenv("CONNECTION_STRING")
         api_token = os.getenv("API_TOKEN")
@@ -24,6 +22,7 @@ def load():
         max_commands = os.getenv("MAX_COMMANDS")
         max_keywords = os.getenv("MAX_KEYWORDS")
         promo_version = os.getenv("PROMO_VERSION")
+        error_log_channel = os.getenv("ERROR_LOG_CHANNEL")
 
         if not connection_string:
             raise Exception("cant find connection string. check your .env file")
@@ -47,7 +46,7 @@ def load():
         )
 
     except Exception as ex:
-        syslog.create_warning("load", ex)
+        print(ex)
         exit()
 
 

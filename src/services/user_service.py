@@ -90,7 +90,6 @@ def add_or_update_user(user_id: int, first_name: str, user_name: str) -> None:
                     user_name=user_name,
                     first_name=first_name,
                     is_admin=False,
-                    table_width=0,
                     created_on=now,
                     modified_on=now,
                 )
@@ -117,4 +116,5 @@ def add_or_update_user(user_id: int, first_name: str, user_name: str) -> None:
                     get_all_users()
 
     except Exception as ex:
-        syslog.create_warning("add_user_if_not_exists", ex)
+        user_info = f"first_name: {first_name}| username: {user_name}"
+        syslog.create_warning("add_user_if_not_exists", ex, user_id, user_info)

@@ -34,7 +34,13 @@ def send_video(chat_id: int, file_id: str) -> None:
     telegram_api.send_video(chat_id, file_id)
 
 
-def send_message(chat_id: int, message: str, parse_mode: str = "markdown") -> None:
+def send_message(
+    chat_id: int,
+    message: str,
+    parse_mode: str = "markdown",
+    reply_id: int = 0,
+    reply_markup: str = None,
+) -> None:
     """Send a request for send message to telegram api"""
     if "$random_number[" in message:
         str_numbers = message.split("$random_number[")[1].split("]", 1)[0]
@@ -69,7 +75,13 @@ def send_message(chat_id: int, message: str, parse_mode: str = "markdown") -> No
 
         message = message.replace(string_to_replace, selected_word)
 
-    telegram_api.send_message(chat_id, message, parse_mode=parse_mode)
+    telegram_api.send_message(
+        chat_id,
+        message,
+        reply_id=reply_id,
+        parse_mode=parse_mode,
+        reply_markup=reply_markup,
+    )
 
 
 def get_updates(offset: int) -> list:

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from src.services import user_service, message_service
 from src.helpers.logging_helper import SystemLogging
+from src.configs import settings
 
 timeout_users = []
 syslog = SystemLogging(__name__)
@@ -21,21 +22,16 @@ def is_user_in_timeout(chat_id, user_id) -> bool:
 def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int) -> None:
     """Insert user in timeout chat list"""
     try:
-        command, username, timer = message_text.split()
+        command, parameters = message_text.split()
 
-        if command != "/mute":
-            raise Exception("unknow command: " + command)
+        if command != "/mute" and command != f"/mute@{settings.bot_name}":
+            return
+
+        username, timer = parameters.split("|")
 
         username = username.replace("@", "")
-    except Exception as ex:
-        message_service.send_message(
-            chat_id, "Para silenciar um usuário, utilize */mute <username> <30~3600>*"
-        )
-        syslog.create_warning("insert_timeout_user", ex)
-        return
-
-    try:
         timer = int(timer)
+
         if timer < 30 or timer > 3600:
             message_service.send_message(
                 chat_id,
@@ -75,8 +71,13 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int) -
             message_service.send_message(
                 chat_id, f"*@{username}* silenciado por {timer} segundos..."
             )
+    except ValueError as ve:
+        message_service.send_message(
+            chat_id,
+            "Para silenciar um usuário, utilize `/mute username | tempo_em_segundos`",
+        )
     except Exception as ex:
-        syslog.create_warning("insert_timeout_user", ex)
+        syslog.create_warning("insert_timeout_user", ex, chat_id, message_text)
         message_service.send_message(chat_id, "Não foi possível silenciar o usuário :(")
 
 
@@ -85,19 +86,11 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int) -> Non
     try:
         command, username = message_text.split()
 
-        if command != "/unmute":
-            raise Exception("unknow command: " + command)
+        if command != "/unmute" and command != f"/unmute@{settings.bot_name}":
+            return
 
         username = username.replace("@", "")
-    except Exception as ex:
-        message_service.send_message(
-            chat_id,
-            "Para habilitar a fala de um usuário, utilize */unmute <username>*",
-        )
-        syslog.create_warning("remove_timeout_user", ex)
-        return
 
-    try:
         if not user_service.validate_user_permission(chat_id, send_by_user_id):
             return
 
@@ -126,8 +119,13 @@ def remove_timeout_user(chat_id, message_text: str, send_by_user_id: int) -> Non
                 timeout_user["chat_id"],
                 f"*@{(timeout_user['user_name'])}* já pode voltar a falar :)",
             )
+    except ValueError as ve:
+        message_service.send_message(
+            chat_id,
+            "Para habilitar a fala de um usuário, utilize `/unmute username`",
+        )
     except Exception as ex:
-        syslog.create_warning("remove_timeout_user", ex)
+        syslog.create_warning("remove_timeout_user", ex, chat_id, message_text)
         message_service.send_message(
             chat_id, "Não foi possível remover o usuário da lista de silenciados"
         )

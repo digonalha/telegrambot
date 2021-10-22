@@ -8,7 +8,6 @@ from src.services import (
     custom_command_service,
     message_service,
     keyword_service,
-    tracked_sale_service,
 )
 
 
@@ -31,12 +30,12 @@ def send_custom_commands_message(chat_id: int, name: str, message_id: int):
             if cc.description and len(cc.description) > 0:
                 description = cc.description
 
-            custom_messages += f"*/{cc.command}:* {description}\n"
+            custom_messages += f"*/{cc.command}* - {description}\n"
 
     if len(custom_messages) == 0:
         message_service.send_message(
             chat_id,
-            "Nenhum comando customizado encontrado para o grupo. Utilize o comando /addcmd para cadastrar novos comandos",
+            "Nenhum comando customizado encontrado para o grupo. Utilize o comando */addcmd* para cadastrar novos comandos",
         )
         return
 
@@ -57,13 +56,13 @@ def send_group_help_message(chat_id: int, name: str, message_id: int) -> None:
         f"Olá, *{(name)}*!\n"
         "Aqui estão os meus comandos disponíveis:\n\n"
         "*/help* - lista os comandos disponíveis\n"
-        "*/mod* `<username>` - promove o usuário ao cargo de moderador \*\n"
-        "*/unmod* `<username>` - rebaixa o usuário do cargo de moderador \*\n"
-        "*/mute* `<username> <tempo em segundos>` - adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
-        "*/unmute* `<username>` - remove o usuário da lista de silenciados \*\*\n"
+        "*/mod* `username` - promove o usuário ao cargo de moderador \*\n"
+        "*/unmod* `username` - rebaixa o usuário do cargo de moderador \*\n"
+        "*/mute* `username | tempo_em_segundos` - adiciona o usuário na lista de silenciados pelo tempo especificado \*\*\n"
+        "*/unmute* `username` - remove o usuário da lista de silenciados \*\*\n"
         "*/cmd* - lista os comandos customizados disponíveis no grupo\n"
-        "*/addcmd* `<comando> | <resposta> | <descrição>` - adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
-        "*/delcmd* `<comando>` - remove um comando customizado \*\n\n"
+        "*/addcmd* `comando | resposta | descrição` - adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
+        "*/delcmd* `comando` - remove um comando customizado \*\n\n"
         "\* _necessário ser um administrador_\n"
         "\*\* _necessário ser um administrador ou moderador_\n"
     )
@@ -73,25 +72,25 @@ def send_group_help_message(chat_id: int, name: str, message_id: int) -> None:
     else:
         help_message += "\nPara monitorar promoções, enviar /help no privado"
 
-    message_service.send_message(chat_id, help_message)
+    message_service.send_message(chat_id, help_message, reply_id=message_id)
 
 
-def send_private_help_message(chat_id: int, name: str, message_id: int) -> None:
+def send_private_help_message(chat_id: int, name: str) -> None:
     help_message = (
         f"Olá, *{(name)}*!\n"
         "Aqui estão os meus comandos disponíveis:\n\n"
         "*/help* - lista os comandos disponíveis\n"
         "*/promo* - lista as promoções monitoradas pelo usuário\n"
-        "*/lastpromo* `<palavra-chave>` - retorna as promoções das últimas 24 horas relacionadas à palavra-chave\n"
-        "*/addpromo* `<palavra-chave> | <valor-máx>` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário\n"
-        "*/delpromo* `<palavra-chave>` - remove a palavra-chave da lista de monitoramento de promoções do usuário\n"
+        "*/lastpromo* `palavra-chave` - retorna as promoções das últimas 24 horas relacionadas à palavra-chave\n"
+        "*/addpromo* `palavra-chave | valor-máx` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário\n"
+        "*/delpromo* `palavra-chave` - remove a palavra-chave da lista de monitoramento de promoções do usuário\n"
         "*/clearpromo* - remove todas as palavras-chave da lista de monitoramento de promoções\n"
     )
 
     message_service.send_message(chat_id, help_message, parse_mode="markdown")
 
 
-def resolve_action(message) -> None:
+def resolve_message(message) -> None:
     """Select an action to answer a message update."""
     try:
         from_user_id = message["from"]["id"]
@@ -196,29 +195,17 @@ def resolve_action(message) -> None:
                 return
         else:
             if text.lower() == "/help" or text.lower() == "/start":
-                send_private_help_message(
-                    chat_id, message["from"]["first_name"], message["message_id"]
-                )
+                send_private_help_message(chat_id, message["from"]["first_name"])
             elif text.lower() == "/promo":
-                keyword_service.get_user_keywords(
-                    chat_id, from_user_id, message["message_id"]
-                )
+                keyword_service.get_user_keywords(chat_id, from_user_id)
             elif text.lower().startswith("/lastpromo"):
-                keyword_service.get_last_sales_by_keyword(
-                    chat_id, text, from_user_id, message["message_id"]
-                )
+                keyword_service.get_last_sales_by_keyword(chat_id, text)
             elif text.lower().startswith("/clearpromo"):
-                keyword_service.remove_all_keywords(
-                    chat_id, text, from_user_id, message["message_id"]
-                )
+                keyword_service.remove_all_keywords(chat_id, text)
             elif text.lower().startswith("/addpromo"):
-                keyword_service.insert_keyword(
-                    chat_id, text, from_user_id, message["message_id"]
-                )
+                keyword_service.insert_keyword(chat_id, text)
             elif text.lower().startswith("/delpromo"):
-                keyword_service.remove_keyword(
-                    chat_id, text, from_user_id, message["message_id"]
-                )
+                keyword_service.remove_keyword(chat_id, text)
 
     except Exception as ex:
-        syslog.create_warning("resolve_action", ex)
+        syslog.create_warning("resolve_action", ex, chat_id, text)

@@ -16,7 +16,7 @@ def get_all_keywords() -> None:
     keywords = keyword_repository.get_all()
 
 
-def get_user_keywords(chat_id: int, user_id: int, message_id: int) -> list:
+def get_user_keywords(chat_id: int, user_id: int) -> list:
     try:
         keywords = keyword_repository.get_by_user_id(user_id)
 
@@ -25,7 +25,7 @@ def get_user_keywords(chat_id: int, user_id: int, message_id: int) -> list:
         if not user:
             raise Exception("user not found. id: " + user_id)
 
-        message = f"Nenhuma palavra-chave encontrada. Você pode adicionar palavras-chave utilizando: \n\n*/addpromo <palavra-chave> | <valor-máx>*\n\n_parâmetro valor-máx opcional_"
+        message = f"Nenhuma palavra-chave encontrada. Você pode adicionar palavras-chave utilizando: \n\n`/addpromo palavra-chave | valor-máx`\n\n_parâmetro valor-máx opcional_"
 
         if keywords and len(keywords) > 0:
             message = f"<b>🤖 Promobot 🤖</b>\n\nAqui está uma lista com suas palavras-chave monitoradas. Fique atento pois palavras-chave sem valor máximo serão sempre notificadas, independente do valor da promoção.\n\n"
@@ -44,14 +44,11 @@ def get_user_keywords(chat_id: int, user_id: int, message_id: int) -> list:
         else:
             message_service.send_message(user_id, message)
     except Exception as ex:
-        syslog.create_warning("get_user_keywords", ex)
+        syslog.create_warning("get_user_keywords", ex, user_id, "")
         message_service.send_message(
             user_id,
             f"Ocorreu um erro ao buscar as palavras-chave",
         )
-    finally:
-        if chat_id != user_id:
-            message_service.delete_message(chat_id, message_id)
 
 
 def add_keyword(keyword: dict) -> bool:
@@ -79,9 +76,7 @@ def add_keyword(keyword: dict) -> bool:
     return False
 
 
-def insert_keyword(
-    chat_id: int, message_text: str, send_by_user_id: int, message_id: int
-):
+def insert_keyword(user_id: int, message_text: str):
     """Logic and validations to add a new keyword on database if not exists."""
     try:
         max_price = None
@@ -99,7 +94,7 @@ def insert_keyword(
                     raise
             except:
                 message_service.send_message(
-                    send_by_user_id,
+                    user_id,
                     "Valor inserido para preço máximo inválido.\n\n*Valor mín: 10 - Valor máx: 9999*\n\n_Não utilize separador para milhares_\n_Não utilize separador para decimais_",
                 )
                 return
@@ -108,51 +103,29 @@ def insert_keyword(
             keyword = parameters
 
         if command != "/addpromo":
-            raise Exception("unknow command: " + command)
+            return
         elif len(keyword) < 4:
             message_service.send_message(
-                send_by_user_id,
+                user_id,
                 "Palavra-chave não pode ter menos de 4 caracteres",
             )
             return
         elif len(keyword) > 40:
             message_service.send_message(
-                send_by_user_id,
+                user_id,
                 "Palavra-chave não pode ter mais de 40 caracteres",
             )
             return
 
-    except ValueError as ve:
-        command = message_text.split(" ", 1)[0]
-
-        if command == "/addpromo":
-            message_service.send_message(
-                send_by_user_id,
-                "Para monitorar uma palavra-chave nas promoções, utilize: \n\n*/addpromo <palavra-chave> | <valor-máx>*\n\n_parâmetro valor-máx opcional_",
-            )
-            syslog.create_warning("insert_keyword", ve)
-
-            if chat_id != send_by_user_id:
-                message_service.delete_message(chat_id, message_id)
-        return
-    except Exception as ex:
-        message_service.send_message(
-            send_by_user_id,
-            "Para monitorar uma palavra-chave nas promoções, utilize: \n\n*/addpromo <palavra-chave> | <valor-máx>*\n\n_parâmetro valor-máx opcional_",
-        )
-        syslog.create_warning("insert_keyword", ex)
-        return
-
-    try:
-        send_by_user = user_service.get_user_by_id_if_exists(send_by_user_id)
+        send_by_user = user_service.get_user_by_id_if_exists(user_id)
 
         if not send_by_user:
-            raise Exception("user not found. id: " + send_by_user_id)
+            raise Exception("user not found. id: " + user_id)
 
         user_keywords = keyword_repository.get_by_user_id(send_by_user.user_id)
 
         if len(user_keywords) >= settings.max_keywords and not send_by_user.is_admin:
-            message = f"Você atingiu o seu limite de {settings.max_keywords} palavras-chave. Remova palavras-chave utilizando: \n\n*/delpromo <palavra-chave>*"
+            message = f"Você atingiu o seu limite de {settings.max_keywords} palavras-chave. Remova palavras-chave utilizando: \n\n`/delpromo palavra-chave`"
             message_service.send_message(send_by_user.user_id, message)
             return
 
@@ -177,15 +150,17 @@ def insert_keyword(
                 send_by_user.user_id,
                 f'A palavra-chave *"{keyword}"* já está sendo monitorada',
             )
+    except ValueError as ve:
+        message_service.send_message(
+            user_id,
+            "Para monitorar uma palavra-chave nas promoções, utilize: \n\n`/addpromo palavra-chave | valor-máx`\n\n_parâmetro valor-máx opcional_",
+        )
     except Exception as ex:
-        syslog.create_warning("insert_keyword", ex)
+        syslog.create_warning("insert_keyword", user_id, message_text)
         message_service.send_message(
             send_by_user.user_id,
             f'Não foi possível adicionar a palavra-chave *"{keyword}"*',
         )
-    finally:
-        if chat_id != send_by_user_id:
-            message_service.delete_message(chat_id, message_id)
 
 
 def delete_keyword(user_id: int, keyword: str) -> bool:
@@ -212,172 +187,126 @@ def delete_keyword(user_id: int, keyword: str) -> bool:
     return False
 
 
-def remove_keyword(
-    chat_id: int, message_text: str, send_by_user_id: int, message_id: int
-) -> None:
+def remove_keyword(user_id: int, message_text: str) -> None:
     """Logic and validations to remove a keyword from database if exists."""
     try:
         command, keyword = message_text.split(" ", 1)
 
         if command != "/delpromo":
-            raise Exception("unknow command: " + command)
-    except ValueError as ve:
-        command = message_text.split(" ", 1)[0]
+            return
 
-        if command == "/delpromo":
+        if delete_keyword(user_id, keyword):
             message_service.send_message(
-                send_by_user_id,
-                "Para remover uma palavra-chave, utilize: \n\n*/delpromo <palavra-chave>*",
-            )
-            syslog.create_warning("remove_keyword", ve)
-
-            if chat_id != send_by_user_id:
-                message_service.delete_message(chat_id, message_id)
-        return
-    except Exception as ex:
-        message_service.send_message(
-            send_by_user_id,
-            "Para remover uma palavra-chave, utilize: \n\n*/delpromo <palavra-chave>*",
-        )
-        syslog.create_warning("remove_keyword", ex)
-        return
-
-    try:
-        if delete_keyword(send_by_user_id, keyword):
-            message_service.send_message(
-                send_by_user_id,
+                user_id,
                 f'A palavra-chave *"{keyword}"* foi removida da lista de monitoramento.\n\n_Envie /promo para ver sua lista de palavras-chave_',
             )
         else:
             message_service.send_message(
-                send_by_user_id,
+                user_id,
                 f'A palavra-chave *"{keyword}"* não está sendo monitorada',
             )
-    except Exception as ex:
-        syslog.create_warning("remove_keyword", ex)
+    except ValueError as ve:
         message_service.send_message(
-            send_by_user_id, f'Não foi possível remover a palavra-chave *"{keyword}"*'
+            user_id,
+            "Para remover uma palavra-chave, utilize: \n\n`/delpromo palavra-chave`",
         )
-    finally:
-        if chat_id != send_by_user_id:
-            message_service.delete_message(chat_id, message_id)
+        return
+    except Exception as ex:
+        syslog.create_warning("remove_keyword", ex, user_id, message_text)
+        message_service.send_message(
+            user_id, f'Não foi possível remover a palavra-chave *"{keyword}"*'
+        )
 
 
-def remove_all_keywords(
-    chat_id: int, message_text: str, send_by_user_id: int, message_id: int
-) -> None:
+def remove_all_keywords(user_id: int, message_text: str) -> None:
     """Logic and validations to remove all keywords from database if exists."""
     try:
         command, confirmation = message_text.split(" ", 1)
 
         if command != "/clearpromo":
-            raise Exception("unknow command: " + command)
+            return
         if confirmation != "yes-baby":
-            raise Exception("wrong confirmation word: " + confirmation)
-    except ValueError as ve:
-        command = message_text.split(" ", 1)[0]
-
-        if command == "/clearpromo":
             message_service.send_message(
-                send_by_user_id,
+                user_id,
                 "Para remover todas as palavras-chave, utilize:\n\n`/clearpromo yes-baby`\n\n_Clique no comando para copiá-lo_",
             )
-            syslog.create_warning("remove_all_keywords", ve)
+            return
 
-            if chat_id != send_by_user_id:
-                message_service.delete_message(chat_id, message_id)
-        return
-    except Exception as ex:
-        message_service.send_message(
-            send_by_user_id,
-            "Para remover todas as palavras-chave, utilize:\n\n`/clearpromo yes-baby`\n\n_Clique no comando para copiá-lo_",
-        )
-        syslog.create_warning("remove_all_keywords", ex)
-        return
-    try:
-        keywords = keyword_repository.get_by_user_id(send_by_user_id)
+        keywords = keyword_repository.get_by_user_id(user_id)
 
         if len(keywords) == 0:
             message_service.send_message(
-                send_by_user_id,
+                user_id,
                 f"Não existem palavras-chave para serem removidas da lista de monitoramento",
             )
             return
 
-        keyword_repository.delete_all_by_user_id(send_by_user_id)
-        keywords = keyword_repository.get_by_user_id(send_by_user_id)
+        keyword_repository.delete_all_by_user_id(user_id)
+        keywords = keyword_repository.get_by_user_id(user_id)
 
         if len(keywords) == 0:
             message_service.send_message(
-                send_by_user_id,
+                user_id,
                 f"Todas as palavras-chave foram removidas da lista de monitoramento",
             )
         else:
             message_service.send_message(
-                send_by_user_id,
+                user_id,
                 f"Não foi possível remover as palavras-chave da lista de monitoramento",
             )
-    except Exception as ex:
-        syslog.create_warning("remove_all_keywords", ex)
+    except ValueError as ve:
         message_service.send_message(
-            send_by_user_id, f"Não foi possível remover as palavras-chave"
+            user_id,
+            "Para remover todas as palavras-chave, utilize:\n\n`/clearpromo yes-baby`\n\n_Clique no comando para copiá-lo_",
         )
-    finally:
-        if chat_id != send_by_user_id:
-            message_service.delete_message(chat_id, message_id)
+    except Exception as ex:
+        syslog.create_warning("remove_all_keywords", ex, user_id, message_text)
+        message_service.send_message(
+            user_id, f"Não foi possível remover as palavras-chave"
+        )
 
 
-def get_last_sales_by_keyword(
-    chat_id: int, message_text: str, send_by_user_id: int, message_id: int
-):
+def get_last_sales_by_keyword(user_id: int, message_text: str):
     """Logic and validations to search last sales in database if not exists."""
     try:
         command, keyword = message_text.split(" ", 1)
 
         if command != "/lastpromo":
-            raise Exception("unknow command: " + command)
+            return
         elif len(keyword) < 4:
             message_service.send_message(
-                send_by_user_id,
+                user_id,
                 "Palavra-chave não pode ter menos de 4 caracteres",
             )
             return
         elif len(keyword) > 40:
             message_service.send_message(
-                send_by_user_id,
+                user_id,
                 "Palavra-chave não pode ter mais de 40 caracteres",
             )
             return
-    except Exception as ex:
-        message_service.send_message(
-            send_by_user_id,
-            "Para verificar as últimas promoções por palavra-chave, utilize: \n\n*/lastpromo <palavra-chave>*",
-        )
-        syslog.create_warning("insert_keyword", ex)
-        return
-
-    try:
         keyword_to_search = {
             "keyword": keyword.lower(),
             "max_price": None,
         }
 
         any_sale_found = tracked_sale_service.check_last_tracked_sales(
-            chat_id, keyword_to_search
+            user_id, keyword_to_search
         )
 
         if not (any_sale_found):
             message_service.send_message(
-                chat_id,
+                user_id,
                 f'Não foi possível encontrar promoções utilizando a palavra-chave *"{keyword}"*',
             )
-
-    except Exception as ex:
-        syslog.create_warning("insert_keyword", ex)
+    except ValueError as ve:
         message_service.send_message(
-            chat_id,
+            user_id,
+            "Para verificar as últimas promoções por palavra-chave, utilize: \n\n`/lastpromo palavra-chave`",
+        )
+    except Exception as ex:
+        syslog.create_warning("get_last_sales_by_keyword", ex, user_id, message_text)
+        message_service.send_message(
+            user_id,
             f'Ocorreu um erro ao buscar promoções que contenham a palavra-chave *"{keyword}"*',
         )
-    finally:
-        if chat_id != send_by_user_id:
-            message_service.delete_message(chat_id, message_id)

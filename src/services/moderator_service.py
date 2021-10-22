@@ -3,6 +3,7 @@ from src.helpers.logging_helper import SystemLogging
 from src.repositories import moderator_repository
 from src.schemas import moderator_schema
 from src.services import user_service, message_service
+from src.configs import settings
 
 moderators = []
 syslog = SystemLogging(__name__)
@@ -43,19 +44,11 @@ def insert_moderator(chat_id: int, message_text: str, send_by_user_id: int):
     try:
         command, username = message_text.split(" ", 1)
 
-        if command != "/mod":
-            raise Exception("unknow command: " + command)
+        if command != "/mod" and command != f"/mod@{settings.bot_name}":
+            return
 
         username = username.replace("@", "")
-    except Exception as ex:
-        message_service.send_message(
-            chat_id,
-            "Para tornar um usuário moderador, utilize */mod <username>*",
-        )
-        syslog.create_warning("insert_moderator", ex)
-        return
 
-    try:
         if not user_service.validate_user_permission(
             chat_id, send_by_user_id, validate_admin_only=True
         ):
@@ -70,8 +63,13 @@ def insert_moderator(chat_id: int, message_text: str, send_by_user_id: int):
             message_service.send_message(chat_id, f"*@{username}* agora é um moderador")
         else:
             message_service.send_message(chat_id, f"*@{username}* já é um moderador")
+    except ValueError as ve:
+        message_service.send_message(
+            chat_id,
+            "Para tornar um usuário moderador, utilize `/mod username`",
+        )
     except Exception as ex:
-        syslog.create_warning("insert_moderator", ex)
+        syslog.create_warning("insert_moderator", ex, send_by_user_id, message_text)
         message_service.send_message(
             chat_id, "Não foi possível cadastrar o novo moderador"
         )
@@ -102,19 +100,11 @@ def remove_moderator(chat_id: int, message_text: str, send_by_user_id: int) -> N
     try:
         command, username = message_text.split(" ", 1)
 
-        if command != "/unmod":
-            raise Exception("unknow command: " + command)
+        if command != "/unmod" and command != f"/unmod@{settings.bot_name}":
+            return
 
         username = username.replace("@", "")
-    except Exception as ex:
-        message_service.send_message(
-            chat_id,
-            "Para remover o status de moderador de um usuário, utilize */unmod <username>*",
-        )
-        syslog.create_warning("remove_moderator", ex)
-        return
 
-    try:
         if not user_service.validate_user_permission(
             chat_id, send_by_user_id, validate_admin_only=True
         ):
@@ -131,6 +121,11 @@ def remove_moderator(chat_id: int, message_text: str, send_by_user_id: int) -> N
             )
         else:
             message_service.send_message(chat_id, f"*@{username}* não é um moderador")
+    except ValueError as ve:
+        message_service.send_message(
+            chat_id,
+            "Para remover o status de moderador de um usuário, utilize `/unmod username`",
+        )
     except Exception as ex:
-        syslog.create_warning("remove_moderator", ex)
+        syslog.create_warning("remove_moderator", ex, send_by_user_id, message_text)
         message_service.send_message(chat_id, "Não foi possível remover o moderador")

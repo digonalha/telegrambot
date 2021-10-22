@@ -13,7 +13,7 @@ def get_last_sales(limit: int = 50) -> list():
 
         if res.status_code != 200:
             return None
-            
+
         response_json = res.json()
         return response_json["offers"]
     except Exception as ex:

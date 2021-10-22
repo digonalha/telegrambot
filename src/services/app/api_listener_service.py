@@ -16,10 +16,13 @@ def run_api_listener() -> None:
             if updates and len(updates) > 0:
                 for update in updates:
                     try:
-                        message = update["message"]
-
-                        if message:
-                            response_service.resolve_action(message)
+                        request_obj = None
+                        if "message" in update:
+                            request_obj = update["message"]
+                            response_service.resolve_message(request_obj)
+                        elif "callback_query" in update:
+                            request_obj = update["callback_query"]
+                            response_service.resolve_message(request_obj)
                     except Exception:
                         continue
         finally:

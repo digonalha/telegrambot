@@ -14,8 +14,7 @@ def create_log_from_response(function_name, response):
         syslog.create_info(function_name, f"request has been sucessfully submitted!")
         return True
 
-    syslog.create_warning(function_name, response["description"])
-    return False
+    raise Exception(response["description"])
 
 
 def get_updates(offset: int):
@@ -47,7 +46,11 @@ def delete_message(chat_id: int, message_id: int):
 
 
 def send_message(
-    chat_id: int, message: str, reply_id: int = 0, parse_mode: str = "markdown"
+    chat_id: int,
+    message: str,
+    reply_id: int = 0,
+    parse_mode: str = "markdown",
+    reply_markup: str = None,
 ):
     try:
         data = {
@@ -59,6 +62,8 @@ def send_message(
 
         if reply_id != None and reply_id > 0:
             data["reply_to_message_id"] = reply_id
+        if reply_markup:
+            data["reply_markup"] = reply_markup
         res = requests.post(f"{API_URI}/sendMessage", data=data)
         create_log_from_response("send_message", res.json())
     except Exception as ex:
@@ -108,7 +113,7 @@ def send_image(
     caption: str = None,
     reply_id: int = None,
     reply_markup: str = None,
-    parse_mode: str = 'markdown',
+    parse_mode: str = "markdown",
 ):
     try:
         if file_id.startswith("[") and file_id.endswith("]"):

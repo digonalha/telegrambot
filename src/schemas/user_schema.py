@@ -10,7 +10,6 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     is_admin: bool
-    table_width: int = None
     created_on: datetime
     modified_on: datetime
 

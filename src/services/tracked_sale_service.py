@@ -4,6 +4,8 @@ from src.repositories import tracked_sale_repository
 from src.schemas import tracked_sale_schema
 from src.services import message_service
 from src.helpers import string_helper
+import json
+import math
 
 tracked_sales = []
 syslog = SystemLogging(__name__)
@@ -37,7 +39,7 @@ def get_last_day_sales_by_keyword(keyword: str, max_price: float = None) -> list
 
 
 def check_last_tracked_sales(
-    chat_id: int, keyword: dict, is_add_keyword: bool = False
+    user_id: int, keyword: dict, is_add_keyword: bool = False
 ) -> bool:
     try:
         last_sales = get_last_day_sales_by_keyword(
@@ -52,6 +54,9 @@ def check_last_tracked_sales(
             last_sales_message = "🚨 <b>Alerta Promobot</b> 🚨"
             last_sales_message += f'\n\nEncontrei {total_sales} {"promoções relacionadas" if total_sales > 1 else "promoção relacionada" } à palavra-chave <b>"{keyword["keyword"]}"</b> nas últimas 24 horas:\n'
             last_sales_message += f"______________________\n"
+
+            pages = math.ceil(total_sales / 3) if total_sales > 1 else 1
+            index = 1
             # send sales from last 8 hours if exists
             for sale in last_sales:
                 last_sales_message += f"\n<b>{sale['product_name']}</b>\n\n"
@@ -59,18 +64,56 @@ def check_last_tracked_sales(
                 last_sales_message += (
                     f"<b>Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}</b>\n\n"
                 )
-                last_sales_message += f"<b><a href='{sale['aggregator_url']}'>Ir para a promoção 🚀</a></b>\n"
-                last_sales_message += f"______________________\n"
+                last_sales_message += f"<b><a href='{sale['aggregator_url']}'>Ir para a promoção</a></b>\n"
+                last_sales_message += f"_____________________\n"
+                index += 1
+
+                if index > 3:
+                    break
 
             if is_add_keyword:
-                last_sales_message += f'\n\nDaqui pra frente você receberá uma notificação todas as vezes que uma promoção relacionada a essa palavra-chave monitorada aparecer! Para remover essa palavra-chave do monitor, utilize o comando:\n\n<code>/delpromo {keyword["keyword"]}</code>\n\n<i>Clique no comando para copiá-lo</i>'
+                last_sales_message += f'\nDaqui pra frente você receberá uma notificação todas as vezes que uma promoção relacionada a essa palavra-chave monitorada aparecer! Para remover essa palavra-chave do monitor, utilize o comando:\n\n<code>/delpromo {keyword["keyword"]}</code>\n\n<i>Clique no comando para copiá-lo</i>'
             else:
-                last_sales_message += f'\n\nVocê pode inserir a palavra-chave <b>"{keyword["keyword"]}"</b> na sua lista de monitoramento e ser notificado sempre que uma nova promoção aparecer! Para adicionar uma nova palavra-chave, utilize o comando:\n\n<code>/addpromo {keyword["keyword"]}</code>\n\n<i>Clique no comando para copiá-lo</i>'
+                last_sales_message += f'\nVocê pode inserir a palavra-chave <b>"{keyword["keyword"]}"</b> na sua lista de monitoramento e ser notificado sempre que uma nova promoção aparecer! Para adicionar uma nova palavra-chave, utilize o comando:\n\n<code>/addpromo {keyword["keyword"]}</code>\n\n<i>Clique no comando para copiá-lo</i>'
 
-            message_service.send_message(chat_id, last_sales_message, parse_mode="HTML")
+            page = 1
+
+            page_text = str(page)
+
+            data_left = (
+                f'preview|{page_text}|{keyword["keyword"]}|{keyword["max_price"]}'
+            )
+            data_middle = (
+                f'refresh|{page_text}|{keyword["keyword"]}|{keyword["max_price"]}'
+            )
+            data_right = f'next|{page_text}|{keyword["keyword"]}|{keyword["max_price"]}'
+
+            reply_markup = (
+                '{"inline_keyboard": [[{"text": "< Ant. ", "callback_data": "'
+                + data_left
+                + '"},'
+            )
+
+            reply_markup += (
+                '{"text": "[ '
+                + page_text
+                + ' ]", "callback_data": "'
+                + data_middle
+                + '"}'
+            )
+            reply_markup += (
+                ',{"text": "Próx. > ", "callback_data": "' + data_right + '"}]]}'
+            )
+            message_service.send_message(
+                user_id,
+                last_sales_message,
+                parse_mode="HTML",
+                reply_markup=reply_markup,
+            )
             return True
     except Exception as ex:
-        syslog.create_warning("check_last_tracked_sales", ex)
+        str_keyword_dict = json.dumps(keyword)
+        syslog.create_warning("check_last_tracked_sales", ex, user_id, str_keyword_dict)
 
 
 def add_tracked_sale_if_not_exists(tracked_sale: dict) -> TrackedSale:
@@ -94,4 +137,4 @@ def add_tracked_sale_if_not_exists(tracked_sale: dict) -> TrackedSale:
 
         return db_tracked_sale
     except Exception as ex:
-        syslog.create_warning("add_tracked_sale_if_not_exists", ex)
+        syslog.create_warning("add_tracked_sale_if_not_exists", ex, 0, "")
