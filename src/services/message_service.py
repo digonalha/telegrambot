@@ -84,6 +84,23 @@ def send_message(
     )
 
 
+def edit_message(
+    chat_id: int,
+    message: str,
+    message_id: int,
+    parse_mode: str = "markdown",
+    reply_markup: str = None,
+) -> None:
+    """Send a request for edit message to telegram api"""
+    telegram_api.edit_message(
+        chat_id,
+        message,
+        message_id,
+        parse_mode=parse_mode,
+        reply_markup=reply_markup,
+    )
+
+
 def get_updates(offset: int) -> list:
     """List last message updates from chats"""
     return telegram_api.get_updates(offset)

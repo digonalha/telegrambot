@@ -70,6 +70,31 @@ def send_message(
         syslog.create_warning("send_message", ex)
 
 
+def edit_message(
+    chat_id: int,
+    message: str,
+    message_id: int,
+    parse_mode: str = "markdown",
+    reply_markup: str = None,
+):
+    try:
+        data = {
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "text": message,
+            "parse_mode": parse_mode,
+            "disable_web_page_preview": True,
+        }
+
+        if reply_markup:
+            data["reply_markup"] = reply_markup
+
+        res = requests.post(f"{API_URI}/editMessageText", data=data)
+        create_log_from_response("edit_message", res.json())
+    except Exception as ex:
+        syslog.create_warning("edit_message", ex)
+
+
 def send_animation(chat_id: int, file_id: str, reply_id: int = 0):
     try:
         data = {"chat_id": chat_id, "animation": file_id}

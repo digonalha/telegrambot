@@ -22,7 +22,7 @@ def run_api_listener() -> None:
                             response_service.resolve_message(request_obj)
                         elif "callback_query" in update:
                             request_obj = update["callback_query"]
-                            response_service.resolve_message(request_obj)
+                            response_service.resolve_callback(request_obj)
                     except Exception:
                         continue
         finally:

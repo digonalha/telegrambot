@@ -1,3 +1,4 @@
+import abc
 from src.repositories.models.custom_command_model import MediaType
 from src.helpers.logging_helper import SystemLogging
 from src.configs import settings
@@ -8,6 +9,7 @@ from src.services import (
     custom_command_service,
     message_service,
     keyword_service,
+    tracked_sale_service,
 )
 
 
@@ -88,6 +90,25 @@ def send_private_help_message(chat_id: int, name: str) -> None:
     )
 
     message_service.send_message(chat_id, help_message, parse_mode="markdown")
+
+
+def resolve_callback(callback_query) -> None:
+    try:
+        from_user_id = callback_query["from"]["id"]
+        message_id = callback_query["message"]["message_id"]
+
+        keyword_to_search = {"keyword": "", "max_price": ""}
+
+        callback_data = callback_query["data"]
+
+        tracked_sale_service.check_last_tracked_sales(
+            from_user_id,
+            keyword_to_search,
+            callback_data=callback_data,
+            message_id=message_id,
+        )
+    except Exception as ex:
+        syslog.create_warning("resolve_callback", ex, from_user_id, callback_data)
 
 
 def resolve_message(message) -> None:
@@ -208,4 +229,4 @@ def resolve_message(message) -> None:
                 keyword_service.remove_keyword(chat_id, text)
 
     except Exception as ex:
-        syslog.create_warning("resolve_action", ex, chat_id, text)
+        syslog.create_warning("resolve_message", ex, chat_id, text)
