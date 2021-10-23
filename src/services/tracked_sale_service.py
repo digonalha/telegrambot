@@ -156,7 +156,7 @@ def check_last_tracked_sales(
 
         reply_markup = None
 
-        if total_pages > 0:
+        if total_pages > 1:
             str_page = str(page)
             str_total_page = str(total_pages)
 
