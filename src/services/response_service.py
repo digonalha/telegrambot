@@ -106,6 +106,7 @@ def resolve_callback(callback_query) -> None:
             keyword_to_search,
             callback_data=callback_data,
             message_id=message_id,
+            callback_id=callback_query["id"],
         )
     except Exception as ex:
         syslog.create_warning("resolve_callback", ex, from_user_id, callback_data)

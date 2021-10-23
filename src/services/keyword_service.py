@@ -28,7 +28,7 @@ def get_user_keywords(chat_id: int, user_id: int) -> list:
         message = f"Nenhuma palavra-chave encontrada. Você pode adicionar palavras-chave utilizando: \n\n`/addpromo palavra-chave | valor-máx`\n\n_parâmetro valor-máx opcional_"
 
         if keywords and len(keywords) > 0:
-            message = f"<b>🤖 Promobot 🤖</b>\n\nAqui está uma lista com suas palavras-chave monitoradas. Fique atento pois palavras-chave sem valor máximo serão sempre notificadas, independente do valor da promoção.\n\n"
+            message = f"<b>Promobot</b>\n\nAqui está uma lista com suas palavras-chave monitoradas. Fique atento pois palavras-chave sem valor máximo serão sempre notificadas, independente do valor da promoção.\n\n"
             message += "<u><b>[Valor máx] Palavra-chave</b></u>\n"
 
             str_max_keywords = f"/{settings.max_keywords}" if not user.is_admin else ""

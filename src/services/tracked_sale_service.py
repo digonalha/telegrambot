@@ -62,11 +62,18 @@ def get_last_day_sales_by_keyword(
 
 
 def create_header_last_tracked_sales(total_sales: int, keyword) -> str:
-    last_sales_message = "🚨 <b>Alerta Promobot</b> 🚨"
+    last_sales_message = "<b>Alerta Promobot</b>"
     last_sales_message += f'\n\nEncontrei {total_sales} {"promoções relacionadas" if total_sales > 1 else "promoção relacionada" } à palavra-chave <b>"{keyword}"</b> nas últimas 24 horas:\n'
-    last_sales_message += f"____________________\n"
+    last_sales_message += f"\n***\n"
 
     return last_sales_message
+
+
+def create_footer_last_tracked_sales(keyword: str, is_add_keyword: bool = False):
+    if is_add_keyword:
+        return f"\n<i>DPara remover essa palavra-chave do monitor e deixar de ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/delpromo {keyword}</code>"
+    else:
+        return f"\n<i>Para adicionar essa palavra-chave e ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/addpromo {keyword}</code>"
 
 
 def check_last_tracked_sales(
@@ -75,6 +82,7 @@ def check_last_tracked_sales(
     is_add_keyword: bool = False,
     callback_data: str = None,
     message_id: int = None,
+    callback_id: str = None,
 ) -> bool:
     try:
         str_keyword = keyword["keyword"]
@@ -92,6 +100,8 @@ def check_last_tracked_sales(
                     page = page - 1 if page > 1 else 1
                 elif cbk_action == "next":
                     page = page + 1
+                else:
+                    return
 
                 str_keyword = cbk_keyword.strip()
                 str_max_price = (
@@ -123,6 +133,8 @@ def check_last_tracked_sales(
             total_last_day_sales, str_keyword
         )
 
+        index = 1
+
         for sale in last_sales:
             last_sales_message += f"\n<b>{sale['product_name']}</b>\n\n"
             last_sales_message += f"<b>Valor: {string_helper.get_old_new_price_str(sale['price'], sale['old_price'])}</b>\n"
@@ -132,42 +144,48 @@ def check_last_tracked_sales(
             last_sales_message += (
                 f"<b><a href='{sale['aggregator_url']}'>Ir para a promoção</a></b>\n"
             )
-            last_sales_message += f"____________________\n"
+            if index < len(last_sales):
+                index += 1
+                last_sales_message += f"--------------------"
+            else:
+                last_sales_message += f"\n***\n"
 
-        if is_add_keyword:
-            last_sales_message += f"\nDPara remover essa palavra-chave do monitor e deixar de ser notificado sempre que uma nova promoção aparecer, utilize o comando:\n\n<code>/delpromo {str_keyword}</code>\n\n<i>Clique no comando para copiá-lo</i>"
-        else:
-            last_sales_message += f"\nPara adicionar essa palavra-chave e ser notificado sempre que uma nova promoção aparecer, utilize o comando:\n\n<code>/addpromo {str_keyword}</code>\n\n<i>Clique no comando para copiá-lo</i>"
+        last_sales_message += create_footer_last_tracked_sales(
+            str_keyword, is_add_keyword
+        )
 
-        str_page = str(page)
-        str_total_page = str(total_pages)
+        reply_markup = None
 
-        data_left = f"preview|{str_page}|{str_keyword}|{str_max_price}"
-        data_middle = f"refresh|{str_page}|{str_keyword}|{str_max_price}"
-        data_right = f"next|{str_page}|{str_keyword}|{str_max_price}"
-        reply_markup = (
-            '{"inline_keyboard": [[{"text": "'
-            + ("← Ant." if page > 1 else "")
-            + '", "callback_data": "'
-            + data_left
-            + '"},'
-        )
-        reply_markup += (
-            '{"text": "Pág. '
-            + str_page
-            + "/"
-            + str_total_page
-            + '", "callback_data": "'
-            + data_middle
-            + '"}'
-        )
-        reply_markup += (
-            ',{"text": "'
-            + ("Próx. →" if page < total_pages else "")
-            + '", "callback_data": "'
-            + data_right
-            + '"}]]}'
-        )
+        if total_pages > 0:
+            str_page = str(page)
+            str_total_page = str(total_pages)
+
+            data_left = f"preview|{str_page}|{str_keyword}|{str_max_price}"
+            data_middle = f"refresh|{str_page}|{str_keyword}|{str_max_price}"
+            data_right = f"next|{str_page}|{str_keyword}|{str_max_price}"
+            reply_markup = (
+                '{"inline_keyboard": [[{"text": "'
+                + ("← Ant." if page > 1 else "")
+                + '", "callback_data": "'
+                + data_left
+                + '"},'
+            )
+            reply_markup += (
+                '{"text": "Pág. '
+                + str_page
+                + "/"
+                + str_total_page
+                + '", "callback_data": "'
+                + data_middle
+                + '"}'
+            )
+            reply_markup += (
+                ',{"text": "'
+                + ("Próx. →" if page < total_pages else "")
+                + '", "callback_data": "'
+                + data_right
+                + '"}]]}'
+            )
 
         if not callback_data:
             message_service.send_message(
@@ -188,6 +206,9 @@ def check_last_tracked_sales(
     except Exception as ex:
         str_keyword_dict = json.dumps(keyword)
         syslog.create_warning("check_last_tracked_sales", ex, user_id, str_keyword_dict)
+    finally:
+        if callback_id:
+            message_service.answer_callback_query(callback_id)
 
 
 def add_tracked_sale_if_not_exists(tracked_sale: dict) -> TrackedSale:

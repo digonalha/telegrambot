@@ -159,3 +159,13 @@ def send_image(
         create_log_from_response("send_photo", res.json())
     except Exception as ex:
         syslog.create_warning("send_photo", ex)
+
+
+def answer_callback_query(callback_query_id: str):
+    try:
+        data = {"callback_query_id": callback_query_id}
+
+        res = requests.post(f"{API_URI}/answerCallbackQuery", data=data)
+        create_log_from_response("answer_callback_query", res.json())
+    except Exception as ex:
+        syslog.create_warning("answer_callback_query", ex)
