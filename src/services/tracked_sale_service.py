@@ -118,7 +118,7 @@ def check_last_tracked_sales(
             return False
 
         take = 3
-        skip = 0 if page == 1 else page * take
+        skip = 0 if page <= 1 else (page - 1) * take
 
         total_pages = math.ceil(total_last_day_sales / take)
 
