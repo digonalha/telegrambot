@@ -147,13 +147,13 @@ def check_last_tracked_sales(
         data_right = f"next|{str_page}|{str_keyword}|{str_max_price}"
         reply_markup = (
             '{"inline_keyboard": [[{"text": "'
-            + ("< Ant." if page > 1 else "")
+            + ("← Ant." if page > 1 else "")
             + '", "callback_data": "'
             + data_left
             + '"},'
         )
         reply_markup += (
-            '{"text": "Pág: '
+            '{"text": "Pág. '
             + str_page
             + "/"
             + str_total_page
@@ -163,7 +163,7 @@ def check_last_tracked_sales(
         )
         reply_markup += (
             ',{"text": "'
-            + ("Próx. >" if page < total_pages else "")
+            + ("Próx. →" if page < total_pages else "")
             + '", "callback_data": "'
             + data_right
             + '"}]]}'
