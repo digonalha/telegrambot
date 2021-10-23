@@ -120,7 +120,7 @@ def check_last_tracked_sales(
         take = 3
         skip = 0 if page == 1 else page * take
 
-        total_pages = math.trunc(total_last_day_sales / take)
+        total_pages = math.ceil(total_last_day_sales / take)
 
         last_sales = get_last_day_sales_by_keyword(
             str_keyword, str_max_price, skip, take
