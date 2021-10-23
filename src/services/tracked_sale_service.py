@@ -64,7 +64,7 @@ def get_last_day_sales_by_keyword(
 def create_header_last_tracked_sales(total_sales: int, keyword) -> str:
     last_sales_message = "🚨 <b>Alerta Promobot</b> 🚨"
     last_sales_message += f'\n\nEncontrei {total_sales} {"promoções relacionadas" if total_sales > 1 else "promoção relacionada" } à palavra-chave <b>"{keyword}"</b> nas últimas 24 horas:\n'
-    last_sales_message += f"______________________\n"
+    last_sales_message += f"____________________\n"
 
     return last_sales_message
 
