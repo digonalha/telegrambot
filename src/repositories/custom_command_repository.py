@@ -1,7 +1,7 @@
 from sqlalchemy import func, text
-from src.schemas import custom_command_schema
-from src.repositories.database import database
-from src.repositories.models.custom_command_model import CustomCommand
+from schemas import custom_command_schema
+from repositories.database import database
+from repositories.models.custom_command_model import CustomCommand
 
 local_session = database.get()
 

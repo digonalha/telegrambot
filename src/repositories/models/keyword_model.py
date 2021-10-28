@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, String, DateTime, Integer
-from src.repositories.database.config import base
+from repositories.database.config import base
 
 
 class Keyword(base):

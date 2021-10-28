@@ -6,13 +6,13 @@ from datetime import datetime, date, timedelta
 from bs4 import BeautifulSoup
 from random import randint
 
-from src.services import (
+from services import (
     message_service,
     tracked_sale_service,
     keyword_service,
 )
-from src.api import promobit_api
-from src.helpers import string_helper
+from api import promobit_api
+from helpers import string_helper
 
 
 def get_promobit_sale_info(aggregator_url: str) -> str:

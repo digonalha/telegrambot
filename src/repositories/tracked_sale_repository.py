@@ -1,6 +1,6 @@
-from src.schemas import tracked_sale_schema
-from src.repositories.database import database
-from src.repositories.models.tracked_sale_model import TrackedSale
+from schemas import tracked_sale_schema
+from repositories.database import database
+from repositories.models.tracked_sale_model import TrackedSale
 from datetime import datetime, date, time, timedelta
 from sqlalchemy import text
 

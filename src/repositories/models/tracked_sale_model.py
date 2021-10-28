@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, String, DateTime, Numeric
-from src.repositories.database.config import base
+from repositories.database.config import base
 
 
 class TrackedSale(base):

@@ -1,6 +1,6 @@
 import requests
-from src.helpers.logging_helper import SystemLogging
-from src.configs import settings
+from helpers.logging_helper import SystemLogging
+from configs import settings
 
 syslog = SystemLogging(__name__)
 

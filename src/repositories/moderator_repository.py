@@ -1,6 +1,6 @@
-from src.schemas import moderator_schema
-from src.repositories.database import database
-from src.repositories.models.moderator_model import Moderator
+from schemas import moderator_schema
+from repositories.database import database
+from repositories.models.moderator_model import Moderator
 
 local_session = database.get()
 

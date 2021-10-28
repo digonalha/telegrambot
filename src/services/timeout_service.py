@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
-from src.services import user_service, message_service
-from src.helpers.logging_helper import SystemLogging
-from src.configs import settings
+from services import user_service, message_service
+from helpers.logging_helper import SystemLogging
+from configs import settings
 
 timeout_users = []
 syslog = SystemLogging(__name__)
