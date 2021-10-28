@@ -1,10 +1,10 @@
 from datetime import datetime
-from src.helpers.logging_helper import SystemLogging
-from src.repositories import keyword_repository
-from src.schemas import keyword_schema
-from src.services import message_service, user_service, tracked_sale_service
-from src.configs import settings
-from src.helpers import string_helper
+from helpers.logging_helper import SystemLogging
+from repositories import keyword_repository
+from schemas import keyword_schema
+from services import message_service, user_service, tracked_sale_service
+from configs import settings
+from helpers import string_helper
 
 keywords = []
 syslog = SystemLogging(__name__)

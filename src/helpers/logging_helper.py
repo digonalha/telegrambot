@@ -1,6 +1,6 @@
 import logging
 import traceback
-from src.helpers import log_channel_helper
+from helpers import log_channel_helper
 
 
 class SystemLogging:

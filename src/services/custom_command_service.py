@@ -1,11 +1,11 @@
 from datetime import datetime
-from src.repositories.models.custom_command_model import CustomCommand, MediaType
-from src.helpers.logging_helper import SystemLogging
-from src.helpers import string_helper
-from src.repositories import custom_command_repository
-from src.schemas import custom_command_schema
-from src.services import user_service, message_service
-from src.configs import settings
+from repositories.models.custom_command_model import CustomCommand, MediaType
+from helpers.logging_helper import SystemLogging
+from helpers import string_helper
+from repositories import custom_command_repository
+from schemas import custom_command_schema
+from services import user_service, message_service
+from configs import settings
 
 custom_commands = []
 syslog = SystemLogging(__name__)

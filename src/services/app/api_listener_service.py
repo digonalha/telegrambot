@@ -1,4 +1,4 @@
-from src.services import timeout_service, message_service, response_service
+from services import timeout_service, message_service, response_service
 
 
 def run_api_listener() -> None:

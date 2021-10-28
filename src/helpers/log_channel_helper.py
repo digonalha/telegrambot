@@ -1,4 +1,4 @@
-from src.configs import settings
+from configs import settings
 import requests
 
 

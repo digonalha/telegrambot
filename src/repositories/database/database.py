@@ -1,8 +1,8 @@
-from src.repositories.database.config import base, session_local, engine
+from repositories.database.config import base, session_local, engine
 
 # necessário importar os modelos para que quando o método create_tables() for chamado,
 # os modelos já estejam mapeados no metadata do declarative_base
-from src.repositories.models import (
+from repositories.models import (
     user_model,
     moderator_model,
     custom_command_model,

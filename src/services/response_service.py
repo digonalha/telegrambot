@@ -1,8 +1,8 @@
 import abc
-from src.repositories.models.custom_command_model import MediaType
-from src.helpers.logging_helper import SystemLogging
-from src.configs import settings
-from src.services import (
+from repositories.models.custom_command_model import MediaType
+from helpers.logging_helper import SystemLogging
+from configs import settings
+from services import (
     user_service,
     moderator_service,
     timeout_service,

@@ -1,9 +1,9 @@
 from datetime import datetime
-from src.helpers.logging_helper import SystemLogging
-from src.repositories import moderator_repository
-from src.schemas import moderator_schema
-from src.services import user_service, message_service
-from src.configs import settings
+from helpers.logging_helper import SystemLogging
+from repositories import moderator_repository
+from schemas import moderator_schema
+from services import user_service, message_service
+from configs import settings
 
 moderators = []
 syslog = SystemLogging(__name__)

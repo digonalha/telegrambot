@@ -1,9 +1,9 @@
 from datetime import datetime
-from src.repositories.models.user_model import User
-from src.helpers.logging_helper import SystemLogging
-from src.repositories import user_repository
-from src.schemas import user_schema
-from src.services import moderator_service, message_service
+from repositories.models.user_model import User
+from helpers.logging_helper import SystemLogging
+from repositories import user_repository
+from schemas import user_schema
+from services import moderator_service, message_service
 
 users = []
 syslog = SystemLogging(__name__)

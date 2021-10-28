@@ -1,6 +1,6 @@
 from datetime import datetime
-from src.api import telegram_api
-from src.helpers.logging_helper import SystemLogging
+from api import telegram_api
+from helpers.logging_helper import SystemLogging
 from random import randint
 
 syslog = SystemLogging(__name__)

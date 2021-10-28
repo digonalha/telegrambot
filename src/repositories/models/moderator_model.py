@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, DateTime
-from src.repositories.database.config import base
+from repositories.database.config import base
 
 
 class Moderator(base):
