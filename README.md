@@ -32,9 +32,9 @@ Com o tempo, adicionei uma funcionalidade para que ele monitore promoçoes e not
 /clearpromo: remove todas as palavras-chave da lista de monitoramento de promoções
 ```
 
-
-
-
+## Rodando com docker-compose:
+entrar na pasta raiz do repositório e executar: 
+docker-compose up --build -d
 
 Qualquer duvida, report de bugs, sugestões de melhorias pode entrar em contato comigo por issue. :)
 
