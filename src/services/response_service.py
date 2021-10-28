@@ -195,6 +195,10 @@ def resolve_message(message) -> None:
                 return
             elif len(text) >= 3:
                 custom_command = text.split(" ", 0)[0].split("/")[1].lower()
+
+                if (settings.bot_name and f"@{settings.bot_name}" in custom_command):
+                    custom_command = custom_command.split(f"@{settings.bot_name}")[0]
+                    
                 db_command = custom_command_service.get_command(custom_command, chat_id)
 
                 if db_command:
