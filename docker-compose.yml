@@ -2,23 +2,21 @@ version: "3.3"
 
 services:
   database:
-    container_name: postgres-arm32v7
+    container_name: postgres-db
     build: ./db
     env_file:
       - ./db/.env
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
     volumes:
-      - ./pg_data:/pg-data
+      - ./db/pg_data:/pg-data
     ports:
       - "5432:5432"
     restart: always
     user: 999:1001
   telegrambot:
-    container_name: telegram-bot
+    container_name: telegrambot-src
     build: ./src
     restart: always
+    environment:
+      - TERM=xterm
 volumes:
   pg_data:
