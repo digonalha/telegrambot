@@ -223,7 +223,7 @@ def resolve_message(message) -> None:
             if text.lower() == "/help" or text.lower() == "/start":
                 send_private_help_message(chat_id, message["from"]["first_name"])
             elif text.lower() == "/promo":
-                keyword_service.get_user_keywords(chat_id, from_user_id)
+                keyword_service.get_user_keywords(chat_id)
             elif text.lower().startswith("/lastpromo"):
                 keyword_service.get_last_sales_by_keyword(chat_id, text)
             elif text.lower().startswith("/clearpromo"):

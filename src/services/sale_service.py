@@ -2,7 +2,7 @@ from repositories.models.sale_model import Sale
 from helpers.logging_helper import SystemLogging
 from repositories import sale_repository
 from schemas import sale_schema
-from services import message_service
+from services import message_service, keyword_service
 from helpers import string_helper
 import json
 import math
@@ -88,25 +88,17 @@ def check_last_sales(
         page = 1
 
         if callback_data:
-            try:
-                cbk_action, cbk_page, cbk_keyword, cbk_max_price = callback_data.split(
-                    "|"
-                )
-                page = int(cbk_page)
-
-                if cbk_action == "preview":
-                    page = page - 1 if page > 1 else 1
-                elif cbk_action == "next":
-                    page = page + 1
-                else:
-                    return
-
-                str_keyword = cbk_keyword.strip()
-                str_max_price = (
-                    None if cbk_max_price == "None" else cbk_max_price.strip()
-                )
-            except:
+            cbk_action, cbk_page, cbk_keyword, cbk_max_price = callback_data.split("|")
+            page = int(cbk_page)
+            if cbk_action == "preview":
+                page = page - 1 if page > 1 else 1
+            elif cbk_action == "next":
+                page = page + 1
+            else:
                 return
+            str_keyword = cbk_keyword.strip()
+            str_max_price = None if cbk_max_price == "None" else cbk_max_price.strip()
+            is_add_keyword = keyword_service.get_keyword(user_id, str_keyword) != None
 
         total_last_day_sales = count_last_day_sales_by_keyword(
             str_keyword, str_max_price

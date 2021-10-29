@@ -1,6 +1,7 @@
 from datetime import datetime
 from helpers.logging_helper import SystemLogging
 from repositories import keyword_repository
+from repositories.models.keyword_model import Keyword
 from schemas import keyword_schema
 from services import message_service, user_service, sale_service
 from configs import settings
@@ -10,13 +11,17 @@ keywords = []
 syslog = SystemLogging(__name__)
 
 
+def get_keyword(user_id: int, keyword: str) -> Keyword:
+    return keyword_repository.get(user_id, keyword)
+
+
 def get_all_keywords() -> None:
     """Fill the global variable keyword with all keywords found in database."""
     global keywords
     keywords = keyword_repository.get_all()
 
 
-def get_user_keywords(chat_id: int, user_id: int) -> list:
+def get_user_keywords(user_id: int) -> list:
     try:
         keywords = keyword_repository.get_by_user_id(user_id)
 
