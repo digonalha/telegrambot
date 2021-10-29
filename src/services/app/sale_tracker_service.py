@@ -2,7 +2,7 @@ import requests
 import json
 import math
 from time import sleep
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from bs4 import BeautifulSoup
 from random import randint
 
@@ -43,9 +43,10 @@ def check_promobit_sales() -> bool:
     for psale in promobit_sales:
         sale_date = datetime.strptime(
             psale["offer_published"], "%Y-%m-%dT%H:%M:%S%z"
-        ).replace(tzinfo=None)
+        ).replace(tzinfo=timezone.utc)
 
-        greater_than_date = datetime.now() - timedelta(1)
+        greater_than_date = datetime.now() - timedelta(days=1)
+        greater_than_date = greater_than_date.replace(tzinfo=timezone.utc)
 
         if sale_date <= greater_than_date:
             return
@@ -156,7 +157,9 @@ def check_gatry_sales():
             "%d/%m/%Y %H:%M",
         )
 
-        if sale_date > datetime.now():
+        sale_date = sale_date.replace(tzinfo=timezone.utc)
+
+        if sale_date > datetime.now().replace(tzinfo=timezone.utc):
             sale_date = sale_date - timedelta(hours=1)
 
         sale = {
