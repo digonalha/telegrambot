@@ -69,7 +69,7 @@ def create_header_last_sales(total_sales: int, keyword) -> str:
 
 def create_footer_last_sales(keyword: str, is_add_keyword: bool = False):
     if is_add_keyword:
-        return f"\n<i>DPara remover essa palavra-chave do monitor e deixar de ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/delpromo {keyword}</code>"
+        return f"\n<i>Para remover essa palavra-chave do monitor e deixar de ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/delpromo {keyword}</code>"
     else:
         return f"\n<i>Para adicionar essa palavra-chave e ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/addpromo {keyword}</code>"
 
