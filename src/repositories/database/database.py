@@ -5,8 +5,8 @@ from repositories.database.config import base, session_local, engine
 from repositories.models import (
     user_model,
     moderator_model,
-    custom_command_model,
-    tracked_sale_model,
+    command_model,
+    sale_model,
     keyword_model,
 )
 

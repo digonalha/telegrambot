@@ -1,30 +1,30 @@
 import abc
-from repositories.models.custom_command_model import MediaType
+from repositories.models.command_model import MediaType
 from helpers.logging_helper import SystemLogging
 from configs import settings
 from services import (
     user_service,
     moderator_service,
     timeout_service,
-    custom_command_service,
+    command_service,
     message_service,
     keyword_service,
-    tracked_sale_service,
+    sale_service,
 )
 
 
 syslog = SystemLogging(__name__)
 
 
-def send_custom_commands_message(chat_id: int, name: str, message_id: int):
+def send_commands_message(chat_id: int, name: str, message_id: int):
     """Send a list of custom commands when asked on chat."""
-    custom_messages = ""
+    messages = ""
 
-    custom_command_service.custom_commands.sort(key=lambda x: x.command)
+    command_service.commands.sort(key=lambda x: x.command)
 
     total_commands = 0
 
-    for cc in custom_command_service.custom_commands:
+    for cc in command_service.commands:
         if cc.chat_id == chat_id:
             total_commands += 1
             description = "Nenhuma descrição encontrada"
@@ -32,9 +32,9 @@ def send_custom_commands_message(chat_id: int, name: str, message_id: int):
             if cc.description and len(cc.description) > 0:
                 description = cc.description
 
-            custom_messages += f"*/{cc.command}* - {description}\n"
+            messages += f"*/{cc.command}* - {description}\n"
 
-    if len(custom_messages) == 0:
+    if len(messages) == 0:
         message_service.send_message(
             chat_id,
             "Nenhum comando customizado encontrado para o grupo. Utilize o comando */addcmd* para cadastrar novos comandos",
@@ -44,7 +44,7 @@ def send_custom_commands_message(chat_id: int, name: str, message_id: int):
     help_message = (
         f"Olá, *{(name)}*!\n"
         "Aqui estão os comandos customizados disponíveis no grupo:\n\n"
-        f"{custom_messages}"
+        f"{messages}"
         f"\n*Total: {str(total_commands)}/{str(settings.max_commands)}*"
     )
 
@@ -101,7 +101,7 @@ def resolve_callback(callback_query) -> None:
 
         callback_data = callback_query["data"]
 
-        tracked_sale_service.check_last_tracked_sales(
+        sale_service.check_last_sales(
             from_user_id,
             keyword_to_search,
             callback_data=callback_data,
@@ -155,7 +155,7 @@ def resolve_message(message) -> None:
             elif text.lower() == "/cmd" or (
                 settings.bot_name and text.lower() == f"/cmd@{settings.bot_name}"
             ):
-                send_custom_commands_message(
+                send_commands_message(
                     chat_id, message["from"]["first_name"], message["message_id"]
                 )
                 return
@@ -185,21 +185,21 @@ def resolve_message(message) -> None:
                     file_id = message["animation"]["file_id"]
                     media_type = MediaType.ANIMATION
 
-                custom_command_service.insert_command(
+                command_service.insert_command(
                     chat_id, text, from_user_id, file_id, media_type
                 )
 
                 return
             elif text.lower().startswith("/delcmd"):
-                custom_command_service.remove_command(chat_id, text, from_user_id)
+                command_service.remove_command(chat_id, text, from_user_id)
                 return
             elif len(text) >= 3:
-                custom_command = text.split(" ", 0)[0].split("/")[1].lower()
+                command = text.split(" ", 0)[0].split("/")[1].lower()
 
-                if (settings.bot_name and f"@{settings.bot_name}" in custom_command):
-                    custom_command = custom_command.split(f"@{settings.bot_name}")[0]
-                    
-                db_command = custom_command_service.get_command(custom_command, chat_id)
+                if settings.bot_name and f"@{settings.bot_name}" in command:
+                    command = command.split(f"@{settings.bot_name}")[0]
+
+                db_command = command_service.get_command(command, chat_id)
 
                 if db_command:
                     if db_command.media_type == MediaType.AUDIO:

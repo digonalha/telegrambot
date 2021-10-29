@@ -7,8 +7,8 @@ from services.app import api_listener_service, sale_tracker_service
 from services import (
     user_service,
     moderator_service,
-    custom_command_service,
-    tracked_sale_service,
+    command_service,
+    sale_service,
     keyword_service,
 )
 
@@ -34,8 +34,8 @@ def load_prerequisites(attempts: int = 0):
         print("→ get all objects from tables... ", end="")
         user_service.get_all_users()
         moderator_service.get_all_moderators()
-        custom_command_service.get_all_commands()
-        tracked_sale_service.get_past_day_sales()
+        command_service.get_all_commands()
+        sale_service.get_last_day_sales()
         keyword_service.get_all_keywords()
         print("done!")
     except Exception as ex:

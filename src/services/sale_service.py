@@ -1,20 +1,20 @@
-from repositories.models.tracked_sale_model import TrackedSale
+from repositories.models.sale_model import Sale
 from helpers.logging_helper import SystemLogging
-from repositories import tracked_sale_repository
-from schemas import tracked_sale_schema
+from repositories import sale_repository
+from schemas import sale_schema
 from services import message_service
 from helpers import string_helper
 import json
 import math
 
-tracked_sales = []
+sales = []
 syslog = SystemLogging(__name__)
 
 
-def get_past_day_sales() -> None:
-    """Fill the global variable tracked_sales with last 24h tracked_sales found in database."""
-    global tracked_sales
-    tracked_sales = tracked_sale_repository.get_past_day_sales()
+def get_last_day_sales() -> None:
+    """Fill the global variable sales with last 24h sales found in database."""
+    global sales
+    sales = sale_repository.get_last_day_sales()
 
 
 def count_last_day_sales_by_keyword(keyword: str, max_price: float = None) -> list:
@@ -33,9 +33,7 @@ def count_last_day_sales_by_keyword(keyword: str, max_price: float = None) -> li
 
     keyword_to_search += "}"
 
-    return tracked_sale_repository.count_last_day_sales_by_keyword(
-        keyword_to_search, max_price
-    )
+    return sale_repository.count_last_day_sales_by_keyword(keyword_to_search, max_price)
 
 
 def get_last_day_sales_by_keyword(
@@ -56,12 +54,12 @@ def get_last_day_sales_by_keyword(
 
     keyword_to_search += "}"
 
-    return tracked_sale_repository.get_last_day_sales_by_keyword(
+    return sale_repository.get_last_day_sales_by_keyword(
         keyword_to_search, max_price, skip, take
     )
 
 
-def create_header_last_tracked_sales(total_sales: int, keyword) -> str:
+def create_header_last_sales(total_sales: int, keyword) -> str:
     last_sales_message = "<b>Alerta Promobot</b>"
     last_sales_message += f'\n\nEncontrei {total_sales} {"promoções relacionadas" if total_sales > 1 else "promoção relacionada" } à palavra-chave <b>"{keyword}"</b> nas últimas 24 horas:\n'
     last_sales_message += f"\n***\n"
@@ -69,14 +67,14 @@ def create_header_last_tracked_sales(total_sales: int, keyword) -> str:
     return last_sales_message
 
 
-def create_footer_last_tracked_sales(keyword: str, is_add_keyword: bool = False):
+def create_footer_last_sales(keyword: str, is_add_keyword: bool = False):
     if is_add_keyword:
         return f"\n<i>DPara remover essa palavra-chave do monitor e deixar de ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/delpromo {keyword}</code>"
     else:
         return f"\n<i>Para adicionar essa palavra-chave e ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/addpromo {keyword}</code>"
 
 
-def check_last_tracked_sales(
+def check_last_sales(
     user_id: int,
     keyword: dict,
     is_add_keyword: bool = False,
@@ -129,9 +127,7 @@ def check_last_tracked_sales(
         if not last_sales:
             return
 
-        last_sales_message = create_header_last_tracked_sales(
-            total_last_day_sales, str_keyword
-        )
+        last_sales_message = create_header_last_sales(total_last_day_sales, str_keyword)
 
         index = 1
 
@@ -150,9 +146,7 @@ def check_last_tracked_sales(
             else:
                 last_sales_message += f"\n***\n"
 
-        last_sales_message += create_footer_last_tracked_sales(
-            str_keyword, is_add_keyword
-        )
+        last_sales_message += create_footer_last_sales(str_keyword, is_add_keyword)
 
         reply_markup = None
 
@@ -205,31 +199,29 @@ def check_last_tracked_sales(
         return True
     except Exception as ex:
         str_keyword_dict = json.dumps(keyword)
-        syslog.create_warning("check_last_tracked_sales", ex, user_id, str_keyword_dict)
+        syslog.create_warning("check_last_sales", ex, user_id, str_keyword_dict)
     finally:
         if callback_id:
             message_service.answer_callback_query(callback_id)
 
 
-def add_tracked_sale_if_not_exists(tracked_sale: dict) -> TrackedSale:
-    """Create a new tracked_sale on database if not exists."""
+def add_sale_if_not_exists(sale: dict) -> Sale:
+    """Create a new sale on database if not exists."""
     try:
-        db_tracked_sale = None
+        db_sale = None
 
         if next(
-            (u for u in tracked_sales if u.sale_id == tracked_sale["sale_id"]),
+            (u for u in sales if u.sale_id == sale["sale_id"]),
             None,
         ):
             return
 
-        if not tracked_sale_repository.get_by_id(tracked_sale["sale_id"]):
-            db_tracked_sale = tracked_sale_repository.add(
-                tracked_sale_schema.TrackedSaleCreate(**tracked_sale)
-            )
+        if not sale_repository.get_by_id(sale["sale_id"]):
+            db_sale = sale_repository.add(sale_schema.SaleCreate(**sale))
 
-            if db_tracked_sale:
-                tracked_sales.append(db_tracked_sale)
+            if db_sale:
+                sales.append(db_sale)
 
-        return db_tracked_sale
+        return db_sale
     except Exception as ex:
-        syslog.create_warning("add_tracked_sale_if_not_exists", ex, 0, "")
+        syslog.create_warning("add_sale_if_not_exists", ex, 0, "")

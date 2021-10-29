@@ -2,10 +2,11 @@ from sqlalchemy import Column, BigInteger, String, DateTime, Numeric
 from repositories.database.config import base
 
 
-class TrackedSale(base):
-    __tablename__ = "tracked_sale"
+class Sale(base):
+    __tablename__ = "sale"
 
-    sale_id = Column(BigInteger, primary_key=True, autoincrement=False, index=True)
+    id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
+    sale_id = Column(BigInteger, nullable=False, index=True)
     product_name = Column(String, nullable=False)
     product_image_url = Column(String, nullable=True)
     old_price = Column(Numeric(10, 2), nullable=True)

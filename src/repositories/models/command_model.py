@@ -12,8 +12,8 @@ class MediaType(IntEnum):
     VIDEO = 4
 
 
-class CustomCommand(base):
-    __tablename__ = "custom_command"
+class Command(base):
+    __tablename__ = "command"
 
     command = Column(String, primary_key=True, index=True)
     text = Column(String, nullable=True)

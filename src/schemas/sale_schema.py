@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class TrackedSaleBase(BaseModel):
+class SaleBase(BaseModel):
     sale_id: int
     product_name: str
     product_image_url: str
@@ -13,11 +13,13 @@ class TrackedSaleBase(BaseModel):
     aggregator_url: str
 
 
-class TrackedSaleCreate(TrackedSaleBase):
+class SaleCreate(SaleBase):
     created_on: datetime
 
 
-class TrackedSale(TrackedSaleBase):
+class Sale(SaleBase):
+    id: int
+
     class Config:
         orm_mode = True
         validate_assignment = True

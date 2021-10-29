@@ -1,42 +1,38 @@
-from schemas import tracked_sale_schema
+from schemas import sale_schema
 from repositories.database import database
-from repositories.models.tracked_sale_model import TrackedSale
+from repositories.models.sale_model import Sale
 from datetime import datetime, date, time, timedelta
 from sqlalchemy import text
 
 local_session = database.get()
 
 
-def add(tracked_sale: tracked_sale_schema.TrackedSaleCreate):
-    new_tracked_sale = TrackedSale(**tracked_sale.dict())
+def add(sale: sale_schema.SaleCreate):
+    new_sale = Sale(**sale.dict())
 
-    local_session.add(new_tracked_sale)
+    local_session.add(new_sale)
     local_session.commit()
-    local_session.refresh(new_tracked_sale)
+    local_session.refresh(new_sale)
 
-    return new_tracked_sale
+    return new_sale
 
 
-def get_past_day_sales():
+def get_last_day_sales():
     greater_than_date = datetime.combine(date.today(), time()) - timedelta(
         1
     )  # date today - 1 day
-    return (
-        local_session.query(TrackedSale)
-        .filter(TrackedSale.sale_date >= greater_than_date)
-        .all()
-    )
+    return local_session.query(Sale).filter(Sale.sale_date >= greater_than_date).all()
 
 
 def get_by_id(id: int):
-    return local_session.query(TrackedSale).filter(TrackedSale.sale_id == id).first()
+    return local_session.query(Sale).filter(Sale.sale_id == id).first()
 
 
 def get_last_day_sales_by_keyword(
     arr_keyword: str, max_price: int = None, skip: int = 0, take: int = 3
 ) -> list():
     str_SQL = """SELECT ts.product_name, ts.product_image_url, ts.sale_url, ts.aggregator_url, ts.price, ts.old_price, ts.sale_date
-               FROM tracked_sale ts 
+               FROM sale ts 
                WHERE lower(ts.product_name) LIKE ALL (:arr_keyword) 
                AND ts.sale_date >= :greater_than_date 
                ORDER BY ts.sale_date DESC
@@ -66,7 +62,7 @@ def get_last_day_sales_by_keyword(
 
 def count_last_day_sales_by_keyword(arr_keyword: str, max_price: int = None) -> int:
     str_SQL = """SELECT COUNT(*) 
-                 FROM tracked_sale ts
+                 FROM sale ts
                  WHERE lower(ts.product_name) LIKE ALL (:arr_keyword) 
                  AND ts.sale_date >= :greater_than_date"""
 

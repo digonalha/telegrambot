@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 from datetime import datetime
-from repositories.models.custom_command_model import MediaType
+from repositories.models.command_model import MediaType
 
 
-class CustomCommandBase(BaseModel):
+class CommandBase(BaseModel):
     command: str
     description: str
     file_id: str = None
@@ -14,11 +14,11 @@ class CustomCommandBase(BaseModel):
     created_by_user_name: str
 
 
-class CustomCommandCreate(CustomCommandBase):
+class CommandCreate(CommandBase):
     created_on: datetime
     modified_on: datetime
 
 
-class CustomCommand(CustomCommandBase):
+class Command(CommandBase):
     class Config:
         orm_mode = True

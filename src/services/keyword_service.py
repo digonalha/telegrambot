@@ -2,7 +2,7 @@ from datetime import datetime
 from helpers.logging_helper import SystemLogging
 from repositories import keyword_repository
 from schemas import keyword_schema
-from services import message_service, user_service, tracked_sale_service
+from services import message_service, user_service, sale_service
 from configs import settings
 from helpers import string_helper
 
@@ -142,7 +142,7 @@ def insert_keyword(user_id: int, message_text: str):
                 f'A palavra-chave *"{keyword}"* agora está sendo monitorada.\n\n_Envie /promo para ver sua lista de palavras-chave_',
             )
 
-            tracked_sale_service.check_last_tracked_sales(
+            sale_service.check_last_sales(
                 send_by_user.user_id, new_keyword, is_add_keyword=True
             )
         else:
@@ -290,9 +290,7 @@ def get_last_sales_by_keyword(user_id: int, message_text: str):
             "max_price": None,
         }
 
-        any_sale_found = tracked_sale_service.check_last_tracked_sales(
-            user_id, keyword_to_search
-        )
+        any_sale_found = sale_service.check_last_sales(user_id, keyword_to_search)
 
         if not (any_sale_found):
             message_service.send_message(
