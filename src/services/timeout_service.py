@@ -22,14 +22,14 @@ def is_user_in_timeout(chat_id, user_id) -> bool:
 def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int) -> None:
     """Insert user in timeout chat list"""
     try:
-        command, parameters = message_text.split()
+        command, parameters = message_text.split(" ", 1)
 
         if command != "/mute" and command != f"/mute@{settings.bot_name}":
             return
 
         username, timer = parameters.split("|")
 
-        username = username.replace("@", "")
+        username = username.replace("@", "").strip()
         timer = int(timer)
 
         if timer < 30 or timer > 3600:

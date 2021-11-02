@@ -1,6 +1,6 @@
 */.env
 /.vscode
-/bot-venv
+/venv
 /info.log
 /ragequit-bot.py
 __pycache__
