@@ -184,6 +184,9 @@ def resolve_message(message) -> None:
                 elif "animation" in message:
                     file_id = message["animation"]["file_id"]
                     media_type = MediaType.ANIMATION
+                elif "video" in message:
+                    file_id = message["video"]["file_id"]
+                    media_type = MediaType.VIDEO
 
                 command_service.insert_command(
                     chat_id, text, from_user_id, file_id, media_type
@@ -216,6 +219,8 @@ def resolve_message(message) -> None:
                         )
                     elif db_command.media_type == MediaType.ANIMATION:
                         message_service.send_animation(chat_id, db_command.file_id)
+                    elif db_command.media_type == MediaType.VIDEO:
+                        message_service.send_video(chat_id, db_command.file_id)
                     else:
                         message_service.send_message(chat_id, db_command.text)
                 return
