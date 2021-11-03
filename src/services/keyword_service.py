@@ -223,6 +223,18 @@ def remove_keyword(user_id: int, message_text: str) -> None:
         )
 
 
+def remove_all_keywords_by_user_id(user_id: int) -> bool:
+    keyword_repository.delete_all_by_user_id(user_id)
+    keywords = keyword_repository.get_by_user_id(user_id)
+
+    all_removed = not keywords or len(keywords) == 0
+
+    if all_removed:
+        get_all_keywords()
+
+    return all_removed
+
+
 def remove_all_keywords(user_id: int, message_text: str) -> None:
     """Logic and validations to remove all keywords from database if exists."""
     try:
@@ -246,10 +258,9 @@ def remove_all_keywords(user_id: int, message_text: str) -> None:
             )
             return
 
-        keyword_repository.delete_all_by_user_id(user_id)
-        keywords = keyword_repository.get_by_user_id(user_id)
+        all_removed = remove_all_keywords_by_user_id(user_id)
 
-        if len(keywords) == 0:
+        if all_removed:
             message_service.send_message(
                 user_id,
                 f"Todas as palavras-chave foram removidas da lista de monitoramento",

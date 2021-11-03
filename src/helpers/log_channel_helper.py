@@ -10,8 +10,7 @@ def send_alert_log_channel(message: str):
             "parse_mode": "markdown",
         }
 
-        response = requests.post(
+        requests.post(
             f"https://api.telegram.org/bot{settings.api_token}/sendMessage",
             data=data,
         )
-        print(response)

@@ -52,11 +52,14 @@ def insert_timeout_user(chat_id: int, message_text: str, send_by_user_id: int) -
             )
             return
 
-        if len(timeout_users) > 0 and next((
-            tu
-            for tu in timeout_users
-            if tu["user_id"] == user.user_id and tu["chat_id"] == chat_id
-        ),None):
+        if len(timeout_users) > 0 and next(
+            (
+                tu
+                for tu in timeout_users
+                if tu["user_id"] == user.user_id and tu["chat_id"] == chat_id
+            ),
+            None,
+        ):
             message_service.send_message(chat_id, f"*@{username}* já está silenciado!")
         else:
             timeout_until = datetime.now() + timedelta(0, timer)

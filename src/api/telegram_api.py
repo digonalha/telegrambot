@@ -3,15 +3,25 @@ from ast import literal_eval
 from random import randint
 from helpers.logging_helper import SystemLogging
 from configs import settings
+from services.keyword_service import remove_all_keywords_by_user_id
 
 syslog = SystemLogging(__name__)
 
 API_URI = f"https://api.telegram.org/bot{settings.api_token}"
 
 
-def create_log_from_response(function_name, response):
+def create_log_from_response(function_name, response, chat_id: int = None):
     if response["ok"]:
         syslog.create_info(function_name, f"request has been sucessfully submitted!")
+        return True
+    if (
+        response["error_code"] == 403
+        and chat_id
+        and "description" in response
+        and "blocked by the user" in response["description"]
+    ):
+        # delete keywords from user
+        remove_all_keywords_by_user_id(chat_id)
         return True
 
     raise Exception(response["description"])
@@ -40,7 +50,7 @@ def delete_message(chat_id: int, message_id: int):
             {"chat_id": chat_id, "message_id": message_id},
         )
 
-        create_log_from_response("delete_message", res.json())
+        create_log_from_response("delete_message", res.json(), chat_id)
     except Exception as ex:
         syslog.create_warning("delete_message", ex)
 
@@ -65,7 +75,7 @@ def send_message(
         if reply_markup:
             data["reply_markup"] = reply_markup
         res = requests.post(f"{API_URI}/sendMessage", data=data)
-        create_log_from_response("send_message", res.json())
+        create_log_from_response("send_message", res.json(), chat_id)
     except Exception as ex:
         syslog.create_warning("send_message", ex)
 
@@ -90,7 +100,7 @@ def edit_message(
             data["reply_markup"] = reply_markup
 
         res = requests.post(f"{API_URI}/editMessageText", data=data)
-        create_log_from_response("edit_message", res.json())
+        create_log_from_response("edit_message", res.json(), chat_id)
     except Exception as ex:
         syslog.create_warning("edit_message", ex)
 
@@ -101,7 +111,7 @@ def send_animation(chat_id: int, file_id: str, reply_id: int = 0):
         if reply_id != None and reply_id > 0:
             data["reply_to_message_id"] = reply_id
         res = requests.post(f"{API_URI}/sendAnimation", data=data)
-        create_log_from_response("send_animation", res.json())
+        create_log_from_response("send_animation", res.json(), chat_id)
     except Exception as ex:
         syslog.create_warning("send_animation", ex)
 
@@ -112,7 +122,7 @@ def send_video(chat_id: int, video_url: str, reply_id: int = 0):
         if reply_id != None and reply_id > 0:
             data["reply_to_message_id"] = reply_id
         res = requests.post(f"{API_URI}/sendVideo", data=data)
-        create_log_from_response("send_video", res.json())
+        create_log_from_response("send_video", res.json(), chat_id)
     except Exception as ex:
         syslog.create_warning("send_video", ex)
 
@@ -127,7 +137,7 @@ def send_audio(chat_id: int, file_id: str, title: str, username: str):
         }
 
         res = requests.post(f"{API_URI}/sendAudio", data=data)
-        create_log_from_response("send_audio", res.json())
+        create_log_from_response("send_audio", res.json(), chat_id)
     except Exception as ex:
         syslog.create_warning("send_audio", ex)
 
@@ -156,7 +166,7 @@ def send_image(
             data["reply_markup"] = reply_markup
 
         res = requests.post(f"{API_URI}/sendPhoto", data=data)
-        create_log_from_response("send_photo", res.json())
+        create_log_from_response("send_photo", res.json(), chat_id)
     except Exception as ex:
         syslog.create_warning("send_photo", ex)
 
