@@ -1,6 +1,7 @@
 import abc
 from repositories.models.command_model import MediaType
 from helpers.logging_helper import SystemLogging
+from helpers import string_helper
 from configs import settings
 from services import (
     user_service,
@@ -141,6 +142,9 @@ def resolve_message(message) -> None:
 
         if not text.startswith("/"):
             return
+
+        # sanitize text:
+        text = string_helper.string_sanitize(text)
 
         is_group = message["chat"]["type"] == "group"
 

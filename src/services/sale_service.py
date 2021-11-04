@@ -83,8 +83,8 @@ def check_last_sales(
     callback_id: str = None,
 ) -> bool:
     try:
-        str_keyword = keyword["keyword"]
-        str_max_price = keyword["max_price"]
+        str_keyword = string_helper.string_sanitize(keyword["keyword"])
+        str_max_price = string_helper.string_sanitize(keyword["max_price"])
         page = 1
 
         if callback_data:
@@ -96,8 +96,12 @@ def check_last_sales(
                 page = page + 1
             else:
                 return
-            str_keyword = cbk_keyword.strip()
-            str_max_price = None if cbk_max_price == "None" else cbk_max_price.strip()
+            str_keyword = string_helper.string_sanitize(cbk_keyword).strip()
+            str_max_price = (
+                None
+                if cbk_max_price == "None"
+                else string_helper.string_sanitize(cbk_max_price).strip()
+            )
             is_add_keyword = keyword_service.get_keyword(user_id, str_keyword) != None
 
         total_last_day_sales = count_last_day_sales_by_keyword(

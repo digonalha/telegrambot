@@ -75,6 +75,12 @@ def html_sanitize(str_html: str) -> str:
 
     return html_sanitized
 
+def string_sanitize(text: str) -> str:
+    text = text.replace('"', "")
+    text = text.replace("'", "")
+
+    return text
+
 
 def get_old_new_price_str(new_price: float, old_price: float = None):
     old_price_str = ""
