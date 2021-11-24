@@ -11,6 +11,7 @@ class SaleBase(BaseModel):
     sale_url: str
     sale_date: datetime
     aggregator_url: str
+    store_name: str
 
 
 class SaleCreate(SaleBase):

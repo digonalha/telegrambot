@@ -5,6 +5,7 @@ from time import sleep
 from datetime import datetime, date, timedelta, timezone
 from bs4 import BeautifulSoup
 from random import randint
+from repositories.models.sale_model import Sale
 
 from services import (
     message_service,
@@ -13,6 +14,7 @@ from services import (
 )
 from api import promobit_api
 from helpers import string_helper
+from configs import settings
 
 
 def get_promobit_sale_info(aggregator_url: str) -> str:
@@ -32,6 +34,85 @@ def get_promobit_sale_info(aggregator_url: str) -> str:
         return ""
     except:
         return ""
+
+
+def send_user_message(sale: Sale) -> bool:
+    users_keyword_to_answer = []
+    lower_product_name = sale.product_name.lower()
+
+    for keyword in keyword_service.keywords:
+        lower_keywords = keyword.keyword.lower().split()
+        if all(k in lower_product_name for k in lower_keywords):
+            if keyword.max_price and keyword.max_price < math.trunc(sale.price):
+                continue
+            users_keyword_to_answer.append(keyword)
+
+    if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
+        return False
+
+    messages_to_send = []
+    for user_keyword in users_keyword_to_answer:
+        message_with_same_chat_id = next(
+            (m for m in messages_to_send if m["user_id"] == user_keyword.user_id),
+            None,
+        )
+        if not message_with_same_chat_id:
+            new_message = {
+                "user_id": user_keyword.user_id,
+                "text": (
+                    f"<b>{sale.product_name}</b>\n\n"
+                    f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
+                    f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>\n\n"
+                    f"{get_promobit_sale_info(sale.aggregator_url)}"
+                    f"<i>Vendido por {sale.store_name}</i>"
+                ),
+            }
+            messages_to_send.append(new_message)
+
+        reply_markup = (
+            '{"inline_keyboard": [[{"text":"Ir para promoção", "url": "'
+            + sale.sale_url
+            + '"}],[{"text":"Ver oferta no Promobit", "url": "'
+            + sale.aggregator_url
+            + '"}]]}'
+        )
+
+        for message in messages_to_send:
+            message_service.send_image(
+                message["user_id"],
+                sale.product_image_url,
+                message["text"],
+                reply_markup,
+                parse_mode="HTML",
+            )
+
+        return True
+
+
+def send_channel_message(sale: Sale) -> None:
+    new_message = (
+        f"<b>{sale.product_name}</b>\n\n"
+        f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
+        f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>\n\n"
+        f"{get_promobit_sale_info(sale.aggregator_url)}"
+        f"<i>Vendido por {sale.store_name}</i>"
+    )
+
+    reply_markup = (
+        '{"inline_keyboard": [[{"text":"Ir para promoção", "url": "'
+        + sale.sale_url
+        + '"}],[{"text":"Ver oferta no Promobit", "url": "'
+        + sale.aggregator_url
+        + '"}]]}'
+    )
+
+    message_service.send_image(
+        settings.promobot_channel,
+        sale.product_image_url,
+        new_message,
+        reply_markup,
+        parse_mode="HTML",
+    )
 
 
 def check_promobit_sales() -> bool:
@@ -61,6 +142,9 @@ def check_promobit_sales() -> bool:
             "aggregator_url": f"https://www.promobit.com.br/oferta/{psale['offer_slug']}",
             "sale_date": sale_date,
             "created_on": datetime.now(),
+            "store_name": psale["store_name"]
+            if psale["store_name"]
+            else psale["store_domain"],
         }
 
         db_sale = sale_service.add_sale_if_not_exists(sale)
@@ -68,59 +152,8 @@ def check_promobit_sales() -> bool:
         if not db_sale:
             return
 
-        users_keyword_to_answer = []
-        lower_product_name = psale["offer_title"].lower()
-
-        for keyword in keyword_service.keywords:
-            lower_keywords = keyword.keyword.lower().split()
-            if all(k in lower_product_name for k in lower_keywords):
-                if keyword.max_price and keyword.max_price < math.trunc(
-                    psale["offer_price"]
-                ):
-                    continue
-
-                users_keyword_to_answer.append(keyword)
-
-        if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
-            continue
-
-        messages_to_send = []
-        for user_keyword in users_keyword_to_answer:
-            message_with_same_chat_id = next(
-                (m for m in messages_to_send if m["user_id"] == user_keyword.user_id),
-                None,
-            )
-            if not message_with_same_chat_id:
-                new_message = {
-                    "user_id": user_keyword.user_id,
-                    "text": (
-                        f"<b>{db_sale.product_name}</b>\n\n"
-                        f"<b>Valor: {string_helper.get_old_new_price_str(db_sale.price, db_sale.old_price)}</b>\n"
-                        f"<b>Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}</b>\n\n"
-                        f"{get_promobit_sale_info(db_sale.aggregator_url)}"
-                        f"<i>Vendido por {psale['store_name'] if psale['store_name'] else psale['store_domain']}</i>"
-                    ),
-                }
-                messages_to_send.append(new_message)
-
-        reply_markup = (
-            '{"inline_keyboard": [[{"text":"Ir para promoção", "url": "'
-            + db_sale.sale_url
-            + '"}],[{"text":"Ver oferta no Promobit", "url": "'
-            + db_sale.aggregator_url
-            + '"}]]}'
-        )
-
-        for message in messages_to_send:
-            message_service.send_image(
-                message["user_id"],
-                db_sale.product_image_url,
-                message["text"],
-                reply_markup,
-                parse_mode="HTML",
-            )
-
-    return True
+        send_channel_message(db_sale)
+        send_user_message(db_sale)
 
 
 def check_gatry_sales():
@@ -139,8 +172,6 @@ def check_gatry_sales():
             continue
         name_tag = info.find("h3", itemprop="name").find("a")
         product_name = name_tag.text
-        users_keyword_to_answer = []
-        lower_product_name = product_name.lower()
 
         sale_price = None
 
@@ -177,57 +208,8 @@ def check_gatry_sales():
         if not db_sale:
             return
 
-        for keyword in keyword_service.keywords:
-            lower_keywords = keyword.keyword.lower().split()
-            if all(k in lower_product_name for k in lower_keywords):
-                if keyword.max_price and keyword.max_price < math.trunc(sale_price):
-                    continue
-                users_keyword_to_answer.append(keyword)
-
-        if not users_keyword_to_answer or len(users_keyword_to_answer) == 0:
-            continue
-
-        store_name = info.find(class_="link_loja").text
-
-        if store_name:
-            try:
-                store_name = store_name.split("Ir para ")[1]
-            except:
-                store_name = "Não informado"
-
-        messages_to_send = []
-        for user_keyword in users_keyword_to_answer:
-            message_with_same_chat_id = next(
-                (m for m in messages_to_send if m["user_id"] == user_keyword.user_id),
-                None,
-            )
-            if not message_with_same_chat_id:
-                new_message = {
-                    "user_id": user_keyword.user_id,
-                    "text": (
-                        f"*{db_sale.product_name}*\n\n"
-                        f"*Valor: {string_helper.get_old_new_price_str(db_sale.price)}*\n"
-                        f"*Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}*\n\n"
-                        f"_Vendido por {store_name}_"
-                    ),
-                }
-                messages_to_send.append(new_message)
-
-        reply_markup = (
-            '{"inline_keyboard": [[{"text":"Ir para promoção", "url": "'
-            + db_sale.sale_url
-            + '"}],[{"text":"Ver oferta no Gatry", "url": "'
-            + db_sale.aggregator_url
-            + '"}]]}'
-        )
-
-        for message in messages_to_send:
-            message_service.send_image(
-                message["user_id"],
-                db_sale.product_image_url,
-                message["text"],
-                reply_markup,
-            )
+        send_channel_message(db_sale)
+        send_user_message(db_sale)
 
 
 def run_sale_tracker() -> None:
@@ -245,8 +227,5 @@ def run_sale_tracker() -> None:
 
         check_gatry_sales()
         check_promobit_sales()
-
-        # if not request_success:
-        # sleep(randint(62, 124))
 
         sleep(randint(62, 126))

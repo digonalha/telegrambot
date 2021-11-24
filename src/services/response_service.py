@@ -67,13 +67,10 @@ def send_group_help_message(chat_id: int, name: str, message_id: int) -> None:
         "*/addcmd* `comando | resposta | descrição` - adiciona um novo comando (para mídias, enviar o comando na legenda) \*\*\n"
         "*/delcmd* `comando` - remove um comando customizado \*\n\n"
         "\* _necessário ser um administrador_\n"
-        "\*\* _necessário ser um administrador ou moderador_\n"
+        "\*\* _necessário ser um administrador ou moderador_\n\n"
+        "Eu também tenho um canal onde posto promoções. Acesse pelo link: https://t.me/promobotcanal"
+        f"\n\nPara monitorar promoções de um produto especifico, envie /help no privado para @{settings.bot_name}"
     )
-
-    if settings.bot_name:
-        help_message += f"\nPara monitorar promoções, enviar /help no privado para @{settings.bot_name}"
-    else:
-        help_message += "\nPara monitorar promoções, enviar /help no privado"
 
     message_service.send_message(chat_id, help_message, reply_id=message_id)
 
@@ -87,7 +84,8 @@ def send_private_help_message(chat_id: int, name: str) -> None:
         "*/lastpromo* `palavra-chave` - retorna as promoções das últimas 24 horas relacionadas à palavra-chave\n"
         "*/addpromo* `palavra-chave | valor-máx` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário\n"
         "*/delpromo* `palavra-chave` - remove a palavra-chave da lista de monitoramento de promoções do usuário\n"
-        "*/clearpromo* - remove todas as palavras-chave da lista de monitoramento de promoções\n"
+        "*/clearpromo* - remove todas as palavras-chave da lista de monitoramento de promoções\n\n"
+        "Eu também tenho um canal onde posto promoções. Acesse pelo link: https://t.me/promobotcanal"
     )
 
     message_service.send_message(chat_id, help_message, parse_mode="markdown")

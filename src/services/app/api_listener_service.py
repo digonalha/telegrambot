@@ -4,6 +4,7 @@ from services import timeout_service, message_service, response_service
 def run_api_listener() -> None:
     """Loop for make requests to telegram api."""
     updates = message_service.get_updates(0)
+
     offset = message_service.get_update_id_offset(updates)
 
     print("→ listening for updates...")
