@@ -27,7 +27,7 @@ Com o tempo, adicionei uma funcionalidade para que ele monitore promoçoes e not
 ```
 /help: lista os comandos disponíveis no chat privado
 /promo: lista as promoções cadastradas pelo usuário
-/addpromo <palavra-chave>: monitora e notifica promoções referentes a palavra-chave
+/addpromo <palavra-chave> | <opcional:valor-máx>: monitora e notifica promoções referentes a palavra-chave (caso não seja passado o valor máximo, todas as promoções são notificadas)
 /delpromo <palavra-chave>: remove a palavra-chave da lista de monitoramento de promoções
 /clearpromo: remove todas as palavras-chave da lista de monitoramento de promoções
 ```
