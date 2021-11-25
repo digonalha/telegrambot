@@ -118,6 +118,8 @@ def send_channel_message(sale: Sale, aggregator_name: str) -> None:
         parse_mode="HTML",
     )
 
+    sleep(1)
+
 
 def check_promobit_sales() -> bool:
     promobit_sales = promobit_api.get_last_sales(100)
