@@ -193,6 +193,14 @@ def check_gatry_sales():
         if sale_date > datetime.now().replace(tzinfo=timezone.utc):
             sale_date = sale_date - timedelta(hours=1)
 
+        store_name = info.find(class_="link_loja").text
+
+        if store_name:
+            try:
+                store_name = store_name.split("Ir para ")[1]
+            except:
+                store_name = "Não informado"
+
         sale = {
             "sale_id": sale_id,
             "product_name": product_name.strip(),
@@ -202,6 +210,7 @@ def check_gatry_sales():
             "aggregator_url": site_url + info.find(class_="mais")["href"],
             "sale_date": sale_date,
             "created_on": datetime.now(),
+            "store_name": store_name,
         }
         db_sale = sale_service.add_sale_if_not_exists(sale)
 
