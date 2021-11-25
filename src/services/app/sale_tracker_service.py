@@ -36,7 +36,7 @@ def get_promobit_sale_info(aggregator_url: str) -> str:
         return ""
 
 
-def send_user_message(sale: Sale) -> bool:
+def send_user_message(sale: Sale, aggregator_name: str) -> bool:
     users_keyword_to_answer = []
     lower_product_name = sale.product_name.lower()
 
@@ -72,7 +72,9 @@ def send_user_message(sale: Sale) -> bool:
         reply_markup = (
             '{"inline_keyboard": [[{"text":"Ir para promoção", "url": "'
             + sale.sale_url
-            + '"}],[{"text":"Ver oferta no Promobit", "url": "'
+            + '"}],[{"text":"Ver oferta no '
+            + aggregator_name
+            + '", "url": "'
             + sale.aggregator_url
             + '"}]]}'
         )
@@ -89,7 +91,7 @@ def send_user_message(sale: Sale) -> bool:
         return True
 
 
-def send_channel_message(sale: Sale) -> None:
+def send_channel_message(sale: Sale, aggregator_name: str) -> None:
     new_message = (
         f"<b>{sale.product_name}</b>\n\n"
         f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
@@ -101,7 +103,9 @@ def send_channel_message(sale: Sale) -> None:
     reply_markup = (
         '{"inline_keyboard": [[{"text":"Ir para promoção", "url": "'
         + sale.sale_url
-        + '"}],[{"text":"Ver oferta no Promobit", "url": "'
+        + '"}],[{"text":"Ver oferta no '
+        + aggregator_name
+        + '", "url": "'
         + sale.aggregator_url
         + '"}]]}'
     )
@@ -152,39 +156,49 @@ def check_promobit_sales() -> bool:
         if not db_sale:
             return
 
-        send_channel_message(db_sale)
-        send_user_message(db_sale)
+        send_channel_message(db_sale, aggregator_name="Promobit")
+        send_user_message(db_sale, aggregator_name="Promobit")
 
 
 def check_gatry_sales():
     site_url = "https://gatry.com"
     page = requests.get(site_url)
     parsed_page = BeautifulSoup(page.content, "html.parser")
-    promos = parsed_page.find_all(class_="promocao")
+    promos = parsed_page.find_all("article")
     for promo in promos:
-        info = promo.find(class_="informacoes")
-        imagem = promo.find(class_="imagem")
-        sale_id = int(promo.get("id").replace("promocao-", ""))
+        info = promo.find(class_="description")
+        imagem = promo.find(class_="image")
+
+        agg_url = info.find(class_="option-more").find("a")["href"]
+        sale_id = int(agg_url.split("/")[2])
+
         if next(
             (ts for ts in sale_service.sales if sale_id == ts.sale_id),
             None,
         ):
             continue
-        name_tag = info.find("h3", itemprop="name").find("a")
+
+        name_tag = info.find("h3").find("a")
         product_name = name_tag.text
 
         sale_price = None
 
         try:
-            sale_price = info.find("span", itemprop="price").text
+            sale_price = info.find(class_="price").text
             sale_price = sale_price.replace(".", "")
             sale_price = sale_price.replace(",", ".")
+            sale_price = sale_price.replace("R$", "")
+            sale_price = sale_price.replace("&nbsp;", "")
+            sale_price = sale_price.replace(" ", "")
+            sale_price = sale_price.replace("\n\xa0", "")
             sale_price = float(sale_price)
         except:
             continue
 
+        date_str = str(info.find(class_="date")["title"].replace(" às ", " "))
+
         sale_date = datetime.strptime(
-            info.find(class_="data_postado")["title"].replace(" às ", " "),
+            date_str.strip(),
             "%d/%m/%Y %H:%M",
         )
 
@@ -193,7 +207,7 @@ def check_gatry_sales():
         if sale_date > datetime.now().replace(tzinfo=timezone.utc):
             sale_date = sale_date - timedelta(hours=1)
 
-        store_name = info.find(class_="link_loja").text
+        store_name = info.find(class_="option-store").text
 
         if store_name:
             try:
@@ -206,19 +220,20 @@ def check_gatry_sales():
             "product_name": product_name.strip(),
             "product_image_url": imagem.find("img")["src"],
             "price": sale_price,
-            "sale_url": info.find(class_="link_loja")["href"],
-            "aggregator_url": site_url + info.find(class_="mais")["href"],
+            "sale_url": info.find(class_="option-store").find("a")["href"],
+            "aggregator_url": site_url
+            + info.find(class_="option-more").find("a")["href"],
             "sale_date": sale_date,
             "created_on": datetime.now(),
-            "store_name": store_name,
+            "store_name": store_name.strip(),
         }
         db_sale = sale_service.add_sale_if_not_exists(sale)
 
         if not db_sale:
             return
 
-        send_channel_message(db_sale)
-        send_user_message(db_sale)
+        send_channel_message(db_sale, aggregator_name="Gatry")
+        send_user_message(db_sale, aggregator_name="Gatry")
 
 
 def run_sale_tracker() -> None:
