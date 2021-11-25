@@ -10,6 +10,11 @@ class KeywordBase(BaseModel):
 
 class KeywordCreate(KeywordBase):
     created_on: datetime
+    modified_on: datetime
+
+
+class KeywordUpdate(KeywordBase):
+    modified_on: datetime
 
 
 class Keyword(KeywordBase):

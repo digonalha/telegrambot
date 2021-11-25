@@ -9,3 +9,4 @@ class Keyword(base):
     keyword = Column(String, primary_key=True, nullable=False)
     max_price = Column(Integer, nullable=True)
     created_on = Column(DateTime, nullable=False)
+    modified_on = Column(DateTime, nullable=False)

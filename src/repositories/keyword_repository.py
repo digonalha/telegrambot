@@ -16,6 +16,26 @@ def add(keyword: keyword_schema.KeywordCreate):
     return new_keyword
 
 
+def update(keyword: keyword_schema.KeywordUpdate) -> Keyword:
+    db_keyword = (
+        local_session.query(Keyword)
+        .filter(
+            Keyword.user_id == keyword.user_id,
+            func.lower(Keyword.keyword) == keyword.keyword.lower(),
+        )
+        .first()
+    )
+
+    if not db_keyword:
+        return None
+
+    db_keyword.max_price = keyword.max_price
+    db_keyword.modified_on = keyword.modified_on
+
+    local_session.commit()
+    return db_keyword
+
+
 def delete(user_id: int, keyword: str):
     local_session.query(Keyword).filter(
         Keyword.user_id == user_id,

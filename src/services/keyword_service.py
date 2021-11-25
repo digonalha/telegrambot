@@ -134,11 +134,15 @@ def insert_keyword(user_id: int, message_text: str):
             message_service.send_message(send_by_user.user_id, message)
             return
 
+        date_now = datetime.now()
+        keyword = keyword.lower().strip()
+
         new_keyword = {
             "user_id": send_by_user.user_id,
-            "keyword": keyword.lower(),
+            "keyword": keyword,
             "max_price": max_price,
-            "created_on": datetime.now(),
+            "created_on": date_now,
+            "modified_on": date_now,
         }
 
         if add_keyword(new_keyword):
@@ -151,10 +155,30 @@ def insert_keyword(user_id: int, message_text: str):
                 send_by_user.user_id, new_keyword, is_add_keyword=True
             )
         else:
-            message_service.send_message(
-                send_by_user.user_id,
-                f'A palavra-chave *"{keyword}"* já está sendo monitorada',
-            )
+            db_keyword = get_keyword(new_keyword["user_id"], new_keyword["keyword"])
+
+            if db_keyword.max_price != new_keyword["max_price"]:
+                updated_keyword = update_keyword(new_keyword)
+
+                if updated_keyword:
+                    if new_keyword["max_price"] and new_keyword["max_price"] > 0:
+                        message_service.send_message(
+                            send_by_user.user_id,
+                            f'O valor máximo da palavra-chave *"{keyword}"* foi alterado para R${new_keyword["max_price"]}',
+                        )
+                    else:
+                        message_service.send_message(
+                            send_by_user.user_id,
+                            f'O valor máximo da palavra-chave *"{keyword}"* foi removido. Todas as promoções da palavra-chave serão notificadas',
+                        )
+
+                else:
+                    raise Exception("Cant update keyword")
+            else:
+                message_service.send_message(
+                    send_by_user.user_id,
+                    f'A palavra-chave *"{keyword}"* já está sendo monitorada',
+                )
     except ValueError as ve:
         message_service.send_message(
             user_id,
@@ -166,6 +190,28 @@ def insert_keyword(user_id: int, message_text: str):
             send_by_user.user_id,
             f'Não foi possível adicionar a palavra-chave *"{keyword}"*',
         )
+
+
+def update_keyword(keyword: dict) -> bool:
+    updated_keyword = keyword_repository.update(
+        keyword_schema.KeywordUpdate(
+            user_id=keyword["user_id"],
+            keyword=keyword["keyword"],
+            max_price=keyword["max_price"],
+            modified_on=datetime.now(),
+        )
+    )
+
+    if updated_keyword:
+        try:
+            keywords.remove(updated_keyword)
+            keywords.append(updated_keyword)
+
+            return True
+        except:
+            get_all_keywords()
+
+    return False
 
 
 def delete_keyword(user_id: int, keyword: str) -> bool:
@@ -199,6 +245,8 @@ def remove_keyword(user_id: int, message_text: str) -> None:
 
         if command != "/delpromo":
             return
+
+        keyword = keyword.lower().strip()
 
         if delete_keyword(user_id, keyword):
             message_service.send_message(
@@ -301,6 +349,8 @@ def get_last_sales_by_keyword(user_id: int, message_text: str):
                 "Palavra-chave não pode ter mais de 40 caracteres",
             )
             return
+
+        keyword = keyword.lower().strip()
         keyword_to_search = {
             "keyword": keyword.lower(),
             "max_price": None,
