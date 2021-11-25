@@ -61,13 +61,14 @@ def send_message(
     reply_id: int = 0,
     parse_mode: str = "markdown",
     reply_markup: str = None,
+    disable_web_page_preview: bool = True,
 ):
     try:
         data = {
             "chat_id": chat_id,
             "text": message,
             "parse_mode": parse_mode,
-            "disable_web_page_preview": True,
+            "disable_web_page_preview": disable_web_page_preview,
         }
 
         if reply_id != None and reply_id > 0:

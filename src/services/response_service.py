@@ -72,7 +72,9 @@ def send_group_help_message(chat_id: int, name: str, message_id: int) -> None:
         f"\n\nPara monitorar promoções de um produto especifico, envie /help no privado para @{settings.bot_name}"
     )
 
-    message_service.send_message(chat_id, help_message, reply_id=message_id)
+    message_service.send_message(
+        chat_id, help_message, reply_id=message_id, disable_web_page_preview=False
+    )
 
 
 def send_private_help_message(chat_id: int, name: str) -> None:
@@ -88,7 +90,9 @@ def send_private_help_message(chat_id: int, name: str) -> None:
         "Eu também tenho um canal onde posto promoções. Acesse pelo link: https://t.me/promobotcanal"
     )
 
-    message_service.send_message(chat_id, help_message, parse_mode="markdown")
+    message_service.send_message(
+        chat_id, help_message, disable_web_page_preview=False
+    )
 
 
 def resolve_callback(callback_query) -> None:

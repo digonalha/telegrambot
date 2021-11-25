@@ -40,6 +40,7 @@ def send_message(
     parse_mode: str = "markdown",
     reply_id: int = 0,
     reply_markup: str = None,
+    disable_web_page_preview: bool = True,
 ) -> None:
     """Send a request for send message to telegram api"""
     if "$random_number[" in message:
@@ -81,6 +82,7 @@ def send_message(
         reply_id=reply_id,
         parse_mode=parse_mode,
         reply_markup=reply_markup,
+        disable_web_page_preview=disable_web_page_preview,
     )
 
 
