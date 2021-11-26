@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class SaleBase(BaseModel):
-    sale_id: int
+    sale_id: int = None
     product_name: str
     product_image_url: str
     old_price: float = None

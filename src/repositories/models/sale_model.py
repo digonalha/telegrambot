@@ -6,7 +6,7 @@ class Sale(base):
     __tablename__ = "sale"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
-    sale_id = Column(BigInteger, nullable=False, index=True)
+    sale_id = Column(BigInteger, nullable=True)
     product_name = Column(String, nullable=False)
     store_name = Column(String, nullable=False)
     product_image_url = Column(String, nullable=True)
