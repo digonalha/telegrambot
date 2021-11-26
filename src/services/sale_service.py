@@ -222,3 +222,25 @@ def add_sale_if_not_exists(sale: dict) -> Sale:
         return db_sale
     except Exception as ex:
         syslog.create_warning("add_sale_if_not_exists", ex, 0, "")
+
+
+def add_sale_if_aggregator_url_not_exists(sale: dict) -> Sale:
+    """Create a new sale on database if not exists."""
+    try:
+        db_sale = None
+
+        if next(
+            (u for u in sales if u.aggregator_url == sale["aggregator_url"]),
+            None,
+        ):
+            return
+
+        if not sale_repository.get_by_aggregator_url(sale["aggregator_url"]):
+            db_sale = sale_repository.add(sale_schema.SaleCreate(**sale))
+
+            if db_sale:
+                sales.append(db_sale)
+
+        return db_sale
+    except Exception as ex:
+        syslog.create_warning("add_sale_if_not_exists", ex, 0, "")

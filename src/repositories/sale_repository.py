@@ -28,6 +28,12 @@ def get_by_id(id: int):
     return local_session.query(Sale).filter(Sale.sale_id == id).first()
 
 
+def get_by_aggregator_url(aggregator_url: str):
+    return (
+        local_session.query(Sale).filter(Sale.aggregator_url == aggregator_url).first()
+    )
+
+
 def get_last_day_sales_by_keyword(
     arr_keyword: str, max_price: int = None, skip: int = 0, take: int = 3
 ) -> list():

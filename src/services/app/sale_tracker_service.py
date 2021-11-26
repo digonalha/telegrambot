@@ -36,7 +36,9 @@ def get_promobit_sale_info(aggregator_url: str) -> str:
         return ""
 
 
-def send_user_message(sale: Sale, aggregator_name: str) -> bool:
+def send_user_message(
+    sale: Sale, aggregator_name: str, description: str = None
+) -> bool:
     users_keyword_to_answer = []
     lower_product_name = sale.product_name.lower()
 
@@ -51,6 +53,12 @@ def send_user_message(sale: Sale, aggregator_name: str) -> bool:
         return False
 
     messages_to_send = []
+
+    sale_description = description
+
+    if aggregator_name == "Promobit":
+        sale_description = get_promobit_sale_info(sale.aggregator_url)
+
     for user_keyword in users_keyword_to_answer:
         message_with_same_chat_id = next(
             (m for m in messages_to_send if m["user_id"] == user_keyword.user_id),
@@ -63,7 +71,7 @@ def send_user_message(sale: Sale, aggregator_name: str) -> bool:
                     f"<b>{sale.product_name}</b>\n\n"
                     f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
                     f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>\n\n"
-                    f"{get_promobit_sale_info(sale.aggregator_url)}"
+                    f"{('' if not sale_description else sale_description)}"
                     f"<i>Vendido por {sale.store_name}</i>"
                 ),
             }
@@ -91,12 +99,19 @@ def send_user_message(sale: Sale, aggregator_name: str) -> bool:
         return True
 
 
-def send_channel_message(sale: Sale, aggregator_name: str) -> None:
+def send_channel_message(
+    sale: Sale, aggregator_name: str, description: str = None
+) -> None:
+    sale_description = description
+
+    if aggregator_name == "Promobit":
+        sale_description = get_promobit_sale_info(sale.aggregator_url)
+
     new_message = (
         f"<b>{sale.product_name}</b>\n\n"
         f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
         f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>\n\n"
-        f"{get_promobit_sale_info(sale.aggregator_url)}"
+        f"{('' if not sale_description else sale_description)}"
         f"<i>Vendido por {sale.store_name}</i>"
     )
 
@@ -238,6 +253,78 @@ def check_gatry_sales():
         send_user_message(db_sale, aggregator_name="Gatry")
 
 
+def check_boletando_sales():
+    site_url = "https://boletando.com/"
+    page = requests.get(site_url)
+    parsed_page = BeautifulSoup(page.content, "html.parser")
+    promos = parsed_page.find_all(class_="col_item")
+    for promo in promos:
+        info = promo.find(class_="info_in_dealgrid")
+        imagem = info.find("figure").find("a").find("img")
+        product_description = info.find("h3").find("a")
+        agg_url = product_description["href"]
+
+        if next(
+            (ts for ts in sale_service.sales if agg_url == ts.aggregator_url),
+            None,
+        ):
+            continue
+
+        product_name = product_description.text
+        sale_price = None
+
+        try:
+            sale_price = info.find(class_="rh_regular_price").text
+            sale_price = sale_price.replace(".", "")
+            sale_price = sale_price.replace(",", ".")
+            sale_price = sale_price.replace("R$", "")
+            sale_price = sale_price.replace("&nbsp;", "")
+            sale_price = sale_price.replace(" ", "")
+            sale_price = sale_price.replace("\n\xa0", "")
+            sale_price = float(sale_price)
+        except:
+            continue
+
+        sale_date = datetime.now().replace(tzinfo=timezone.utc)
+        store_name = promo.find(class_="cat_link_meta").find("a").text
+
+        custom_notice = None
+        div_custom_notice = promo.find(class_="rh_custom_notice")
+
+        if div_custom_notice:
+            custom_notice = div_custom_notice.text
+
+        if not store_name:
+            store_name = "Não informado"
+
+        sale = {
+            "sale_id": None,
+            "product_name": product_name.strip(),
+            "product_image_url": imagem["data-src"],
+            "price": sale_price,
+            "sale_url": promo.find(class_="rh_button_wrapper").find("a")["href"],
+            "aggregator_url": agg_url,
+            "sale_date": sale_date,
+            "created_on": datetime.now(),
+            "store_name": store_name.strip(),
+        }
+
+        db_sale = sale_service.add_sale_if_aggregator_url_not_exists(sale)
+
+        if not db_sale:
+            return
+
+        if custom_notice:
+            custom_notice += " \n\n"
+
+        send_channel_message(
+            db_sale, aggregator_name="Boletando", description=custom_notice
+        )
+        send_user_message(
+            db_sale, aggregator_name="Boletando", description=custom_notice
+        )
+
+
 def run_sale_tracker() -> None:
     today = date.today()
 
@@ -253,5 +340,6 @@ def run_sale_tracker() -> None:
 
         check_gatry_sales()
         check_promobit_sales()
+        check_boletando_sales()
 
         sleep(randint(62, 126))
