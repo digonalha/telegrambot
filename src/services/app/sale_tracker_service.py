@@ -314,15 +314,14 @@ def check_boletando_sales():
         if not db_sale:
             return
 
+        more_info = None
         if custom_notice:
-            custom_notice += " \n\n"
+            more_info = f"<u>Informações adicionais</u>\n{custom_notice}\n\n"
 
         send_channel_message(
-            db_sale, aggregator_name="Boletando", description=custom_notice
+            db_sale, aggregator_name="Boletando", description=more_info
         )
-        send_user_message(
-            db_sale, aggregator_name="Boletando", description=custom_notice
-        )
+        send_user_message(db_sale, aggregator_name="Boletando", description=more_info)
 
 
 def run_sale_tracker() -> None:
