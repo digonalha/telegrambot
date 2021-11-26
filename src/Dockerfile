@@ -1,6 +1,7 @@
 FROM python:3.8-slim-buster
 ADD . /app
 WORKDIR /app
+ENV TZ="America/Sao_Paulo"
 RUN apt-get update && \
     yes | apt-get install --reinstall build-essential && \
     yes | apt-get install libpq-dev gcc  && \

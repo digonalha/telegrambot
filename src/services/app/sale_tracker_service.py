@@ -285,7 +285,7 @@ def check_boletando_sales():
         except:
             continue
 
-        sale_date = datetime.now().replace(tzinfo=timezone.utc)
+        sale_date = datetime.now()
         store_name = promo.find(class_="cat_link_meta").find("a").text
 
         custom_notice = None
