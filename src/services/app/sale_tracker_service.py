@@ -68,11 +68,11 @@ def send_user_message(
             new_message = {
                 "user_id": user_keyword.user_id,
                 "text": (
-                    f"<b>{sale.product_name}</b>\n\n"
+                    f"<b>{string_helper.html_sanitize(sale.product_name)}</b>\n\n"
                     f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
                     f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>\n\n"
-                    f"{('' if not sale_description else sale_description)}"
-                    f"<i>Vendido por {sale.store_name}</i>"
+                    f"{('' if not sale_description else string_helper.html_sanitize(sale_description))}"
+                    f"<i>Vendido por {string_helper.html_sanitize(sale.store_name)}</i>"
                 ),
             }
             messages_to_send.append(new_message)
@@ -108,11 +108,11 @@ def send_channel_message(
         sale_description = get_promobit_sale_info(sale.aggregator_url)
 
     new_message = (
-        f"<b>{sale.product_name}</b>\n\n"
+        f"<b>{string_helper.html_sanitize(sale.product_name)}</b>\n\n"
         f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
         f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>\n\n"
-        f"{('' if not sale_description else sale_description)}"
-        f"<i>Vendido por {sale.store_name}</i>"
+        f"{('' if not sale_description else string_helper.html_sanitize(sale_description))}"
+        f"<i>Vendido por {string_helper.html_sanitize(sale.store_name)}</i>"
     )
 
     reply_markup = (
@@ -153,10 +153,17 @@ def check_promobit_sales() -> bool:
         if sale_date <= greater_than_date:
             return
 
+        image_url = None
+
+        if "http" in psale["offer_photo"] or "www" in psale["offer_photo"]:
+            image_url = psale["offer_photo"]
+        else:
+            image_url = f"https://i.promobit.com.br/268{psale['offer_photo']}"
+
         sale = {
             "sale_id": psale["offer_id"],
             "product_name": psale["offer_title"].strip(),
-            "product_image_url": f"https://i.promobit.com.br/268{psale['offer_photo']}",
+            "product_image_url": image_url,
             "old_price": psale["offer_old_price"],
             "price": psale["offer_price"],
             "sale_url": f"https://www.promobit.com.br/Redirect/to/{psale['offer_id']}",
