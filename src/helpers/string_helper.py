@@ -64,16 +64,20 @@ def format_decimal(str_currency) -> str:
 
 def html_sanitize(str_html: str) -> str:
     html_sanitized = str_html.replace("<br>", "\n")
-
+    html_sanitized = str_html.replace("</br>", "\n")
     html_sanitized = html_sanitized.replace("<br >", "\n")
     html_sanitized = html_sanitized.replace("<br/>", "\n")
     html_sanitized = html_sanitized.replace("<br />", "\n")
     html_sanitized = html_sanitized.replace("&nbsp;", " ")
+    html_sanitized = html_sanitized.replace("&amp;", " ")
     html_sanitized = html_sanitized.replace("\n\n\n", "\n\n")
     html_sanitized = html_sanitized.replace("\n\n\n\n", "\n\n")
     html_sanitized = html_sanitized.replace("\n\n\n\n\n", "\n\n")
+    html_sanitized = str_html.replace("<b>", "\n")
+    html_sanitized = str_html.replace("</b>", "\n")
 
     return html_sanitized
+
 
 def string_sanitize(text: str) -> str:
     text = text.replace('"', "")
