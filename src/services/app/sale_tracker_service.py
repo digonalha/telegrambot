@@ -71,7 +71,7 @@ def send_user_message(
                     f"<b>{string_helper.html_sanitize(sale.product_name)}</b>\n\n"
                     f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
                     f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>\n\n"
-                    f"{('' if not sale_description else string_helper.html_sanitize(sale_description))}"
+                    f"{('' if not sale_description else sale_description)}"
                     f"<i>Vendido por {string_helper.html_sanitize(sale.store_name)}</i>"
                 ),
             }
@@ -111,7 +111,7 @@ def send_channel_message(
         f"<b>{string_helper.html_sanitize(sale.product_name)}</b>\n\n"
         f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
         f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>\n\n"
-        f"{('' if not sale_description else string_helper.html_sanitize(sale_description))}"
+        f"{('' if not sale_description else sale_description)}"
         f"<i>Vendido por {string_helper.html_sanitize(sale.store_name)}</i>"
     )
 
@@ -323,7 +323,7 @@ def check_boletando_sales():
 
         more_info = None
         if custom_notice:
-            more_info = f"<u>Informações adicionais</u>\n{custom_notice}\n\n"
+            more_info = f"<u>Informações adicionais</u>\n{string_helper.html_sanitize(custom_notice)}\n\n"
 
         send_channel_message(
             db_sale, aggregator_name="Boletando", description=more_info

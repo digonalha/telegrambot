@@ -1,4 +1,5 @@
 from random import randint
+import re
 
 
 def random_number_validation(text: str):
@@ -63,6 +64,8 @@ def format_decimal(str_currency) -> str:
 
 
 def html_sanitize(str_html: str) -> str:
+    REGEX_CLEANER = re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
+
     html_sanitized = str_html.replace("<br>", "\n")
 
     html_sanitized = html_sanitized.replace("</br>", "\n")
@@ -73,6 +76,7 @@ def html_sanitize(str_html: str) -> str:
     html_sanitized = html_sanitized.replace("\n\n\n", "\n\n")
     html_sanitized = html_sanitized.replace("\n\n\n\n", "\n\n")
     html_sanitized = html_sanitized.replace("\n\n\n\n\n", "\n\n")
+    html_sanitized = re.sub(REGEX_CLEANER, "", html_sanitized)
 
     return html_sanitized
 
