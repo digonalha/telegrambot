@@ -155,7 +155,7 @@ def check_promobit_sales() -> bool:
 
         image_url = None
 
-        if "http" in psale["offer_photo"] or "www" in psale["offer_photo"]:
+        if "http" in psale["offer_photo"]:
             image_url = psale["offer_photo"]
         else:
             image_url = f"https://i.promobit.com.br/268{psale['offer_photo']}"
