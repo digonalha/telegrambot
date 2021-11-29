@@ -66,8 +66,9 @@ def format_decimal(str_currency) -> str:
 def html_sanitize(str_html: str) -> str:
     REGEX_CLEANER = re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
 
-    html_sanitized = str_html.replace("<br>", "\n")
-
+    html_sanitized = str_html.replace("<br> ", "\n")
+    html_sanitized = html_sanitized.replace("<br>", "\n")
+    html_sanitized = html_sanitized.replace("</br> ", "\n")
     html_sanitized = html_sanitized.replace("</br>", "\n")
     html_sanitized = html_sanitized.replace("<br >", "\n")
     html_sanitized = html_sanitized.replace("<br/>", "\n")

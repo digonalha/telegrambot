@@ -167,7 +167,23 @@ def send_image(
             data["reply_markup"] = reply_markup
 
         res = requests.post(f"{API_URI}/sendPhoto", data=data)
-        create_log_from_response("send_photo", res.json(), chat_id)
+
+        res_json = res.json()
+
+        if (
+            res.status_code == 400
+            and caption
+            and (
+                "failed to get HTTP URL content" in res.description["description"]
+                or " wrong file identifier/HTTP URL specified"
+                in res.description["description"]
+            )
+        ):
+            data = {"chat_id": chat_id, "photo": file_id, "parse_mode": parse_mode}
+
+            send_message(chat_id, caption, reply_markup)
+        else:
+            create_log_from_response("send_photo", res_json, chat_id)
     except Exception as ex:
         syslog.create_warning("send_photo", ex)
 
