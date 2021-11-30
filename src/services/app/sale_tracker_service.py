@@ -217,7 +217,7 @@ def check_gatry_sales():
             sale_price = sale_price.replace("\n\xa0", "")
             sale_price = float(sale_price)
         except:
-            continue
+            sale_price = 0
 
         date_str = str(info.find(class_="date")["title"].replace(" às ", " "))
 
@@ -290,7 +290,7 @@ def check_boletando_sales():
             sale_price = sale_price.replace("\n\xa0", "")
             sale_price = float(sale_price)
         except:
-            continue
+            sale_price = 0
 
         sale_date = datetime.now()
         store_name = promo.find(class_="cat_link_meta").find("a").text
