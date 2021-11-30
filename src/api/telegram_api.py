@@ -171,7 +171,7 @@ def send_image(
         res_json = res.json()
 
         if res.status_code == 400 and caption:
-            send_message(chat_id, caption, reply_markup)
+            send_message(chat_id=chat_id, message=caption, reply_markup=reply_markup)
         else:
             create_log_from_response("send_photo", res_json, chat_id)
     except Exception as ex:
