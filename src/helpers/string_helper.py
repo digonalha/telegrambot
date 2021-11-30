@@ -74,9 +74,9 @@ def html_sanitize(str_html: str) -> str:
     html_sanitized = html_sanitized.replace("<br/>", "\n")
     html_sanitized = html_sanitized.replace("<br />", "\n")
     html_sanitized = html_sanitized.replace("&nbsp;", " ")
-    html_sanitized = html_sanitized.replace("\n\n\n", "\n\n")
-    html_sanitized = html_sanitized.replace("\n\n\n\n", "\n\n")
     html_sanitized = html_sanitized.replace("\n\n\n\n\n", "\n\n")
+    html_sanitized = html_sanitized.replace("\n\n\n\n", "\n\n")
+    html_sanitized = html_sanitized.replace("\n\n\n", "\n\n")
     html_sanitized = re.sub(REGEX_CLEANER, "", html_sanitized)
 
     return html_sanitized
