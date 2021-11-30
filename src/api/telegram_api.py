@@ -1,5 +1,5 @@
 import requests
-from ast import literal_eval
+from ast import literal_eval, parse
 from random import randint
 from helpers.logging_helper import SystemLogging
 from configs import settings
@@ -171,7 +171,14 @@ def send_image(
         res_json = res.json()
 
         if res.status_code == 400 and caption:
-            send_message(chat_id=chat_id, message=caption, reply_markup=reply_markup)
+            send_message(
+                chat_id=chat_id,
+                message=caption,
+                reply_id=reply_id,
+                reply_markup=reply_markup,
+                parse_mode=parse_mode,
+                disable_web_page_preview=False,
+            )
         else:
             create_log_from_response("send_photo", res_json, chat_id)
     except Exception as ex:
