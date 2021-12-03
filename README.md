@@ -1,6 +1,6 @@
 # telegrambot
 
-Criei esse bot para gerenciar alguns canais de telegram que sou administrador. Preferi não utilizar nenhum wrapper já conhecido da API (como o python-telegram-bot) e criar o meu próprio, mas por enquanto não tem tantos comandos.
+Criei esse bot para gerenciar alguns canais de telegram que sou administrador e monitorar promoções. Preferi não utilizar nenhum wrapper já conhecido da API (como o python-telegram-bot) e criar o meu próprio, mas por enquanto não tem tantos comandos.
 
 No momento o bot atende os seguintes comandos 
 
