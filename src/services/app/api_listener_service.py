@@ -1,4 +1,7 @@
+from helpers.logging_helper import SystemLogging
 from services import timeout_service, message_service, response_service
+
+syslog = SystemLogging(__name__)
 
 
 def run_api_listener() -> None:
@@ -24,7 +27,8 @@ def run_api_listener() -> None:
                         elif "callback_query" in update:
                             request_obj = update["callback_query"]
                             response_service.resolve_callback(request_obj)
-                    except Exception:
+                    except Exception as ex:
+                        syslog.create_warning("run_api_listener", ex)
                         continue
         finally:
             offset = message_service.get_update_id_offset(updates)

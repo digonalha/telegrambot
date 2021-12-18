@@ -5,6 +5,7 @@ from time import sleep
 from datetime import datetime, date, timedelta, timezone
 from bs4 import BeautifulSoup
 from random import randint
+from helpers.logging_helper import SystemLogging
 from repositories.models.sale_model import Sale
 
 from services import (
@@ -15,6 +16,8 @@ from services import (
 from api import promobit_api
 from helpers import string_helper
 from configs import settings
+
+syslog = SystemLogging(__name__)
 
 
 def get_promobit_sale_info(aggregator_url: str) -> str:
@@ -332,20 +335,24 @@ def check_boletando_sales():
 
 
 def run_sale_tracker() -> None:
-    today = date.today()
+    try:
+        today = date.today()
 
-    """Loop for sale's tracker sites web scraping."""
-    while True:
-        if len(keyword_service.keywords) == 0:
-            sleep(120)
-            continue
+        """Loop for sale's tracker sites web scraping."""
+        while True:
+            if len(keyword_service.keywords) == 0:
+                sleep(120)
+                continue
 
-        if today != date.today():
-            sale_service.get_last_day_sales()
-            today = date.today()
+            if today != date.today():
+                sale_service.get_last_day_sales()
+                today = date.today()
 
-        check_gatry_sales()
-        check_promobit_sales()
-        check_boletando_sales()
+            check_gatry_sales()
+            check_promobit_sales()
+            check_boletando_sales()
 
-        sleep(randint(62, 126))
+            sleep(randint(62, 126))
+
+    except Exception as ex:
+        syslog.create_warning("run_sale_tracker", ex)
