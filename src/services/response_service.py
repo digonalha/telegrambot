@@ -161,7 +161,7 @@ def resolve_message(message) -> None:
             ):
                 send_commands_message(
                     chat_id, message["from"]["first_name"], message["message_id"]
-                )
+                )le
                 return
             elif text.lower().startswith("/mod"):
                 moderator_service.insert_moderator(chat_id, text, from_user_id)
@@ -183,11 +183,11 @@ def resolve_message(message) -> None:
                     file_id = message["audio"]["file_id"]
                     media_type = MediaType.AUDIO
                 elif "photo" in message:
-                    if message["photo"][2]:
+                    if len(message["photo"]) == 3:
                         file_id = message["photo"][2]["file_id"]
-                    if message["photo"][1]:
+                    elif len(message["photo"]) == 2:
                         file_id = message["photo"][1]["file_id"]
-                    if message["photo"][0]:
+                    else:
                         file_id = message["photo"][0]["file_id"]
                     media_type = MediaType.IMAGE
                 elif "animation" in message:
