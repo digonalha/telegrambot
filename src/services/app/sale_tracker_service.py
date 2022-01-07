@@ -335,11 +335,11 @@ def check_boletando_sales():
 
 
 def run_sale_tracker() -> None:
-    try:
-        today = date.today()
+    today = date.today()
 
-        """Loop for sale's tracker sites web scraping."""
-        while True:
+    """Loop for sale's tracker sites web scraping."""
+    while True:
+        try:
             if len(keyword_service.keywords) == 0:
                 sleep(120)
                 continue
@@ -354,5 +354,6 @@ def run_sale_tracker() -> None:
 
             sleep(randint(62, 126))
 
-    except Exception as ex:
-        syslog.create_warning("run_sale_tracker", ex)
+        except Exception as ex:
+            syslog.create_warning("run_sale_tracker", ex)
+            continue
