@@ -161,7 +161,7 @@ def resolve_message(message) -> None:
             ):
                 send_commands_message(
                     chat_id, message["from"]["first_name"], message["message_id"]
-                )le
+                )
                 return
             elif text.lower().startswith("/mod"):
                 moderator_service.insert_moderator(chat_id, text, from_user_id)
