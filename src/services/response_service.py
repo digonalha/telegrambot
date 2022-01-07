@@ -183,7 +183,12 @@ def resolve_message(message) -> None:
                     file_id = message["audio"]["file_id"]
                     media_type = MediaType.AUDIO
                 elif "photo" in message:
-                    file_id = message["photo"][2]["file_id"]
+                    if message["photo"][2]:
+                        file_id = message["photo"][2]["file_id"]
+                    if message["photo"][1]:
+                        file_id = message["photo"][1]["file_id"]
+                    if message["photo"][0]:
+                        file_id = message["photo"][0]["file_id"]
                     media_type = MediaType.IMAGE
                 elif "animation" in message:
                     file_id = message["animation"]["file_id"]
