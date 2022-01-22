@@ -32,7 +32,7 @@ def get_promobit_sale_info(aggregator_url: str) -> str:
         more_info = string_helper.html_sanitize(more_info)
 
         if more_info:
-            return f"<u>Informações adicionais</u>\n{more_info}\n\n"
+            return f"<u>Informações adicionais</u>\n{more_info}"
 
         return ""
     except:
@@ -46,8 +46,9 @@ def send_user_message(
     lower_product_name = sale.product_name.lower()
 
     for keyword in keyword_service.keywords:
-        lower_keywords = keyword.keyword.lower().split()
-        if all(k in lower_product_name for k in lower_keywords):
+        lower_keyword = keyword.keyword.lower()
+        split_keyword = lower_keyword.split()
+        if all(k in lower_product_name for k in split_keyword):
             if keyword.max_price and keyword.max_price < math.trunc(sale.price):
                 continue
             users_keyword_to_answer.append(keyword)
@@ -62,39 +63,59 @@ def send_user_message(
     if aggregator_name == "Promobit":
         sale_description = get_promobit_sale_info(sale.aggregator_url)
 
+    if sale_description:
+        sale_description = '\n\n' + sale_description
+
     for user_keyword in users_keyword_to_answer:
         message_with_same_chat_id = next(
             (m for m in messages_to_send if m["user_id"] == user_keyword.user_id),
             None,
         )
+
         if not message_with_same_chat_id:
             new_message = {
                 "user_id": user_keyword.user_id,
+                "keywords": user_keyword.keyword,
                 "text": (
                     f"<b>{string_helper.html_sanitize(sale.product_name)}</b>\n\n"
                     f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
-                    f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>\n\n"
+                    f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>"
                     f"{('' if not sale_description else sale_description)}"
-                    f"<i>Vendido por {string_helper.html_sanitize(sale.store_name)}</i>"
                 ),
             }
             messages_to_send.append(new_message)
-
-        reply_markup = (
-            '{"inline_keyboard": [[{"text":"Ir para promoção", "url": "'
-            + sale.sale_url
-            + '"}],[{"text":"Ver oferta no '
-            + aggregator_name
-            + '", "url": "'
-            + sale.aggregator_url
-            + '"}]]}'
-        )
+        elif message_with_same_chat_id["keywords"] != user_keyword.keyword:
+            for msg in messages_to_send:
+                if msg["user_id"] == message_with_same_chat_id["user_id"]:
+                    msg["keywords"] = msg["keywords"] + ";" + user_keyword.keywords
 
         for message in messages_to_send:
+            reply_markup = (
+                '{"inline_keyboard": [[{"text":"Ir para promoção ('
+                + string_helper.html_sanitize(sale.store_name)
+                + ')", "url": "'
+                + sale.sale_url
+                + '"}],[{"text":"Ver no '
+                + aggregator_name
+                + '", "url": "'
+                + sale.aggregator_url
+                + '"},'
+                + '{"text": "Parar de monitorar", "callback_data": '
+                + '"delkeywords|'
+                + message["keywords"]
+                + '"}]]}'
+            )
+
+            text = (
+                message["text"]
+                + "\n\nPalavra-chave: <i>"
+                + message["keywords"].replace(":", ", ") + "</i>"
+            )
+
             message_service.send_image(
                 message["user_id"],
                 sale.product_image_url,
-                message["text"],
+                text,
                 reply_markup,
                 parse_mode="HTML",
             )
@@ -110,16 +131,20 @@ def send_channel_message(
     if aggregator_name == "Promobit":
         sale_description = get_promobit_sale_info(sale.aggregator_url)
 
+    if sale_description:
+        sale_description = '\n\n' + sale_description
+
     new_message = (
         f"<b>{string_helper.html_sanitize(sale.product_name)}</b>\n\n"
         f"<b>Valor: {string_helper.get_old_new_price_str(sale.price, sale.old_price)}</b>\n"
-        f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>\n\n"
+        f"<b>Data: {sale.sale_date.strftime('%d/%m - %H:%M')}</b>"
         f"{('' if not sale_description else sale_description)}"
-        f"<i>Vendido por {string_helper.html_sanitize(sale.store_name)}</i>"
     )
 
     reply_markup = (
-        '{"inline_keyboard": [[{"text":"Ir para promoção", "url": "'
+        '{"inline_keyboard": [[{"text":"Ir para promoção ('
+        + string_helper.html_sanitize(sale.store_name)
+        + ')", "url": "'
         + sale.sale_url
         + '"}],[{"text":"Ver oferta no '
         + aggregator_name

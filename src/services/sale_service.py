@@ -80,7 +80,6 @@ def check_last_sales(
     is_add_keyword: bool = False,
     callback_data: str = None,
     message_id: int = None,
-    callback_id: str = None,
 ) -> bool:
     try:
         str_keyword = keyword["keyword"]
@@ -197,9 +196,6 @@ def check_last_sales(
     except Exception as ex:
         str_keyword_dict = json.dumps(keyword)
         syslog.create_warning("check_last_sales", ex, user_id, str_keyword_dict)
-    finally:
-        if callback_id:
-            message_service.answer_callback_query(callback_id)
 
 
 def add_sale_if_not_exists(sale: dict) -> Sale:

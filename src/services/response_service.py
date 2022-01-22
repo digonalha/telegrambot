@@ -97,20 +97,38 @@ def resolve_callback(callback_query) -> None:
     try:
         from_user_id = callback_query["from"]["id"]
         message_id = callback_query["message"]["message_id"]
-
-        keyword_to_search = {"keyword": "", "max_price": ""}
-
         callback_data = callback_query["data"]
 
-        sale_service.check_last_sales(
-            from_user_id,
-            keyword_to_search,
-            callback_data=callback_data,
-            message_id=message_id,
-            callback_id=callback_query["id"],
-        )
+        if callback_data.startswith("delkeywords|") or callback_data.startswith(
+            "addkeywords|"
+        ):
+            split_message = callback_data.split("|")
+
+            if split_message[0] == "delkeywords":
+                keyword_service.delete_by_callback(
+                    from_user_id,
+                    split_message[1],
+                    message_id,
+                    callback_query["message"]["reply_markup"]["inline_keyboard"],
+                )
+
+        elif (
+            callback_data.startswith("preview|")
+            or callback_data.startswith("refresh|")
+            or callback_data.startswith("next|")
+        ):
+            sale_service.check_last_sales(
+                from_user_id,
+                {"keyword": "", "max_price": ""},
+                callback_data=callback_data,
+                message_id=message_id,
+            )
+        else:
+            raise Exception("cant resolve callback data")
     except Exception as ex:
         syslog.create_warning("resolve_callback", ex, from_user_id, callback_data)
+    finally:
+        message_service.answer_callback_query(callback_query["id"])
 
 
 def resolve_message(message) -> None:

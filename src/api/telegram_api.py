@@ -106,6 +106,28 @@ def edit_message(
         syslog.create_warning("edit_message", ex)
 
 
+def edit_message_reply_markup(
+    chat_id: int,
+    message_id: int,
+    reply_markup: str,
+):
+    try:
+        data = {
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "reply_markup": reply_markup,
+        }
+
+        res = requests.post(f"{API_URI}/editMessageReplyMarkup", data=data)
+        create_log_from_response(
+            "edit_message_reply_markup",
+            res.json(),
+            f"chat_id: {chat_id} | message_id {message_id}",
+        )
+    except Exception as ex:
+        syslog.create_warning("edit_message_reply_markup", ex)
+
+
 def send_animation(chat_id: int, file_id: str, reply_id: int = 0):
     try:
         data = {"chat_id": chat_id, "animation": file_id}

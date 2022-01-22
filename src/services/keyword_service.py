@@ -6,6 +6,7 @@ from schemas import keyword_schema
 from services import message_service, user_service, sale_service
 from configs import settings
 from helpers import string_helper
+import json
 
 keywords = []
 syslog = SystemLogging(__name__)
@@ -374,3 +375,27 @@ def get_last_sales_by_keyword(user_id: int, message_text: str):
             user_id,
             f'Ocorreu um erro ao buscar promoções que contenham a palavra-chave *"{keyword}"*',
         )
+
+
+def delete_by_callback(
+    user_id: int, keywords_string: str, message_id: str, inline_keyboard
+) -> None:
+    try:
+        arr_keywords = keywords_string.split(";")
+
+        for kw in arr_keywords:
+            delete_keyword(user_id, kw)        
+
+        ikb_str = (
+            '{ "inline_keyboard": [['
+            + json.dumps(inline_keyboard[0][0])
+            + "],["
+            + json.dumps(inline_keyboard[1][0])
+            + "]]}"
+        )
+
+        message_service.edit_reply_markup(user_id, message_id, ikb_str)
+    except Exception as ex:
+        syslog.create_warning("delete_by_callback", ex, user_id)
+    finally:
+        get_all_keywords()
