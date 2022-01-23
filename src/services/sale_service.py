@@ -60,18 +60,16 @@ def get_last_day_sales_by_keyword(
 
 
 def create_header_last_sales(total_sales: int, keyword) -> str:
-    last_sales_message = "<b>Alerta Promobot</b>"
-    last_sales_message += f'\n\nEncontrei {total_sales} {"promoções relacionadas" if total_sales > 1 else "promoção relacionada" } à palavra-chave <b>"{keyword}"</b> nas últimas 24 horas:\n'
-    last_sales_message += f"\n***\n"
-
+    last_sales_message = f'\n\nEncontrei {total_sales} {"promoções relacionadas" if total_sales > 1 else "promoção relacionada" } à palavra-chave <b>"{keyword}"</b> nas últimas 24 horas:\n'
+    last_sales_message += f"\n--------------------"
     return last_sales_message
 
 
 def create_footer_last_sales(keyword: str, is_add_keyword: bool = False):
     if is_add_keyword:
-        return f"\n<i>Para remover essa palavra-chave do monitor e deixar de ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/delpromo {keyword}</code>"
+        return f"\n\n<i>Para remover essa palavra-chave do monitor e deixar de ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/delpromo {keyword}</code>"
     else:
-        return f"\n<i>Para adicionar essa palavra-chave e ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/addpromo {keyword}</code>"
+        return f"\n\n<i>Para adicionar essa palavra-chave e ser notificado sempre que uma nova promoção aparecer, utilize o comando (clique para copiar):</i>\n\n<code>/addpromo {keyword}</code>"
 
 
 def check_last_sales(
@@ -136,11 +134,8 @@ def check_last_sales(
             last_sales_message += (
                 f"<b><a href='{sale['aggregator_url']}'>Ir para a promoção</a></b>\n"
             )
-            if index < len(last_sales):
-                index += 1
-                last_sales_message += f"--------------------"
-            else:
-                last_sales_message += f"\n***\n"
+
+            last_sales_message += f"--------------------"
 
         last_sales_message += create_footer_last_sales(str_keyword, is_add_keyword)
 

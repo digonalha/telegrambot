@@ -64,7 +64,7 @@ def send_user_message(
         sale_description = get_promobit_sale_info(sale.aggregator_url)
 
     if sale_description:
-        sale_description = '\n\n' + sale_description
+        sale_description = "\n\n" + sale_description
 
     for user_keyword in users_keyword_to_answer:
         message_with_same_chat_id = next(
@@ -87,40 +87,37 @@ def send_user_message(
         elif message_with_same_chat_id["keywords"] != user_keyword.keyword:
             for msg in messages_to_send:
                 if msg["user_id"] == message_with_same_chat_id["user_id"]:
-                    msg["keywords"] = msg["keywords"] + ";" + user_keyword.keywords
+                    msg["keywords"] = msg["keywords"] + ";" + user_keyword.keyword
 
-        for message in messages_to_send:
-            reply_markup = (
-                '{"inline_keyboard": [[{"text":"Ir para promoção ('
-                + string_helper.html_sanitize(sale.store_name)
-                + ')", "url": "'
-                + sale.sale_url
-                + '"}],[{"text":"Ver no '
-                + aggregator_name
-                + '", "url": "'
-                + sale.aggregator_url
-                + '"},'
-                + '{"text": "Parar de monitorar", "callback_data": '
-                + '"delkeywords|'
-                + message["keywords"]
-                + '"}]]}'
-            )
-
-            text = (
-                message["text"]
-                + "\n\nPalavra-chave: <i>"
-                + message["keywords"].replace(":", ", ") + "</i>"
-            )
-
-            message_service.send_image(
-                message["user_id"],
-                sale.product_image_url,
-                text,
-                reply_markup,
-                parse_mode="HTML",
-            )
-
-        return True
+    for message in messages_to_send:
+        reply_markup = (
+            '{"inline_keyboard": [[{"text":"Ir para promoção ('
+            + string_helper.html_sanitize(sale.store_name)
+            + ')", "url": "'
+            + sale.sale_url
+            + '"}],[{"text":"Ver no '
+            + aggregator_name
+            + '", "url": "'
+            + sale.aggregator_url
+            + '"},'
+            + '{"text": "Parar de monitorar", "callback_data": '
+            + '"delkeywords|'
+            + message["keywords"]
+            + '"}]]}'
+        )
+        text = (
+            message["text"]
+            + "\n\n<b>Palavra-chave:</b> <i>"
+            + message["keywords"].replace(";", ", ")
+            + "</i>"
+        )
+        message_service.send_image(
+            message["user_id"],
+            sale.product_image_url,
+            text,
+            reply_markup,
+            parse_mode="HTML",
+        )
 
 
 def send_channel_message(
@@ -132,7 +129,7 @@ def send_channel_message(
         sale_description = get_promobit_sale_info(sale.aggregator_url)
 
     if sale_description:
-        sale_description = '\n\n' + sale_description
+        sale_description = "\n\n" + sale_description
 
     new_message = (
         f"<b>{string_helper.html_sanitize(sale.product_name)}</b>\n\n"
@@ -165,7 +162,7 @@ def send_channel_message(
 
 
 def check_promobit_sales() -> bool:
-    promobit_sales = promobit_api.get_last_sales(100)
+    promobit_sales = promobit_api.get_last_sales(50)
 
     if not promobit_sales or len(promobit_sales) == 0:
         return False
