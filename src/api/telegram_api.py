@@ -209,11 +209,11 @@ def send_image(
 
 def answer_callback_query(callback_query_id: str, notification_text: str):
     try:
-        data = {
-            "callback_query_id": callback_query_id,
-            "show_alert": True,
-            "text": notification_text,
-        }
+        data = {"callback_query_id": callback_query_id}
+
+        if notification_text and len(notification_text) > 0:
+            data["show_alert"] = True
+            data["text"] = notification_text
 
         res = requests.post(f"{API_URI}/answerCallbackQuery", data=data)
         create_log_from_response("answer_callback_query", res.json())
