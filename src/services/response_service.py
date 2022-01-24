@@ -118,12 +118,10 @@ def resolve_callback(callback_query) -> None:
 
             if total_kw > 1:
                 keywords = split_message[1].replace(";", '", "')
-                notification_text = (
-                    f'Palavras-chave *"{keywords}"* removidas do monitor'
-                )
+                notification_text = f'Palavras-chave "{keywords}" removidas do monitor'
             else:
                 notification_text = (
-                    f'Palavra-chave *"{split_message[1]}"* removida do monitor'
+                    f'Palavra-chave "{split_message[1]}" removida do monitor'
                 )
 
         elif (
