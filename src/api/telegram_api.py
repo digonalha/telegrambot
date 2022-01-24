@@ -207,9 +207,13 @@ def send_image(
         syslog.create_warning("send_photo", ex)
 
 
-def answer_callback_query(callback_query_id: str):
+def answer_callback_query(callback_query_id: str, notification_text: str):
     try:
-        data = {"callback_query_id": callback_query_id}
+        data = {
+            "callback_query_id": callback_query_id,
+            "show_alert": True,
+            "text": notification_text,
+        }
 
         res = requests.post(f"{API_URI}/answerCallbackQuery", data=data)
         create_log_from_response("answer_callback_query", res.json())

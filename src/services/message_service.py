@@ -159,6 +159,6 @@ def delete_message(chat_id: int, message_id: int) -> None:
     telegram_api.delete_message(chat_id, message_id)
 
 
-def answer_callback_query(callback_query_id: str) -> None:
+def answer_callback_query(callback_query_id: str, notification_text: str) -> None:
     """Answer to callback queries sent from inline keyboards"""
-    telegram_api.answer_callback_query(callback_query_id)
+    telegram_api.answer_callback_query(callback_query_id, notification_text)

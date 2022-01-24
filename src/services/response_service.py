@@ -94,6 +94,7 @@ def send_private_help_message(chat_id: int, name: str) -> None:
 
 
 def resolve_callback(callback_query) -> None:
+    notification_text = "Erro! Não foi possível selecionar um retorno."
     try:
         from_user_id = callback_query["from"]["id"]
         message_id = callback_query["message"]["message_id"]
@@ -111,6 +112,13 @@ def resolve_callback(callback_query) -> None:
                     message_id,
                     callback_query["message"]["reply_markup"]["inline_keyboard"],
                 )
+            
+            total_kw = len(split_message[1].split(";"))
+            
+            if (total_kw > 1):
+                notification_text = f"Palavras-chave removidas do monitor"
+            else:
+                notification_text = f"Palavra-chave removida do monitor"
 
         elif (
             callback_data.startswith("preview|")
@@ -123,12 +131,14 @@ def resolve_callback(callback_query) -> None:
                 callback_data=callback_data,
                 message_id=message_id,
             )
+            notification_text = "Últimas promoções atualizadas"
+
         else:
             raise Exception("cant resolve callback data")
     except Exception as ex:
         syslog.create_warning("resolve_callback", ex, from_user_id, callback_data)
     finally:
-        message_service.answer_callback_query(callback_query["id"])
+        message_service.answer_callback_query(callback_query["id"], notification_text)
 
 
 def resolve_message(message) -> None:
