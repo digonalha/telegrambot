@@ -356,7 +356,7 @@ def check_boletando_sales():
         send_user_message(db_sale, aggregator_name="Boletando", description=more_info)
 
 
-def run_sale_tracker() -> None:
+def run_webscrap_worker() -> None:
     today = date.today()
 
     """Loop for sale's tracker sites web scraping."""
