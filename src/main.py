@@ -3,7 +3,7 @@ import time
 import os
 from helpers.logging_helper import SystemLogging
 from repositories.database import database
-from services.app import api_listener_service, sale_tracker_service
+from services.app import sale_tracker_service, telegram_service, correios_service
 from services import (
     user_service,
     moderator_service,
@@ -56,14 +56,19 @@ def load_prerequisites(attempts: int = 0):
 def main():
     load_prerequisites()
 
-    print("→ starting sale tracker thread... ", end="")
-    t1 = threading.Thread(target=sale_tracker_service.run_sale_tracker)
+    print("→ starting sale tracker worker... ", end="")
+    t1 = threading.Thread(target=sale_tracker_service.run_webscrap_worker)
     t1.start()
     print("done!")
 
-    print("→ starting api listener thread... ", end="")
-    t2 = threading.Thread(target=api_listener_service.run_api_listener)
+    print("→ starting bot listener worker... ", end="")
+    t2 = threading.Thread(target=telegram_service.run_telegram_worker)
     t2.start()
+    print("done!")
+
+    print("→ starting correios tracking worker... ", end="")
+    t3 = threading.Thread(target=correios_service.run_tracking_worker)
+    t3.start()
     print("done!")
 
 
