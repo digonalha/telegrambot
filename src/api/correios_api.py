@@ -3,7 +3,7 @@ from helpers.logging_helper import SystemLogging
 
 syslog = SystemLogging(__name__)
 
-API_URI = "https://proxyapp.correios.com.br/v1/sro-rastro/"
+API_URI = "https://proxyapp.correios.com.br/v1/sro-rastro"
 
 
 def get_object_tracking_info(tracking_id: str) -> list():

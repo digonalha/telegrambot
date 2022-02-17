@@ -56,12 +56,12 @@ def load_prerequisites(attempts: int = 0):
 def main():
     load_prerequisites()
 
-    print("→ starting sale tracker worker... ", end="")
+    print("→ starting sale webscrap worker... ", end="")
     t1 = threading.Thread(target=sale_tracker_service.run_webscrap_worker)
     t1.start()
     print("done!")
 
-    print("→ starting bot listener worker... ", end="")
+    print("→ starting telegrambot worker... ", end="")
     t2 = threading.Thread(target=telegram_service.run_telegram_worker)
     t2.start()
     print("done!")
