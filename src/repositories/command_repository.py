@@ -1,7 +1,7 @@
 from sqlalchemy import func, text
 from schemas import command_schema
-from repositories.database import database
-from repositories.models.command_model import Command
+from database import database
+from models.command import Command
 
 local_session = database.get()
 

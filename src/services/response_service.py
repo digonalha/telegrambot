@@ -1,5 +1,5 @@
 import abc
-from repositories.models.command_model import MediaType
+from models.command import MediaType
 from helpers.logging_helper import SystemLogging
 from helpers import string_helper
 from configs import settings

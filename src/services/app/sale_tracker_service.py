@@ -6,7 +6,7 @@ from datetime import datetime, date, timedelta, timezone
 from bs4 import BeautifulSoup
 from random import randint
 from helpers.logging_helper import SystemLogging
-from repositories.models.sale_model import Sale
+from models.sale import Sale
 
 from services import (
     message_service,

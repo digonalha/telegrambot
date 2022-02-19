@@ -1,7 +1,7 @@
 from datetime import datetime
 from helpers.logging_helper import SystemLogging
 from repositories import keyword_repository
-from repositories.models.keyword_model import Keyword
+from models.keyword import Keyword
 from schemas import keyword_schema
 from services import message_service, user_service, sale_service
 from configs import settings

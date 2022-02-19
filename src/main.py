@@ -2,7 +2,7 @@ import threading
 import time
 import os
 from helpers.logging_helper import SystemLogging
-from repositories.database import database
+from database import database
 from services.app import sale_tracker_service, telegram_service, correios_service
 from services import (
     user_service,

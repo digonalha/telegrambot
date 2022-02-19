@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, String, DateTime, Numeric
-from repositories.database.config import base
+from database.config import base
 
 
 class Sale(base):

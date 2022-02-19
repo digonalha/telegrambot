@@ -1,6 +1,6 @@
 from schemas import sale_schema
-from repositories.database import database
-from repositories.models.sale_model import Sale
+from database import database
+from models.sale import Sale
 from datetime import datetime, date, time, timedelta
 from sqlalchemy import text
 

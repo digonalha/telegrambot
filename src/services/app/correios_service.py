@@ -11,6 +11,10 @@ def run_tracking_worker() -> None:
 
     while True:
         try:
+            # tracking_codes = tracking_code_service.get_all_current()
+            
+
+
             correios_api.get_object_tracking_info("LB289177205HK")
         finally:
             sleep(randint(300, 500))

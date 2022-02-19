@@ -1,5 +1,5 @@
-from repositories.database import database
-from repositories.models.user_model import User
+from database import database
+from models.user import User
 from schemas import user_schema
 
 local_session = database.get()

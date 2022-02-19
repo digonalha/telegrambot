@@ -1,4 +1,4 @@
-from repositories.models.sale_model import Sale
+from models.sale import Sale
 from helpers.logging_helper import SystemLogging
 from repositories import sale_repository
 from schemas import sale_schema

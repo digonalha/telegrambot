@@ -1,6 +1,6 @@
 from sqlalchemy import Column, BigInteger, String, DateTime
 from sqlalchemy.sql.sqltypes import Integer
-from repositories.database.config import base
+from database.config import base
 from enum import IntEnum
 
 

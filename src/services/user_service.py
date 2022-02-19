@@ -1,5 +1,5 @@
 from datetime import datetime
-from repositories.models.user_model import User
+from models.user import User
 from helpers.logging_helper import SystemLogging
 from repositories import user_repository
 from schemas import user_schema

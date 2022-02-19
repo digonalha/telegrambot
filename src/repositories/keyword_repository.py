@@ -1,7 +1,7 @@
 from sqlalchemy import func
 from schemas import keyword_schema
-from repositories.database import database
-from repositories.models.keyword_model import Keyword
+from database import database
+from models.keyword import Keyword
 
 local_session = database.get()
 
