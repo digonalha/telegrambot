@@ -2,7 +2,7 @@ from datetime import datetime
 from models.user import User
 from helpers.logging_helper import SystemLogging
 from repositories import user_repository
-from schemas import user_schema
+from schemas.user_schemas import user_base
 from services import moderator_service, message_service
 
 users = []
@@ -85,7 +85,7 @@ def add_or_update_user(user_id: int, first_name: str, user_name: str) -> None:
             now = datetime.now()
 
             db_user = user_repository.add(
-                user_schema.UserCreate(
+                user_base.UserCreate(
                     user_id=user_id,
                     user_name=user_name,
                     first_name=first_name,
@@ -100,7 +100,7 @@ def add_or_update_user(user_id: int, first_name: str, user_name: str) -> None:
         elif db_user.user_name != user_name or db_user.first_name != first_name:
 
             updated_user = user_repository.update(
-                user_schema.UserUpdate(
+                user_base.UserUpdate(
                     user_id=user_id,
                     user_name=user_name,
                     first_name=first_name,

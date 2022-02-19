@@ -1,12 +1,13 @@
 from sqlalchemy import func
-from schemas import keyword_schema
+from schemas.keyword_schemas.keyword_create import KeywordCreate
+from schemas.keyword_schemas.keyword_update import KeywordUpdate
 from database import database
 from models.keyword import Keyword
 
 local_session = database.get()
 
 
-def add(keyword: keyword_schema.KeywordCreate):
+def add(keyword: KeywordCreate):
     new_keyword = Keyword(**keyword.dict())
 
     local_session.add(new_keyword)
@@ -16,7 +17,7 @@ def add(keyword: keyword_schema.KeywordCreate):
     return new_keyword
 
 
-def update(keyword: keyword_schema.KeywordUpdate) -> Keyword:
+def update(keyword: KeywordUpdate) -> Keyword:
     db_keyword = (
         local_session.query(Keyword)
         .filter(

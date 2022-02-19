@@ -1,7 +1,7 @@
 from models.sale import Sale
 from helpers.logging_helper import SystemLogging
 from repositories import sale_repository
-from schemas import sale_schema
+from schemas.sale_schemas import sale_base
 from services import message_service, keyword_service
 from helpers import string_helper
 import json
@@ -205,7 +205,7 @@ def add_sale_if_not_exists(sale: dict) -> Sale:
             return
 
         if not sale_repository.get_by_id(sale["sale_id"]):
-            db_sale = sale_repository.add(sale_schema.SaleCreate(**sale))
+            db_sale = sale_repository.add(sale_base.SaleCreate(**sale))
 
             if db_sale:
                 sales.append(db_sale)
@@ -227,7 +227,7 @@ def add_sale_if_aggregator_url_not_exists(sale: dict) -> Sale:
             return
 
         if not sale_repository.get_by_aggregator_url(sale["aggregator_url"]):
-            db_sale = sale_repository.add(sale_schema.SaleCreate(**sale))
+            db_sale = sale_repository.add(sale_base.SaleCreate(**sale))
 
             if db_sale:
                 sales.append(db_sale)

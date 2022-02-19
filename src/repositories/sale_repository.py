@@ -1,4 +1,4 @@
-from schemas import sale_schema
+from schemas.sale_schemas.sale_create import SaleCreate
 from database import database
 from models.sale import Sale
 from datetime import datetime, date, time, timedelta
@@ -7,7 +7,7 @@ from sqlalchemy import text
 local_session = database.get()
 
 
-def add(sale: sale_schema.SaleCreate):
+def add(sale: SaleCreate):
     new_sale = Sale(**sale.dict())
 
     local_session.add(new_sale)

@@ -1,7 +1,7 @@
 from datetime import datetime
 from helpers.logging_helper import SystemLogging
 from repositories import moderator_repository
-from schemas import moderator_schema
+from schemas.moderator_schemas import moderator
 from services import user_service, message_service
 from configs import settings
 
@@ -25,7 +25,7 @@ def add_moderator(user_id: int, chat_id: int) -> bool:
 
     if not moderator_repository.get(user_id, chat_id):
         db_moderator = moderator_repository.add(
-            moderator_schema.ModeratorCreate(
+            moderator.ModeratorCreate(
                 user_id=user_id,
                 chat_id=chat_id,
                 created_on=datetime.now(),

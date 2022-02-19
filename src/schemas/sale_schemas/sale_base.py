@@ -12,15 +12,3 @@ class SaleBase(BaseModel):
     sale_date: datetime
     aggregator_url: str
     store_name: str
-
-
-class SaleCreate(SaleBase):
-    created_on: datetime
-
-
-class Sale(SaleBase):
-    id: int
-
-    class Config:
-        orm_mode = True
-        validate_assignment = True

@@ -2,7 +2,7 @@ from datetime import datetime
 from helpers.logging_helper import SystemLogging
 from repositories import keyword_repository
 from models.keyword import Keyword
-from schemas import keyword_schema
+from schemas.keyword_schemas import keyword_update
 from services import message_service, user_service, sale_service
 from configs import settings
 from helpers import string_helper
@@ -73,7 +73,7 @@ def add_keyword(keyword: dict) -> bool:
         keyword["user_id"],
         keyword["keyword"],
     ):
-        db_keyword = keyword_repository.add(keyword_schema.KeywordCreate(**keyword))
+        db_keyword = keyword_repository.add(keyword_update.KeywordCreate(**keyword))
 
         if db_keyword:
             keywords.append(db_keyword)
@@ -195,7 +195,7 @@ def insert_keyword(user_id: int, message_text: str):
 
 def update_keyword(keyword: dict) -> bool:
     updated_keyword = keyword_repository.update(
-        keyword_schema.KeywordUpdate(
+        keyword_update.KeywordUpdate(
             user_id=keyword["user_id"],
             keyword=keyword["keyword"],
             max_price=keyword["max_price"],

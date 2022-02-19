@@ -1,12 +1,12 @@
 from sqlalchemy import func, text
-from schemas import command_schema
+from schemas.command_schemas.command_create import CommandCreate
 from database import database
 from models.command import Command
 
 local_session = database.get()
 
 
-def add(command: command_schema.CommandCreate):
+def add(command: CommandCreate):
     new_command = Command(**command.dict())
 
     local_session.add(new_command)

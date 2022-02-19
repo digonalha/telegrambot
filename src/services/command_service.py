@@ -4,7 +4,7 @@ from enums.media_type import MediaType
 from helpers.logging_helper import SystemLogging
 from helpers import string_helper
 from repositories import command_repository
-from schemas import command_schema
+from schemas.command_schemas import command_base
 from services import user_service, message_service
 from configs import settings
 
@@ -64,7 +64,7 @@ def add_command(new_command: dict) -> bool:
     )
 
     if not command_already_in_db:
-        db_command = command_repository.add(command_schema.CommandCreate(**new_command))
+        db_command = command_repository.add(command_base.CommandCreate(**new_command))
         commands.append(db_command)
         return True
 

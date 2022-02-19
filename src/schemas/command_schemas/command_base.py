@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from datetime import datetime
 from enums.media_type import MediaType
 
 
@@ -12,13 +11,3 @@ class CommandBase(BaseModel):
     chat_id: int
     created_by_user_id: int
     created_by_user_name: str
-
-
-class CommandCreate(CommandBase):
-    created_on: datetime
-    modified_on: datetime
-
-
-class Command(CommandBase):
-    class Config:
-        orm_mode = True

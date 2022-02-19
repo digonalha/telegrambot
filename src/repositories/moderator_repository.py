@@ -1,11 +1,11 @@
-from schemas import moderator_schema
+from schemas.moderator_schemas.moderator_create import ModeratorCreate
 from database import database
 from models.moderator import Moderator
 
 local_session = database.get()
 
 
-def add(moderator: moderator_schema.ModeratorCreate):
+def add(moderator: ModeratorCreate):
     new_moderator = Moderator(**moderator.dict())
 
     local_session.add(new_moderator)
