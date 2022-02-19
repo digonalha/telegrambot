@@ -1,4 +1,11 @@
-from sqlalchemy import Column, BigInteger, String, DateTime, UniqueConstraint
+from sqlalchemy import (
+    Column,
+    BigInteger,
+    ForeignKey,
+    String,
+    DateTime,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 from database.config import base
 from models.tracking_event import TrackingEvent
@@ -11,7 +18,7 @@ class TrackingCode(base):
     )
 
     id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
-    user_id = Column(BigInteger, nullable=False)
+    user_id = Column(BigInteger, ForeignKey("user.user_id"))
     tracking_code = Column(String, nullable=False)
     created_on = Column(DateTime, nullable=False)
     event = relationship(TrackingEvent)
