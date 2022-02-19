@@ -8,6 +8,8 @@ from repositories.models import (
     command_model,
     sale_model,
     keyword_model,
+    tracking_event_model,
+    tracking_code_model,
 )
 
 
