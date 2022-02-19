@@ -1,15 +1,6 @@
 from sqlalchemy import Column, BigInteger, String, DateTime
 from sqlalchemy.sql.sqltypes import Integer
 from database.config import base
-from enum import IntEnum
-
-
-class MediaType(IntEnum):
-    NONE = 0
-    AUDIO = 1
-    IMAGE = 2
-    ANIMATION = 3
-    VIDEO = 4
 
 
 class Command(base):

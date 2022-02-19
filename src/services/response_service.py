@@ -1,5 +1,4 @@
-import abc
-from models.command import MediaType
+from enums.media_type import MediaType
 from helpers.logging_helper import SystemLogging
 from helpers import string_helper
 from configs import settings

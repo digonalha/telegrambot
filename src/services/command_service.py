@@ -1,5 +1,6 @@
 from datetime import datetime
-from models.command import Command, MediaType
+from models.command import Command
+from enums.media_type import MediaType
 from helpers.logging_helper import SystemLogging
 from helpers import string_helper
 from repositories import command_repository

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from models.command import MediaType
+from enums.media_type import MediaType
 
 
 class CommandBase(BaseModel):
