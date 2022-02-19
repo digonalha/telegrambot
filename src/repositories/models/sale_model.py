@@ -16,3 +16,5 @@ class Sale(base):
     sale_date = Column(DateTime, nullable=False)
     aggregator_url = Column(String, nullable=False)
     created_on = Column(DateTime, nullable=False)
+
+    __table_args__ = {"schema": "per_user"}
