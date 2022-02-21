@@ -1,4 +1,5 @@
 from app.configs import settings
+from domain.services import message_service, tracking_code_service
 from shared.enums.media_type import MediaType
 from shared.helpers.logging_helper import SystemLogging
 from shared.helpers import string_helper
@@ -7,9 +8,9 @@ from domain.services import (
     moderator_service,
     timeout_service,
     command_service,
-    message_service,
     keyword_service,
     sale_service,
+    tracking_code_service,
 )
 
 
@@ -276,6 +277,11 @@ def resolve_message(message) -> None:
                 keyword_service.insert_keyword(chat_id, text)
             elif text.lower().startswith("/delpromo"):
                 keyword_service.remove_keyword(chat_id, text)
+            # RASTREIO CORREIOS
+            elif text.lower().startswith("/addrastreio"):
+                tracking_code_service.insert_tracking_code(chat_id, text)
+            elif text.lower().startswith("/delrastreio"):
+                tracking_code_service.remove_tracking_code(chat_id, text)
 
     except Exception as ex:
         syslog.create_warning("resolve_message", ex, chat_id, text)

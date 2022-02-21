@@ -8,11 +8,11 @@ from random import randint
 
 from app.configs import settings
 from app.api import promobit_api
+from domain.services import message_service
 from shared.helpers.logging_helper import SystemLogging
 from shared.helpers import string_helper
 from domain.models.sale import Sale
 from domain.services import (
-    message_service,
     sale_service,
     keyword_service,
 )

@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 
 from app.configs import settings
+from domain.services import message_service
 from shared.helpers.logging_helper import SystemLogging
-from domain.services import user_service, message_service
+from domain.services import user_service
 
 timeout_users = []
 syslog = SystemLogging(__name__)

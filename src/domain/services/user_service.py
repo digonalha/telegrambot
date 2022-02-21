@@ -1,11 +1,12 @@
 from datetime import datetime
+from domain.services import message_service
 
 from data.repositories import user_repository
 from shared.helpers.logging_helper import SystemLogging
 from domain.models.user import User
 from domain.schemas.user_schemas.user_create import UserCreate
 from domain.schemas.user_schemas.user_update import UserUpdate
-from domain.services import moderator_service, message_service
+from domain.services import moderator_service
 
 users = []
 syslog = SystemLogging(__name__)

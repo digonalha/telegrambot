@@ -1,10 +1,11 @@
 from datetime import datetime
 
 from app.configs import settings
+from domain.services import message_service
 from data.repositories import moderator_repository
 from shared.helpers.logging_helper import SystemLogging
-from domain.schemas.moderator_schemas import moderator
-from domain.services import user_service, message_service
+from domain.schemas.moderator_schemas.moderator_create import ModeratorCreate
+from domain.services import user_service
 
 moderators = []
 syslog = SystemLogging(__name__)
@@ -26,7 +27,7 @@ def add_moderator(user_id: int, chat_id: int) -> bool:
 
     if not moderator_repository.get(user_id, chat_id):
         db_moderator = moderator_repository.add(
-            moderator.ModeratorCreate(
+            ModeratorCreate(
                 user_id=user_id,
                 chat_id=chat_id,
                 created_on=datetime.now(),

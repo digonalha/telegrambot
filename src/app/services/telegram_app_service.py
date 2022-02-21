@@ -1,5 +1,6 @@
+from app.services import response_app_service
 from shared.helpers.logging_helper import SystemLogging
-from domain.services import timeout_service, message_service, response_service
+from domain.services import message_service, timeout_service
 
 syslog = SystemLogging(__name__)
 
@@ -23,10 +24,10 @@ def run_telegram_worker() -> None:
                         request_obj = None
                         if "message" in update:
                             request_obj = update["message"]
-                            response_service.resolve_message(request_obj)
+                            response_app_service.resolve_message(request_obj)
                         elif "callback_query" in update:
                             request_obj = update["callback_query"]
-                            response_service.resolve_callback(request_obj)
+                            response_app_service.resolve_callback(request_obj)
                     except Exception as ex:
                         syslog.create_warning("run_api_listener", ex)
                         continue

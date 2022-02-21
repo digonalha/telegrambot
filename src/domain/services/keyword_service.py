@@ -2,12 +2,14 @@ import json
 
 from datetime import datetime
 from app.configs import settings
+from domain.services import message_service
 from data.repositories import keyword_repository
 from shared.helpers import string_helper
 from shared.helpers.logging_helper import SystemLogging
-from domain.schemas.keyword_schemas import keyword_update
+from domain.schemas.keyword_schemas.keyword_update import KeywordUpdate
+from domain.schemas.keyword_schemas.keyword_create import KeywordCreate
 from domain.models.keyword import Keyword
-from domain.services import message_service, user_service, sale_service
+from domain.services import user_service, sale_service
 
 
 keywords = []
@@ -75,7 +77,7 @@ def add_keyword(keyword: dict) -> bool:
         keyword["user_id"],
         keyword["keyword"],
     ):
-        db_keyword = keyword_repository.add(keyword_update.KeywordCreate(**keyword))
+        db_keyword = keyword_repository.add(KeywordCreate(**keyword))
 
         if db_keyword:
             keywords.append(db_keyword)
@@ -197,7 +199,7 @@ def insert_keyword(user_id: int, message_text: str):
 
 def update_keyword(keyword: dict) -> bool:
     updated_keyword = keyword_repository.update(
-        keyword_update.KeywordUpdate(
+        KeywordUpdate(
             user_id=keyword["user_id"],
             keyword=keyword["keyword"],
             max_price=keyword["max_price"],

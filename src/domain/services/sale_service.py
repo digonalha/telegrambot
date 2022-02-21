@@ -1,12 +1,13 @@
 import json
 import math
+from domain.services import message_service
 
 from data.repositories import sale_repository
 from shared.helpers.logging_helper import SystemLogging
 from shared.helpers import string_helper
-from domain.schemas.sale_schemas import sale_base
+from domain.schemas.sale_schemas.sale_create import SaleCreate
 from domain.models.sale import Sale
-from domain.services import message_service, keyword_service
+from domain.services import keyword_service
 
 
 sales = []
@@ -207,7 +208,7 @@ def add_sale_if_not_exists(sale: dict) -> Sale:
             return
 
         if not sale_repository.get_by_id(sale["sale_id"]):
-            db_sale = sale_repository.add(sale_base.SaleCreate(**sale))
+            db_sale = sale_repository.add(SaleCreate(**sale))
 
             if db_sale:
                 sales.append(db_sale)
@@ -229,7 +230,7 @@ def add_sale_if_aggregator_url_not_exists(sale: dict) -> Sale:
             return
 
         if not sale_repository.get_by_aggregator_url(sale["aggregator_url"]):
-            db_sale = sale_repository.add(sale_base.SaleCreate(**sale))
+            db_sale = sale_repository.add(SaleCreate(**sale))
 
             if db_sale:
                 sales.append(db_sale)

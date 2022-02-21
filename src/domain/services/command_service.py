@@ -1,12 +1,13 @@
 from datetime import datetime
 
 from app.configs import settings
+from domain.services import message_service
 from data.repositories import command_repository
 from shared.enums.media_type import MediaType
 from shared.helpers.logging_helper import SystemLogging
 from shared.helpers import string_helper
-from domain.schemas.command_schemas import command_base
-from domain.services import user_service, message_service
+from domain.schemas.command_schemas.command_create import CommandCreate
+from domain.services import user_service
 from domain.models.command import Command
 
 commands = []
@@ -65,7 +66,7 @@ def add_command(new_command: dict) -> bool:
     )
 
     if not command_already_in_db:
-        db_command = command_repository.add(command_base.CommandCreate(**new_command))
+        db_command = command_repository.add(CommandCreate(**new_command))
         commands.append(db_command)
         return True
 
