@@ -16,7 +16,7 @@ def get_object_tracking_info(tracking_id: str) -> list():
 
         response_json = res.json()
 
-        return response_json["objetos"]
+        return response_json["objetos"][0]["eventos"]
     except Exception as ex:
         syslog.create_warning("get_object_tracking_info", ex)
         return []

@@ -57,6 +57,11 @@ def add_tracking_code(user_id: int, code: str) -> bool:
     return False
 
 
+def get_all_active() -> list:
+    """Get  all ative tracking codes commands found in database."""
+    return tracking_code_repository.get_all_active()
+
+
 def delete_tracking_code(user_id: int, code: str) -> bool:
     """Remove a tracking code from database if exists."""
 
@@ -64,6 +69,18 @@ def delete_tracking_code(user_id: int, code: str) -> bool:
 
     if tracking_code_db:
         tracking_code_repository.delete(user_id, code)
+        return True
+
+    return False
+
+
+def delete_tracking_code(tracking_code_id: int) -> bool:
+    """Remove a tracking code from database if exists."""
+
+    tracking_code_db = tracking_code_repository.get(tracking_code_id)
+
+    if tracking_code_db:
+        tracking_code_repository.delete(tracking_code_id)
         return True
 
     return False

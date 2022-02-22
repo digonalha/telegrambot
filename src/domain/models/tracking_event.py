@@ -7,11 +7,11 @@ class TrackingEvent(base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     tracking_code_id = Column(BigInteger, ForeignKey("tracking_code.id"))
-    user_id = Column(BigInteger, ForeignKey("user.user_id"))
     code = Column(String, nullable=False)
     description = Column(String, nullable=False)
     detail = Column(String, nullable=True)
     city = Column(String, nullable=True)
     country = Column(String, nullable=True)
     event_type = Column(String, nullable=True)
+    event_date = Column(DateTime, nullable=False)
     created_on = Column(DateTime, nullable=False)

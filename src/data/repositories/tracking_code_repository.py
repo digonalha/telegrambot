@@ -18,7 +18,7 @@ def add(tracking_code: TrackingCodeCreate) -> TrackingCode:
     return new_tracking
 
 
-def get_all():
+def get_all_active():
     return (
         local_session.query(TrackingCode).filter(TrackingCode.is_active == True).all()
     )
@@ -32,11 +32,23 @@ def get(user_id: int, code: str):
     )
 
 
+def get(id: int):
+    return local_session.query(TrackingCode).filter(TrackingCode.id == id).first()
+
+
 def delete(user_id: int, code: str):
     local_session.query(TrackingCode).filter(
         TrackingCode.user_id == user_id,
         func.lower(TrackingCode.tracking_code) == code.lower(),
     ).delete(synchronize_session="fetch")
+
+    local_session.commit()
+
+
+def delete(id: int):
+    local_session.query(TrackingCode).filter(TrackingCode.id == id).delete(
+        synchronize_session="fetch"
+    )
 
     local_session.commit()
 
