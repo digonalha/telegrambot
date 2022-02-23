@@ -32,8 +32,14 @@ def get(user_id: int, code: str):
     )
 
 
-def get(id: int):
+def get_by_id(id: int):
     return local_session.query(TrackingCode).filter(TrackingCode.id == id).first()
+
+
+def get_by_user_id(user_id: int):
+    return (
+        local_session.query(TrackingCode).filter(TrackingCode.user_id == user_id).all()
+    )
 
 
 def delete(user_id: int, code: str):

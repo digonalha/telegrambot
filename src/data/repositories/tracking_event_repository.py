@@ -20,13 +20,13 @@ def add(tracking_event: TrackingEventCreate) -> TrackingEvent:
     return new_event
 
 
-def get(tracking_code_id: int, code: str, event_date: datetime):
+def get(tracking_code_id: int, code: str, event_datetime: datetime):
     return (
         local_session.query(TrackingEvent)
         .filter(
             TrackingEvent.tracking_code_id == tracking_code_id,
             TrackingEvent.code == code,
-            TrackingEvent.event_date == event_date,
+            TrackingEvent.event_datetime == event_datetime,
         )
         .first()
     )

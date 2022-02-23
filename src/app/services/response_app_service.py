@@ -81,12 +81,17 @@ def send_private_help_message(chat_id: int, name: str) -> None:
     help_message = (
         f"Olá, *{(name)}*!\n"
         "Aqui estão os meus comandos disponíveis:\n\n"
+        "*Promoções* \n"
         "*/help* - lista os comandos disponíveis\n"
         "*/promo* - lista as promoções monitoradas pelo usuário\n"
         "*/lastpromo* `palavra-chave` - retorna as promoções das últimas 24 horas relacionadas à palavra-chave\n"
         "*/addpromo* `palavra-chave | valor-máx` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário\n"
         "*/delpromo* `palavra-chave` - remove a palavra-chave da lista de monitoramento de promoções do usuário\n"
         "*/clearpromo* - remove todas as palavras-chave da lista de monitoramento de promoções\n\n"
+        "*Rastreio Correios* \n"
+        "*/rastreio* - lista os códigos de rastreio dos correios monitorados pelo usuário\n"
+        "*/addrastreio* `código-rastreio | nome` - adiciona um código de rastreio no serviço de rastreio dos correios\n"
+        "*/delrastreio* `código-rastreio` - remove um código de rastreio do serviço de rastreio dos correios\n\n"
         "Eu também tenho um canal onde posto promoções. Acesse pelo link: https://t.me/promobotcanal"
     )
 
@@ -282,6 +287,8 @@ def resolve_message(message) -> None:
                 tracking_code_service.insert_tracking_code(chat_id, text)
             elif text.lower().startswith("/delrastreio"):
                 tracking_code_service.remove_tracking_code(chat_id, text)
+            elif text.lower() == ("/rastreio"):
+                tracking_code_service.get_user_trackings(chat_id)
 
     except Exception as ex:
         syslog.create_warning("resolve_message", ex, chat_id, text)

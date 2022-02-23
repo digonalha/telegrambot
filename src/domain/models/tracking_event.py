@@ -10,8 +10,16 @@ class TrackingEvent(base):
     code = Column(String, nullable=False)
     description = Column(String, nullable=False)
     detail = Column(String, nullable=True)
-    city = Column(String, nullable=True)
-    country = Column(String, nullable=True)
-    event_type = Column(String, nullable=True)
-    event_date = Column(DateTime, nullable=False)
+
+    city_origin = Column(String, nullable=True)
+    state_origin = Column(String, nullable=True)
+    unit_name_origin = Column(String, nullable=True)
+    unit_type_origin = Column(String, nullable=False)
+
+    city_destination = Column(String, nullable=True)
+    state_destination = Column(String, nullable=True)
+    unit_name_destination = Column(String, nullable=True)
+    unit_type_destination = Column(String, nullable=True)
+
+    event_datetime = Column(DateTime, nullable=False)
     created_on = Column(DateTime, nullable=False)

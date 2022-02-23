@@ -21,6 +21,7 @@ class TrackingCode(base):
     id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     user_id = Column(BigInteger, ForeignKey("user.user_id"))
     tracking_code = Column(String, nullable=False)
+    name = Column(String, nullable=True)
     is_active = Column(Boolean, nullable=True)
     created_on = Column(DateTime, nullable=False)
     event = relationship(TrackingEvent)

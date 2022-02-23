@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil import parser
 
 from shared.helpers.logging_helper import SystemLogging
 from domain.models.tracking_event import TrackingEvent
@@ -20,20 +21,37 @@ def add_tracking_event(
         tracking_event_obj["codigo"],
         tracking_event_obj["dtHrCriado"],
     ):
-        country = None
-        if tracking_event_obj["unidade"]["tipo"] == "País":
-            country = tracking_event_obj["unidade"]["nome"]
+
+        city_destination = ""
+        state_destination = ""
+        unit_name_destination = ""
+        unit_type_destination = ""
+
+        if "unidadeDestino" in tracking_event_obj:
+            city_destination = tracking_event_obj["unidadeDestino"]["endereco"].get(
+                "cidade", ""
+            )
+            state_destination = tracking_event_obj["unidadeDestino"]["endereco"].get(
+                "uf", ""
+            )
+            unit_name_destination = tracking_event_obj["unidadeDestino"].get("nome", "")
+            unit_type_destination = tracking_event_obj["unidadeDestino"]["tipo"]
 
         db_tracking_event = tracking_event_repository.add(
             TrackingEventCreate(
                 tracking_code_id=tracking_code_id,
                 code=tracking_event_obj["codigo"],
                 description=tracking_event_obj["descricao"],
-                detail=tracking_event_obj["detalhe"] or None,
-                city=tracking_event_obj["unidade"]["endereco"]["cidade"] or None,
-                state=tracking_event_obj["unidade"]["endereco"]["uf"] or None,
-                country=country,
-                event_type=tracking_event_obj["unidade"]["tipo"],
+                detail=tracking_event_obj.get("detalhe", ""),
+                city_origin=tracking_event_obj["unidade"]["endereco"].get("cidade", ""),
+                state_origin=tracking_event_obj["unidade"]["endereco"].get("uf", ""),
+                unit_name_origin=tracking_event_obj["unidade"].get("nome", ""),
+                unit_type_origin=tracking_event_obj["unidade"].get("tipo", ""),
+                city_destination=city_destination,
+                state_destination=state_destination,
+                unit_name_destination=unit_name_destination,
+                unit_type_destination=unit_type_destination,
+                event_datetime=parser.parse(tracking_event_obj.get("dtHrCriado", "")),
                 created_on=datetime.now(),
             )
         )
