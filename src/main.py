@@ -1,10 +1,15 @@
 import threading
 import time
 import os
-from helpers.logging_helper import SystemLogging
-from repositories.database import database
-from services.app import api_listener_service, sale_tracker_service
-from services import (
+
+from app.services import (
+    sale_tracker_app_service,
+    telegram_app_service,
+    correios_app_service,
+)
+from data.database import database
+from shared.helpers.logging_helper import SystemLogging
+from domain.services import (
     user_service,
     moderator_service,
     command_service,
@@ -56,14 +61,19 @@ def load_prerequisites(attempts: int = 0):
 def main():
     load_prerequisites()
 
-    print("→ starting sale tracker thread... ", end="")
-    t1 = threading.Thread(target=sale_tracker_service.run_sale_tracker)
+    print("→ starting sale webscrap worker... ", end="")
+    t1 = threading.Thread(target=sale_tracker_app_service.run_webscrap_worker)
     t1.start()
     print("done!")
 
-    print("→ starting api listener thread... ", end="")
-    t2 = threading.Thread(target=api_listener_service.run_api_listener)
+    print("→ starting telegrambot worker... ", end="")
+    t2 = threading.Thread(target=telegram_app_service.run_telegram_worker)
     t2.start()
+    print("done!")
+
+    print("→ starting correios tracking worker... ", end="")
+    t3 = threading.Thread(target=correios_app_service.run_tracking_worker)
+    t3.start()
     print("done!")
 
 
