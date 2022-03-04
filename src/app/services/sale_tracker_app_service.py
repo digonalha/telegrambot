@@ -19,6 +19,10 @@ from domain.services import (
 
 syslog = SystemLogging(__name__)
 
+boletando_retry = 0
+promobit_retry = 0
+gatry_retry = 0
+
 
 def get_promobit_sale_info(aggregator_url: str) -> str:
     try:
@@ -370,9 +374,21 @@ def run_webscrap_worker() -> None:
                 sale_service.get_last_day_sales()
                 today = date.today()
 
-            check_gatry_sales()
-            check_promobit_sales()
-            check_boletando_sales()
+            if promobit_retry < 5:
+                try:
+                    check_promobit_sales()
+                except:
+                    promobit_retry += 1
+            elif gatry_retry < 5:
+                try:
+                    check_gatry_sales()
+                except:
+                    gatry_retry += 1
+            elif boletando_retry < 5:
+                try:
+                    check_boletando_sales()
+                except:
+                    boletando_retry += 1
 
             sleep(randint(62, 126))
 
