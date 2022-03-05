@@ -332,7 +332,7 @@ def check_boletando_sales():
         sale = {
             "sale_id": None,
             "product_name": product_name.strip(),
-            "product_image_url": imagem["data-src"],
+            "product_image_url": imagem["src"],
             "price": sale_price,
             "sale_url": promo.find(class_="rh_button_wrapper").find("a")["href"],
             "aggregator_url": agg_url,
@@ -357,21 +357,12 @@ def check_boletando_sales():
 
 
 def run_webscrap_worker() -> None:
-    today = date.today()
-
     promobit_retry = 0
     gatry_retry = 0
+    boletando_retry = 0
     """Loop for sale's tracker sites web scraping."""
     while True:
         try:
-            if len(keyword_service.keywords) == 0:
-                sleep(120)
-                continue
-
-            if today != date.today():
-                sale_service.get_last_day_sales()
-                today = date.today()
-
             if promobit_retry < 5:
                 try:
                     check_promobit_sales()
@@ -382,11 +373,11 @@ def run_webscrap_worker() -> None:
                     check_gatry_sales()
                 except:
                     gatry_retry += 1
-            # elif boletando_retry < 5:
-            #     try:
-            #         check_boletando_sales()
-            #     except:
-            #         boletando_retry += 1
+            elif boletando_retry < 5:
+                try:
+                    check_boletando_sales()
+                except:
+                    boletando_retry += 1
 
             sleep(randint(62, 126))
 
