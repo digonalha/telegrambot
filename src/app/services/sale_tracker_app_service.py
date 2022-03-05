@@ -19,10 +19,6 @@ from domain.services import (
 
 syslog = SystemLogging(__name__)
 
-boletando_retry = 0
-promobit_retry = 0
-gatry_retry = 0
-
 
 def get_promobit_sale_info(aggregator_url: str) -> str:
     try:
@@ -363,6 +359,8 @@ def check_boletando_sales():
 def run_webscrap_worker() -> None:
     today = date.today()
 
+    promobit_retry = 0
+    gatry_retry = 0
     """Loop for sale's tracker sites web scraping."""
     while True:
         try:
