@@ -384,11 +384,11 @@ def run_webscrap_worker() -> None:
                     check_gatry_sales()
                 except:
                     gatry_retry += 1
-            elif boletando_retry < 5:
-                try:
-                    check_boletando_sales()
-                except:
-                    boletando_retry += 1
+            # elif boletando_retry < 5:
+            #     try:
+            #         check_boletando_sales()
+            #     except:
+            #         boletando_retry += 1
 
             sleep(randint(62, 126))
 
