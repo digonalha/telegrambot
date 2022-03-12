@@ -47,7 +47,7 @@ def run_tracking_worker() -> None:
                 if len(tracking_events) > 0:
                     if code.name:
                         tracking_message = (
-                            f"<b>Rastreio Correios</b>"
+                            f"<b>Correios</b>"
                             + "\n--------------------\n"
                             + "<u>Informações</u>"
                             + f"\n\n<b>Nome</b>: {code.name}"
@@ -62,16 +62,12 @@ def run_tracking_worker() -> None:
                             index += 1
 
                         if index > 1:
-                            tracking_message += "\n\n--------------------\n"
+                            tracking_message += "\n\n"
 
                         if index >= 1:
                             tracking_message += f"<b>{index}.</b> "
 
-                        tracking_message += f"<em>{tracking_event.event_datetime.strftime('%d/%m/%y - %H:%M')}</em>\n\n"
-
-                        tracking_message += (
-                            f"<b>Status</b>: {tracking_event.description}"
-                        )
+                        tracking_message += f"[{tracking_event.event_datetime.strftime('%d/%m/%y - %H:%M')}]  <b>{tracking_event.description}</b>"
 
                         if tracking_event.unit_name_destination:
                             tracking_message += f"\n<b>Destino</b>: {tracking_event.unit_name_destination}"
