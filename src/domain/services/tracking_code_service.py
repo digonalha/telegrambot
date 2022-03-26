@@ -116,7 +116,7 @@ def get_user_trackings(user_id: int) -> list:
 def delete_tracking_code(user_id: int, code: str) -> bool:
     """Remove a tracking code from database if exists."""
 
-    tracking_code_db = tracking_code_repository.get_by_id(user_id, code)
+    tracking_code_db = tracking_code_repository.get(user_id, code)
 
     if tracking_code_db:
         tracking_code_repository.delete(user_id, code)
