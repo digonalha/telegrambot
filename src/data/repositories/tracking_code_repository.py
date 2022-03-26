@@ -1,7 +1,6 @@
-from sqlalchemy import func
-
 from data.database import database
 from domain.models.tracking_code import TrackingCode
+from domain.models.tracking_event import TrackingEvent
 from domain.schemas.tracking_code_schemas.tracking_code_create import TrackingCodeCreate
 
 
@@ -42,21 +41,20 @@ def get_by_user_id(user_id: int):
     )
 
 
-def delete(user_id: int, code: str):
-    local_session.query(TrackingCode).filter(
-        TrackingCode.user_id == user_id,
-        func.lower(TrackingCode.tracking_code) == code.lower(),
-    ).delete(synchronize_session="fetch")
-
-    local_session.commit()
-
-
 def delete_by_id(id: int):
-    local_session.query(TrackingCode).filter(TrackingCode.id == id).delete(
-        synchronize_session="fetch"
-    )
+    try:
+        local_session.query(TrackingEvent).filter(
+            TrackingEvent.tracking_code_id == id
+        ).delete(synchronize_session="fetch")
 
-    local_session.commit()
+        local_session.query(TrackingCode).filter(TrackingCode.id == id).delete(
+            synchronize_session="fetch"
+        )
+
+        local_session.commit()
+    except:
+        local_session.rollback()
+        raise
 
 
 def delete_all_by_user_id(user_id: int):

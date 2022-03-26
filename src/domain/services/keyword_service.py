@@ -46,7 +46,7 @@ def get_user_keywords(user_id: int) -> list:
             message += f"<b>Total: {len(keywords)}{str_max_keywords}</b>\n"
 
             for stk in keywords:
-                message += f"\n<b>•</b>  {'' if not stk.max_price else ' [R$' + string_helper.format_decimal(stk.max_price) + ']'} <code>{stk.keyword}</code>"
+                message += f"\n<b>📌</b>  {'' if not stk.max_price else ' [R$' + string_helper.format_decimal(stk.max_price) + ']'} <code>{stk.keyword}</code>"
 
             message += f"\n\n<i>Clique na palavra-chave para copiá-la</i>\n\n<i>/addpromo  /delpromo  /clearpromo</i>"
 

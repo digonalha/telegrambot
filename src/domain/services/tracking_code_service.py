@@ -1,11 +1,13 @@
 from datetime import datetime
 
+
 from app.configs import settings
 from shared.helpers.logging_helper import SystemLogging
 from domain.schemas.tracking_code_schemas.tracking_code_create import (
     TrackingCodeCreate,
 )
-from domain.services import message_service, user_service
+from domain.models.tracking_code import TrackingCode
+from domain.services import message_service, user_service, tracking_event_service
 from data.repositories import tracking_code_repository
 
 syslog = SystemLogging(__name__)
@@ -15,6 +17,7 @@ def insert_tracking_code(user_id: int, message_text: str):
     """Logic and validations to add a new tracking code on database if not exists."""
     try:
         command, parameters = message_text.split(" ", 1)
+        name = ""
 
         try:
             code, name = parameters.split("|", 1)
@@ -26,11 +29,7 @@ def insert_tracking_code(user_id: int, message_text: str):
         if command != "/addrastreio":
             return
 
-        if add_tracking_code(user_id, code, name):
-            message_service.send_message(
-                user_id, f"Código de rastreio *{code}* adicionado"
-            )
-        else:
+        if not add_tracking_code(user_id, code, name):
             message_service.send_message(
                 user_id, f"Código de rastreio *{code}* já cadastrado"
             )
@@ -61,9 +60,42 @@ def add_tracking_code(user_id: int, code: str, name: str = None) -> bool:
         )
 
         if db_tracking_code:
+            message_service.send_message(
+                user_id, f"Código de rastreio *{code}* adicionado"
+            )
+            tracking_event_service.list_tracking_events(db_tracking_code)
+
             return True
 
     return False
+
+
+def list_events_from_tracking_code(user_id: int, message_text: str):
+    """Logic and validations to add a new tracking code on database if not exists."""
+    try:
+        command, tracking_code = message_text.split(" ", 1)
+
+        if command != "/rastreio":
+            return
+
+        code = TrackingCode()
+        code.tracking_code = tracking_code
+        code.user_id = user_id
+
+        tracking_event_service.list_tracking_events(code)
+
+    except ValueError as ve:
+        message_service.send_message(
+            user_id,
+            "Para rastrear uma encomenda dos correios, utilize `/rastreio código-rastreio`",
+        )
+    except Exception as ex:
+        syslog.create_warning(
+            "list_events_from_tracking_code", ex, user_id, message_text
+        )
+        message_service.send_message(
+            user_id, "Não foi possível retornar as informações do rastreio"
+        )
 
 
 def get_all_active() -> list:
@@ -98,7 +130,7 @@ def get_user_trackings(user_id: int) -> list:
             message += f"<b>Total: {len(tracking_codes)}{str_max_keywords}</b>\n"
 
             for tc in tracking_codes:
-                message += f"\n<b>•</b>  {'' if not tc.name else ' [' + tc.name + ']'} <code>{tc.tracking_code}</code>"
+                message += f"\n<b>📌</b>  {'' if not tc.name else ' [' + tc.name + ']'} <code>{tc.tracking_code}</code>"
 
             message += f"\n\n<i>Clique no código de rastreio para copiá-lo</i>\n\n<i>/addrastreio  /delrastreio</i>"
 
@@ -119,7 +151,7 @@ def delete_tracking_code(user_id: int, code: str) -> bool:
     tracking_code_db = tracking_code_repository.get(user_id, code)
 
     if tracking_code_db:
-        tracking_code_repository.delete(user_id, code)
+        tracking_code_repository.delete_by_id(tracking_code_db.id)
         return True
 
     return False

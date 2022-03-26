@@ -81,8 +81,8 @@ def send_private_help_message(chat_id: int, name: str) -> None:
     help_message = (
         f"Olá, *{(name)}*!\n"
         "Aqui estão os meus comandos disponíveis:\n\n"
+        "*/help* - lista os comandos disponíveis\n\n"
         "*Promoções* \n"
-        "*/help* - lista os comandos disponíveis\n"
         "*/promo* - lista as promoções monitoradas pelo usuário\n"
         "*/lastpromo* `palavra-chave` - retorna as promoções das últimas 24 horas relacionadas à palavra-chave\n"
         "*/addpromo* `palavra-chave | valor-máx` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário\n"
@@ -289,6 +289,8 @@ def resolve_message(message) -> None:
                 tracking_code_service.remove_tracking_code(chat_id, text)
             elif text.lower() == ("/rastreio"):
                 tracking_code_service.get_user_trackings(chat_id)
+            elif text.startswith("/rastreio"):
+                tracking_code_service.list_events_from_tracking_code(chat_id, text)
 
     except Exception as ex:
         syslog.create_warning("resolve_message", ex, chat_id, text)

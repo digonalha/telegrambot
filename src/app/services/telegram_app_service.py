@@ -14,8 +14,9 @@ def run_telegram_worker() -> None:
     print("→ listening for updates...")
 
     while True:
-        updates = message_service.get_updates(offset)
         try:
+            updates = message_service.get_updates(offset)
+
             message_service.delete_messages(updates, timeout_service.timeout_users)
 
             if updates and len(updates) > 0:
