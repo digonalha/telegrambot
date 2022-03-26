@@ -51,7 +51,7 @@ def delete(user_id: int, code: str):
     local_session.commit()
 
 
-def delete(id: int):
+def delete_by_id(id: int):
     local_session.query(TrackingCode).filter(TrackingCode.id == id).delete(
         synchronize_session="fetch"
     )

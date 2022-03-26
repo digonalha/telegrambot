@@ -131,7 +131,7 @@ def delete_tracking_code_by_id(tracking_code_id: int) -> bool:
     tracking_code_db = tracking_code_repository.get_by_id(tracking_code_id)
 
     if tracking_code_db:
-        tracking_code_repository.delete(tracking_code_id)
+        tracking_code_repository.delete_by_id(tracking_code_id)
         return True
 
     return False
