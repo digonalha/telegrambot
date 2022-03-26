@@ -1,6 +1,6 @@
 # telegrambot
 
-Essa aplicação tem dois propósitos: Gerenciar Grupos e Monitorar Promoções no Telegram. Preferi não utilizar nenhuma biblioteca já conhecido da API do telegram e criar a minha própria por motivos de estudo. Também utilizo BeautifulSoup para fazer webscraper na hora de buscar promoções. Você pode testar o bot pelo link abaixo:
+Essa aplicação tem três propósitos: gerenciar grupos, monitorar promoções e rastrear objetos na api do Correios no Telegram. Preferi não utilizar nenhuma biblioteca já conhecido da API do telegram e criar a minha própria por motivos de estudo. Também utilizo BeautifulSoup para fazer webscraper na hora de buscar promoções. Você pode testar o bot pelo link abaixo:
 
 https://t.me/taxadorbot
 
@@ -41,6 +41,9 @@ Com o tempo, adicionei uma funcionalidade para que ele monitore promoçoes e not
 /addpromo <palavra-chave> | <opcional:valor-máx>: adiciona ou atualiza uma palavra-chave no monitor de promoções do usuário (caso não seja passado o valor máximo, todas as promoções são notificadas)
 /delpromo <palavra-chave>: remove a palavra-chave da lista de monitoramento de promoções
 /clearpromo: remove todas as palavras-chave da lista de monitoramento de promoções
+/rastreio - lista os códigos de rastreio dos correios monitorados pelo usuário
+/addrastreio código-rastreio | nome - adiciona um código de rastreio no serviço de rastreio dos correios
+/delrastreio código-rastreio - remove um código de rastreio do serviço de rastreio dos correios
 ```
 
 Qualquer duvida, report de bugs, sugestões de melhorias pode entrar em contato comigo por issue. :)
