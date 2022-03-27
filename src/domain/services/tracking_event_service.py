@@ -4,6 +4,7 @@ from dateutil import parser
 from app.api import correios_api
 from domain.services import tracking_code_service, message_service
 from shared.helpers.logging_helper import SystemLogging
+from shared.helpers.datetime_helper import days_between
 from domain.models.tracking_event import TrackingEvent
 from domain.schemas.tracking_event_schemas.tracking_event_create import (
     TrackingEventCreate,
@@ -95,10 +96,10 @@ def list_tracking_events(code, list_all=True):
     if len(tracking_events) > 0:
         if code.name:
             tracking_message = (
-                f"<b>Rastreio Correios</b> \n[{code.tracking_code} - {code.name}]\n\n"
+                f"<b>Rastreio Correios</b> [{code.tracking_code} - {code.name}]\n\n"
             )
         else:
-            tracking_message = f"<b>Rastreio Correios</b> \n[{code.tracking_code}]\n\n"
+            tracking_message = f"<b>Rastreio Correios</b> [{code.tracking_code}]\n\n"
 
         index = 0
 
@@ -144,5 +145,8 @@ def list_tracking_events(code, list_all=True):
             tracking_message += (
                 f"\nàs {tracking_event.event_datetime.strftime('%d/%m/%y - %H:%M')}"
             )
+
+        if len(tracking_info) > 1:
+            tracking_message += f"\n\n******\n<b>Tempo decorrido</b>: \n{days_between(tracking_info[len(tracking_info) - 1]['dtHrCriado'], tracking_info[0]['dtHrCriado'])} dias"
 
         message_service.send_message(code.user_id, tracking_message, parse_mode="HTML")
