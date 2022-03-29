@@ -63,7 +63,7 @@ def add_tracking_code(user_id: int, code: str, name: str = None) -> bool:
             message_service.send_message(
                 user_id, f"Código de rastreio *{code}* adicionado"
             )
-            tracking_event_service.list_tracking_events(db_tracking_code)
+            tracking_event_service.list_tracking_events(db_tracking_code, list_all=False)
 
             return True
 
