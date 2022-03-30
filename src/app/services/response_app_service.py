@@ -83,14 +83,13 @@ def send_private_help_message(chat_id: int, name: str) -> None:
         "Aqui estão os meus comandos disponíveis:\n\n"
         "*/help* - lista os comandos disponíveis\n\n"
         "*Promoções* \n"
-        "*/promo* - lista as promoções monitoradas pelo usuário\n"
-        "*/lastpromo* `palavra-chave` - retorna as promoções das últimas 24 horas relacionadas à palavra-chave\n"
-        "*/addpromo* `palavra-chave | valor-máx` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário\n"
+        "*/promo ˋpalavra-chave(opcional)ˋ* - lista as promoções monitoradas pelo usuário\n"
+        "*/addpromo* `palavra-chave | valor-máx(opcional)` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário\n"
         "*/delpromo* `palavra-chave` - remove a palavra-chave da lista de monitoramento de promoções do usuário\n"
         "*/clearpromo* - remove todas as palavras-chave da lista de monitoramento de promoções\n\n"
         "*Rastreio Correios* \n"
-        "*/rastreio* - lista os códigos de rastreio dos correios monitorados pelo usuário\n"
-        "*/addrastreio* `código-rastreio | nome` - adiciona um código de rastreio no serviço de rastreio dos correios\n"
+        "*/rastreio ˋcódigo-rastreio(opcional)ˋ* - lista os códigos de rastreio dos correios monitorados pelo usuário\n"
+        "*/addrastreio* `código-rastreio | nome(opcional)` - adiciona um código de rastreio no serviço de rastreio dos correios\n"
         "*/delrastreio* `código-rastreio` - remove um código de rastreio do serviço de rastreio dos correios\n\n"
         "Eu também tenho um canal onde posto promoções. Acesse pelo link: https://t.me/promobotcanal"
     )
@@ -274,7 +273,7 @@ def resolve_message(message) -> None:
                 send_private_help_message(chat_id, message["from"]["first_name"])
             elif text.lower() == "/promo":
                 keyword_service.get_user_keywords(chat_id)
-            elif text.lower().startswith("/lastpromo"):
+            elif text.lower().startswith("/promo"):
                 keyword_service.get_last_sales_by_keyword(chat_id, text)
             elif text.lower().startswith("/clearpromo"):
                 keyword_service.remove_all_keywords(chat_id, text)

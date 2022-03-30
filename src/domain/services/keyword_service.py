@@ -340,7 +340,7 @@ def get_last_sales_by_keyword(user_id: int, message_text: str):
     try:
         command, keyword = message_text.split(" ", 1)
 
-        if command != "/lastpromo":
+        if command != "/promo":
             return
         elif len(keyword) < 4:
             message_service.send_message(
@@ -371,7 +371,7 @@ def get_last_sales_by_keyword(user_id: int, message_text: str):
     except ValueError as ve:
         message_service.send_message(
             user_id,
-            "Para verificar as últimas promoções por palavra-chave, utilize: \n\n`/lastpromo palavra-chave`",
+            "Para verificar as últimas promoções por palavra-chave, utilize: \n\n`/promo palavra-chave`",
         )
     except Exception as ex:
         syslog.create_warning("get_last_sales_by_keyword", ex, user_id, message_text)
