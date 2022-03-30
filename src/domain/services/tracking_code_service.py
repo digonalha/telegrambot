@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import re as regex
 
 from app.configs import settings
 from shared.helpers.logging_helper import SystemLogging
@@ -13,6 +13,10 @@ from data.repositories import tracking_code_repository
 syslog = SystemLogging(__name__)
 
 
+def is_valid_tracking_code(code: str) -> bool:
+    return regex.match("^[A-Z]{2}[0-9]{9}[A-Z]{2}$", code)
+
+
 def insert_tracking_code(user_id: int, message_text: str):
     """Logic and validations to add a new tracking code on database if not exists."""
     try:
@@ -20,18 +24,22 @@ def insert_tracking_code(user_id: int, message_text: str):
         name = ""
 
         try:
-            code, name = parameters.split("|", 1)
-            code = code.strip()
+            tracking_code, name = parameters.split("|", 1)
+            tracking_code = tracking_code.strip()
             name = name.strip()
         except ValueError as ve:
-            code = parameters
+            tracking_code = parameters
 
         if command != "/addrastreio":
             return
 
-        if not add_tracking_code(user_id, code, name):
+        if not is_valid_tracking_code(tracking_code):
+            message_service.send_message(user_id, "Código de rastreio inválido!")
+            return
+
+        if not add_tracking_code(user_id, tracking_code, name):
             message_service.send_message(
-                user_id, f"Código de rastreio *{code}* já cadastrado"
+                user_id, f"Código de rastreio *{tracking_code}* inválido!"
             )
     except ValueError as ve:
         message_service.send_message(
@@ -61,9 +69,11 @@ def add_tracking_code(user_id: int, code: str, name: str = None) -> bool:
 
         if db_tracking_code:
             message_service.send_message(
-                user_id, f"Código de rastreio *{code}* adicionado"
+                user_id, f"Código de rastreio *{code}* adicionado!"
             )
-            tracking_event_service.list_tracking_events(db_tracking_code, list_all=False)
+            tracking_event_service.list_tracking_events(
+                db_tracking_code, list_all=False
+            )
 
             return True
 
@@ -76,6 +86,12 @@ def list_events_from_tracking_code(user_id: int, message_text: str):
         command, tracking_code = message_text.split(" ", 1)
 
         if command != "/rastreio":
+            return
+
+        if not is_valid_tracking_code(tracking_code):
+            message_service.send_message(
+                user_id, f"Código de rastreio *{tracking_code}* inválido!"
+            )
             return
 
         code = TrackingCode()
