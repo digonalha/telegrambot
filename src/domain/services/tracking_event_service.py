@@ -143,10 +143,12 @@ def list_tracking_events(code, list_all=True):
                     tracking_message += f" - <b>{tracking_event.state_destination}</b>"
 
             tracking_message += (
-                f"\nàs {tracking_event.event_datetime.strftime('%d/%m/%y - %H:%M')}"
+                f"\n{tracking_event.event_datetime.strftime('%d/%m/%y - %H:%M')}"
             )
 
         if len(tracking_info) > 1:
             tracking_message += f"\n\n******\n<b>Tempo decorrido</b>: \n{days_between(tracking_info[len(tracking_info) - 1]['dtHrCriado'], tracking_info[0]['dtHrCriado'])} dias"
+    elif list_all:
+        tracking_message = f"Nenhum evento encontrado para o código de rastreio <b>{code.tracking_code}</b>"
 
-        message_service.send_message(code.user_id, tracking_message, parse_mode="HTML")
+    message_service.send_message(code.user_id, tracking_message, parse_mode="HTML")
