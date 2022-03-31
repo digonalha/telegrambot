@@ -368,16 +368,19 @@ def run_webscrap_worker() -> None:
                     check_promobit_sales()
                 except:
                     promobit_retry += 1
-            elif gatry_retry < 5:
+                    raise
+            if gatry_retry < 5:
                 try:
                     check_gatry_sales()
                 except:
                     gatry_retry += 1
-            elif boletando_retry < 5:
+                    raise
+            if boletando_retry < 5:
                 try:
                     check_boletando_sales()
                 except:
                     boletando_retry += 1
+                    raise
 
             sleep(randint(62, 126))
 
