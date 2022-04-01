@@ -142,7 +142,7 @@ def get_user_trackings(user_id: int) -> list:
             )
 
             for tc in tracking_codes:
-                emoji = "⌛"
+                emoji = "⏳"
                 if not tc.is_active:
                     emoji = "✅"
                 elif len(tc.event) == 0:
