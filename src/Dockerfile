@@ -1,4 +1,4 @@
-FROM arm32v7/python:3.8-alpine3.14
+FROM python:3.8-alpine
 ADD . /app
 WORKDIR /app
 ENV TZ="America/Sao_Paulo"
