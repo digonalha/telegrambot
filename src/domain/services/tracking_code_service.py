@@ -136,19 +136,27 @@ def get_user_trackings(user_id: int) -> list:
         message = f"Nenhum código de rastreio encontrado. Você pode adicionar códigos de rastreio utilizando: \n\n`/addrastreio código-rastreio | nome`\n\n_parâmetro nome opcional_"
 
         if tracking_codes and len(tracking_codes) > 0:
-            message = (
-                f"Aqui está uma lista com seus códigos de rastreio monitorados.\n\n"
-            )
-            message += "<u><b>[Nome] Código de Rastreio</b></u>\n"
-
             str_max_keywords = f"/{settings.max_keywords}" if not user.is_admin else ""
-
-            message += f"<b>Total: {len(tracking_codes)}{str_max_keywords}</b>\n"
+            message = (
+                f"<b>{len(tracking_codes)}{str_max_keywords} Códigos de Rastreio</b>\n"
+            )
 
             for tc in tracking_codes:
-                message += f"\n<b>📌</b>  {'' if not tc.name else ' [' + tc.name + ']'} <code>{tc.tracking_code}</code>"
+                emoji = "⌛"
+                if not tc.is_active:
+                    emoji = "✅"
+                elif len(tc.event) == 0:
+                    emoji = "⚠️"
 
-            message += f"\n\n<i>Clique no código de rastreio para copiá-lo</i>\n\n<i>/addrastreio  /delrastreio</i>"
+                str_event = "Nenhum evento encontrado"
+
+                if len(tc.event) > 0:
+                    str_event = tc.event[len(tc.event) - 1].description
+
+                message += f"\n{emoji}  <code>{tc.tracking_code}</code> {'' if not tc.name else ' [' + tc.name + ']'}"
+                message += f"\n      <b>></b> <i>{str_event}</i>\n"
+
+            message += f"\n******\n<i>Clique no código de rastreio para copiá-lo</i>\n<i>/addrastreio  /delrastreio</i>"
 
             message_service.send_message(user_id, message, parse_mode="HTML")
         else:
@@ -212,3 +220,7 @@ def remove_tracking_code(chat_id: int, message_text: str) -> None:
         message_service.send_message(
             chat_id, f"Não foi possível remover o código de rastreio *{code}*"
         )
+
+
+def deactivate_tracking_code(tracking_code_id=int):
+    tracking_code_repository.deactivate_code(tracking_code_id)

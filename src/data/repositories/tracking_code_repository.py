@@ -60,3 +60,19 @@ def delete_by_id(id: int):
 def delete_all_by_user_id(user_id: int):
     local_session.query(TrackingCode).filter(TrackingCode.user_id == user_id).delete()
     local_session.commit()
+
+
+def deactivate_code(code_id: int) -> TrackingCode:
+    db_tracking_code = (
+        local_session.query(TrackingCode).filter(TrackingCode.id == code_id).first()
+    )
+
+    if not db_tracking_code:
+        return None
+
+    db_tracking_code.is_active = False
+
+    local_session.commit()
+    local_session.refresh(db_tracking_code)
+
+    return not db_tracking_code.is_active
