@@ -74,11 +74,12 @@ def add_tracking_event(
 def list_tracking_events(code, list_all=True):
     tracking_info = correios_api.get_object_tracking_info(code.tracking_code)
 
-    if len(tracking_info) == 1 and tracking_info[0]["mensagem"].startswith("SRO-019"):
-        tracking_code_service.delete_tracking_code(code.id)
-        return
-    elif len(tracking_info) == 1 and tracking_info[0]["mensagem"].startswith("SRO-020"):
-        return
+    if len(tracking_info) == 1 and "mensagem" in tracking_info[0]:
+        if tracking_info[0]["mensagem"].startswith("SRO-019"):
+            tracking_code_service.delete_tracking_code(code.id)
+            return
+        elif tracking_info[0]["mensagem"].startswith("SRO-020"):
+            return
 
     tracking_events = []
 
