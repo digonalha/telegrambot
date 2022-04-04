@@ -153,7 +153,8 @@ def list_tracking_events(code, list_all=True):
         tracking_message = f"Nenhum evento encontrado para o código de rastreio <b>{code.tracking_code}</b>"
 
     if (
-        code.id > 0
+        code.id
+        and code.id > 0
         and len(tracking_info) > 0
         and tracking_info[0]["codigo"].startswith("BDE")
     ):
