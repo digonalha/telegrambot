@@ -79,7 +79,7 @@ def send_group_help_message(chat_id: int, name: str, message_id: int) -> None:
 
 def send_private_help_message(chat_id: int, name: str) -> None:
     help_message = (
-        f"Olá, *{(name)}*! <3\n"
+        f"Olá, *{(name)}*! TESTE \n"
         "Aqui estão os meus comandos disponíveis:\n\n"
         "*/help* - lista os comandos disponíveis\n\n"
         "*Promoções* \n"
