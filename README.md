@@ -8,7 +8,8 @@ https://t.me/taxadorbot
 Crie um arquivo .env no modelo do .env.example (se não estiver criado e preenchido, a aplicação não irá iniciar)
 
 Tenha o docker e docker-compose instalados na máquina. Entrar na pasta raiz do repositório e executar o comando: 
-docker-compose up --build -d
+
+**docker-compose up --build -d**
 
 E pronto! Após a execução do comando, será instalado o banco de dados postgres e a aplicação telegrambot.
 
