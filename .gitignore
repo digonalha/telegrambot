@@ -1,7 +1,7 @@
 */.env
 /.vscode
 /venv
-/info.log
+/*.log
 /ragequit-bot.py
 __pycache__
 *.pyc
