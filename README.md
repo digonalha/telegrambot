@@ -12,7 +12,7 @@ docker-compose up --build -d
 
 E pronto! Após a execução do comando, será instalado o banco de dados postgres e a aplicação telegrambot.
 
-No momento o bot atende os seguintes comandos:
+# No momento o bot atende os seguintes comandos:
 
 ## Dentro de grupos:
 ```
