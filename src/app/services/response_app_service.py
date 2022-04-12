@@ -91,7 +91,7 @@ def send_private_help_message(chat_id: int, name: str) -> None:
         "*/rastreio* `código-rastreio (opcional)` - lista os códigos de rastreio dos correios monitorados pelo usuário. Caso o código-rastreio esteja preenchido, lista os eventos disponíveis.\n"
         "*/addrastreio* `código-rastreio | nome(opcional)` - adiciona um código de rastreio no serviço de rastreio dos correios\n"
         "*/delrastreio* `código-rastreio` - remove um código de rastreio do serviço de rastreio dos correios\n\n"
-        "Eu também tenho um canal onde posto promoções. Acesse pelo link: https://t.me/promobotcanal"
+        "Eu também tenho um canal onde posto promoções. Acesse pelo link: https://t.me/promobotcanal <3"
     )
 
     message_service.send_message(chat_id, help_message, disable_web_page_preview=True)
