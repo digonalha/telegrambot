@@ -95,12 +95,9 @@ def list_tracking_events(code, list_all=True):
     tracking_message = ""
 
     if len(tracking_events) > 0:
-        if code.name:
-            tracking_message = (
-                f"<b>Rastreio Correios</b> [{code.tracking_code} - {code.name}]\n\n"
-            )
-        else:
-            tracking_message = f"<b>Rastreio Correios</b> [{code.tracking_code}]\n\n"
+        tracking_message = (
+            f"<b>Rastreio Correios</b> > {code.name}]\n[{code.tracking_code}]\n\n"
+        )
 
         index = 0
 
