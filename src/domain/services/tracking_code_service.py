@@ -152,15 +152,17 @@ def get_user_trackings(user_id: int) -> list:
                 str_event = "Nenhum evento encontrado"
 
                 if len(tracking_code.event) > 0:
-                     tracking_event = tracking_code.event[len(tracking_code.event) - 1]
+                    tracking_event = tracking_code.event[len(tracking_code.event) - 1]
 
-                     str_event = tracking_event_service.tracking_event_str(tracking_event)
+                    str_event = tracking_event_service.tracking_event_str(
+                        tracking_event
+                    )
 
-                message += f"\n{emoji}"
+                message += f"\n{emoji} {'' if not tracking_code.name else ' [' + tracking_code.name + ']'}  <code>{tracking_code.tracking_code}</code>\n"
                 message += str_event
-                message += f"\n<code>/rastreio {tracking_code.tracking_code}</code>\n"
+                message += f"\n\n******"
 
-            message += f"\n******\n<i>Clique no código de rastreio para copiá-lo</i>\n<i>/addrastreio  /delrastreio</i>"
+            message += f"\n<i>Clique no código de rastreio para copiá-lo</i>\n<i>/rastreio • /addrastreio • /delrastreio</i>"
 
             message_service.send_message(user_id, message, parse_mode="HTML")
         else:

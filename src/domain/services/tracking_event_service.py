@@ -106,6 +106,8 @@ def tracking_event_str(tracking_event):
         f"\n{tracking_event.event_datetime.strftime('%d/%m/%y - %H:%M')}"
     )
 
+    return tracking_message
+
 
 def list_tracking_events(code, list_all=True):
     tracking_info = correios_api.get_object_tracking_info(code.tracking_code)
@@ -143,7 +145,7 @@ def list_tracking_events(code, list_all=True):
             if index > 1:
                 tracking_message += "\n\n"
 
-            tracking_message += f"🏷"
+            tracking_message += f"🏷\n"
             tracking_message += tracking_event_str(tracking_event)
 
         if len(tracking_info) > 1:
