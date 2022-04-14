@@ -71,6 +71,42 @@ def add_tracking_event(
     return None
 
 
+def tracking_event_str(tracking_event):
+    tracking_message = f"{tracking_event.description}"
+
+    if tracking_event.detail:
+        tracking_message += f"\n<i>{tracking_event.detail}</i>"
+
+    if (
+        tracking_event.unit_type_origin
+        and tracking_event.unit_type_destination
+        and tracking_event.unit_type_origin != "País"
+    ):
+        tracking_message += f"\nde <b>{tracking_event.unit_type_origin}</b> em <b>{tracking_event.city_origin} - {tracking_event.state_origin}</b>"
+    elif tracking_event.unit_type_origin != "País":
+        tracking_message += f"\nem <b>{tracking_event.unit_type_origin}</b>, <b>{tracking_event.city_origin} - {tracking_event.state_origin}</b>"
+    else:
+        tracking_message += f"\nem <b>{tracking_event.unit_name_origin}</b>"
+
+    if (
+        tracking_event.unit_type_destination
+        and tracking_event.unit_type_origin != "País"
+    ):
+        tracking_message += f"\npara <b>{tracking_event.unit_type_destination}</b> em <b>{tracking_event.city_destination} - {tracking_event.state_destination}</b>"
+    elif (
+        tracking_event.unit_type_origin == "País"
+        and tracking_event.unit_name_destination
+    ):
+        tracking_message += f"\npara <b>{tracking_event.unit_name_destination}</b>"
+
+        if tracking_event.state_destination:
+            tracking_message += f" - <b>{tracking_event.state_destination}</b>"
+
+    tracking_message += (
+        f"\n{tracking_event.event_datetime.strftime('%d/%m/%y - %H:%M')}"
+    )
+
+
 def list_tracking_events(code, list_all=True):
     tracking_info = correios_api.get_object_tracking_info(code.tracking_code)
 
@@ -96,9 +132,7 @@ def list_tracking_events(code, list_all=True):
 
     if len(tracking_events) > 0:
         name = "" if not code.name else f": {code.name}"
-        tracking_message = (
-            f"<b>Rastreio Correios</b>{name}\n[{code.tracking_code}]\n\n"
-        )
+        tracking_message = f"<b>Rastreio Correios</b>{name}\n[{code.tracking_code}]\n\n"
 
         index = 0
 
@@ -109,41 +143,8 @@ def list_tracking_events(code, list_all=True):
             if index > 1:
                 tracking_message += "\n\n"
 
-            tracking_message += f"🏷\n{tracking_event.description}"
-
-            if tracking_event.detail:
-                tracking_message += f"\n<i>{tracking_event.detail}</i>"
-
-            if (
-                tracking_event.unit_type_origin
-                and tracking_event.unit_type_destination
-                and tracking_event.unit_type_origin != "País"
-            ):
-                tracking_message += f"\nde <b>{tracking_event.unit_type_origin}</b> em <b>{tracking_event.city_origin} - {tracking_event.state_origin}</b>"
-            elif tracking_event.unit_type_origin != "País":
-                tracking_message += f"\nem <b>{tracking_event.unit_type_origin}</b>, <b>{tracking_event.city_origin} - {tracking_event.state_origin}</b>"
-            else:
-                tracking_message += f"\nem <b>{tracking_event.unit_name_origin}</b>"
-
-            if (
-                tracking_event.unit_type_destination
-                and tracking_event.unit_type_origin != "País"
-            ):
-                tracking_message += f"\npara <b>{tracking_event.unit_type_destination}</b> em <b>{tracking_event.city_destination} - {tracking_event.state_destination}</b>"
-            elif (
-                tracking_event.unit_type_origin == "País"
-                and tracking_event.unit_name_destination
-            ):
-                tracking_message += (
-                    f"\npara <b>{tracking_event.unit_name_destination}</b>"
-                )
-
-                if tracking_event.state_destination:
-                    tracking_message += f" - <b>{tracking_event.state_destination}</b>"
-
-            tracking_message += (
-                f"\n{tracking_event.event_datetime.strftime('%d/%m/%y - %H:%M')}"
-            )
+            tracking_message += f"🏷"
+            tracking_message += tracking_event_str(tracking_event)
 
         if len(tracking_info) > 1:
             tracking_message += f"\n\n******\n<b>Tempo decorrido</b>: \n{days_between(tracking_info[len(tracking_info) - 1]['dtHrCriado'], tracking_info[0]['dtHrCriado'])} dias"

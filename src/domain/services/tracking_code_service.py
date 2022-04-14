@@ -142,21 +142,23 @@ def get_user_trackings(user_id: int) -> list:
             str_max_keywords = f"/{settings.max_keywords}" if not user.is_admin else ""
             message += f"<b>Total: {len(tracking_codes)}{str_max_keywords}</b>\n"
 
-            for tc in tracking_codes:
+            for tracking_code in tracking_codes:
                 emoji = "⏳"
-                if not tc.is_active:
+                if not tracking_code.is_active:
                     emoji = "✅"
-                elif len(tc.event) == 0:
+                elif len(tracking_code.event) == 0:
                     emoji = "⚠️"
 
                 str_event = "Nenhum evento encontrado"
 
-                if len(tc.event) > 0:
-                    str_event = tc.event[len(tc.event) - 1].description
+                if len(tracking_code.event) > 0:
+                     tracking_event = tracking_code.event[len(tracking_code.event) - 1]
 
-                message += f"\n{emoji}  {'' if not tc.name else ' [' + tc.name + ']'}"
-                message += f"\n{str_event}"
-                message += f"\n<code>/rastreio {tc.tracking_code}</code>\n"
+                     str_event = tracking_event_service.tracking_event_str(tracking_event)
+
+                message += f"\n{emoji}"
+                message += str_event
+                message += f"\n<code>/rastreio {tracking_code.tracking_code}</code>\n"
 
             message += f"\n******\n<i>Clique no código de rastreio para copiá-lo</i>\n<i>/addrastreio  /delrastreio</i>"
 
