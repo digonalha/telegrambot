@@ -154,8 +154,9 @@ def get_user_trackings(user_id: int) -> list:
                 if len(tc.event) > 0:
                     str_event = tc.event[len(tc.event) - 1].description
 
-                message += f"\n{emoji}  <code>{tc.tracking_code}</code> {'' if not tc.name else ' [' + tc.name + ']'}"
-                message += f"\n{str_event}\n"
+                message += f"\n{emoji}  {'' if not tc.name else ' [' + tc.name + ']'}"
+                message += f"\n{str_event}"
+                message += f"\n<code>/rastreio {tc.tracking_code}</code>\n"
 
             message += f"\n******\n<i>Clique no código de rastreio para copiá-lo</i>\n<i>/addrastreio  /delrastreio</i>"
 
