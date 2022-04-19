@@ -363,19 +363,19 @@ def run_webscrap_worker() -> None:
     """Loop for sale's tracker sites web scraping."""
     while True:
         try:
-            if promobit_retry < 5:
+            if promobit_retry < 100:
                 try:
                     check_promobit_sales()
                 except:
                     promobit_retry += 1
                     raise
-            if gatry_retry < 5:
+            if gatry_retry < 100:
                 try:
                     check_gatry_sales()
                 except:
                     gatry_retry += 1
                     raise
-            if boletando_retry < 5:
+            if boletando_retry < 100:
                 try:
                     check_boletando_sales()
                 except:
