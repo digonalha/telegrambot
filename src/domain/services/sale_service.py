@@ -126,7 +126,7 @@ def check_last_sales(
         last_sales_message = create_header_last_sales(total_last_day_sales, str_keyword)
 
         for sale in last_sales:
-            last_sales_message += f"📌\n<b><a href='{sale['aggregator_url']}'>{sale['product_name']}</a></b>\n\n"
+            last_sales_message += f"\n📌 <b><a href='{sale['aggregator_url']}'>{sale['product_name']}</a></b>\n"
             last_sales_message += f"<b>Valor: {string_helper.get_old_new_price_str(sale['price'], sale['old_price'])}</b>\n"
             last_sales_message += (
                 f"<b>Data: {sale['sale_date'].strftime('%d/%m - %H:%M')}</b>\n\n******"
