@@ -24,4 +24,4 @@ class TrackingCode(base):
     name = Column(String, nullable=True)
     is_active = Column(Boolean, nullable=True)
     created_on = Column(DateTime, nullable=False)
-    event = relationship(TrackingEvent)
+    event = relationship(TrackingEvent, order_by="asc(TrackingEvent.event_datetime)")
