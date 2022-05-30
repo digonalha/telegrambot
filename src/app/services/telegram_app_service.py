@@ -31,7 +31,6 @@ def run_telegram_worker() -> None:
                         request_obj = update["callback_query"]
                         response_app_service.resolve_callback(request_obj)
         except Exception as ex:
-            syslog.create_warning("run_api_listener", ex)
-            continue
+            syslog.create_warning("run_telegram_worker", ex)
         finally:
             offset = message_service.get_update_id_offset(updates)

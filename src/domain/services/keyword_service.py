@@ -48,7 +48,7 @@ def get_user_keywords(user_id: int) -> list:
             for stk in keywords:
                 message += f"\n<b>📌</b>  {'' if not stk.max_price else ' [R$' + string_helper.format_decimal(stk.max_price) + ']'} <code>{stk.keyword}</code>"
 
-            message += f"\n\n******\n<i>Clique na palavra-chave para copiá-la</i>\n<i>/promo • /addpromo\n /delpromo • /clearpromo</i>"
+            message += f"\n\n******\n<i>Clique na palavra-chave para copiá-la</i>\n<i>/promo • /addpromo\n/delpromo • /clearpromo</i>"
 
             message_service.send_message(user_id, message, parse_mode="HTML")
         else:

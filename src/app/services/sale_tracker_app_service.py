@@ -385,5 +385,4 @@ def run_webscrap_worker() -> None:
             sleep(randint(62, 126))
 
         except Exception as ex:
-            syslog.create_warning("run_sale_tracker", ex)
-            continue
+            syslog.create_warning("run_webscrap_worker", ex)
