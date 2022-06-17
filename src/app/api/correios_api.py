@@ -9,7 +9,7 @@ API_URI = f"https://proxyapp.correios.com.br/v1/sro-rastro"
 
 def get_object_tracking_info(tracking_id: str) -> list():
     try:
-        res = requests.get(f"{API_URI}/{tracking_id}")
+        res = requests.get(f"{API_URI}/{tracking_id}", verify=False)
 
         if res.status_code != 200:
             return None
