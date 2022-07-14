@@ -112,7 +112,7 @@ def tracking_event_str(tracking_event):
 def list_tracking_events(code, list_all=True):
     tracking_info = correios_api.get_object_tracking_info(code.tracking_code)
 
-    if len(tracking_info) == 1 and "mensagem" in tracking_info[0]:
+    if tracking_info and len(tracking_info) == 1 and "mensagem" in tracking_info[0]:
         if tracking_info[0]["mensagem"].startswith("SRO-019"):
             tracking_code_service.delete_tracking_code(code.id)
             return
@@ -149,7 +149,13 @@ def list_tracking_events(code, list_all=True):
             tracking_message += tracking_event_str(tracking_event)
 
         if len(tracking_info) > 1:
-            tracking_message += f"\n\n******\n<b>Tempo decorrido</b>: \n{days_between(tracking_info[len(tracking_info) - 1]['dtHrCriado'], tracking_info[0]['dtHrCriado'])} dias"
+            last_update = (
+                parser.parse(tracking_info[0]["dtHrCriado"])
+                if tracking_info[0]["codigo"] == "BDE"
+                else datetime.now()
+            )
+
+            tracking_message += f"\n\n******\n<b>Tempo decorrido</b>: \n{days_between(parser.parse(tracking_info[len(tracking_info) - 1]['dtHrCriado']), last_update)} dias"
     elif list_all:
         tracking_message = f"Nenhum evento encontrado para o código de rastreio <b>{code.tracking_code}</b>"
 

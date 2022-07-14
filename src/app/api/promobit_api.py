@@ -9,7 +9,7 @@ API_URI = f"https://api.promobit.com.br"
 
 def get_last_sales(limit: int = 50) -> list():
     try:
-        res = requests.get(f"{API_URI}/offers?limit={limit}&sort=latest", verify=False)
+        res = requests.get(f"{API_URI}/offers?limit={limit}&sort=latest")
 
         if res.status_code != 200:
             return None
