@@ -5,5 +5,5 @@ from app.configs import settings
 
 
 engine = create_engine(settings.connection_string)
-session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+session_local = sessionmaker(autocommit=True, autoflush=True, bind=engine)
 base = declarative_base()
