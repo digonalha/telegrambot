@@ -120,15 +120,15 @@ def list_tracking_events(code, list_all=True):
             return
 
     tracking_events = []
+    if tracking_info:
+        for info in reversed(tracking_info):
+            if list_all:
+                tracking_events.append(generate_tracking_event_create(1, info))
+            else:
+                tracking_event = add_tracking_event(code.id, info)
 
-    for info in reversed(tracking_info):
-        if list_all:
-            tracking_events.append(generate_tracking_event_create(1, info))
-        else:
-            tracking_event = add_tracking_event(code.id, info)
-
-            if tracking_event:
-                tracking_events.append(tracking_event)
+                if tracking_event:
+                    tracking_events.append(tracking_event)
 
     tracking_message = ""
 
@@ -162,6 +162,7 @@ def list_tracking_events(code, list_all=True):
     if (
         code.id
         and code.id > 0
+        and tracking_info
         and len(tracking_info) > 0
         and tracking_info[0]["codigo"].startswith("BDE")
     ):
