@@ -365,21 +365,24 @@ def run_webscrap_worker() -> None:
         try:
             sleep(randint(62, 126))
 
-            if promobit_retry:
+            if promobit_retry >= 0:
                 try:
                     check_promobit_sales()
-                except:
+                except Exception as ex:
+                    syslog.create_warning("webscrap_worker - promobit", ex)
                     promobit_retry += 1
-            if gatry_retry:
+            if gatry_retry >= 0:
                 try:
                     check_gatry_sales()
-                except:
+                except Exception as ex:
+                    syslog.create_warning("webscrap_worker - gatry", ex)
                     gatry_retry += 1
-            if boletando_retry:
+            if boletando_retry >= 0:
                 try:
                     check_boletando_sales()
-                except:
-                    boletando_retry += 1            
+                except Exception as ex:
+                    syslog.create_warning("webscrap_worker - boletando", ex)
+                    boletando_retry += 1
 
         except Exception as ex:
             syslog.create_warning("webscrap_worker", ex)
