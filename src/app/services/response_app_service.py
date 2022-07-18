@@ -150,146 +150,127 @@ def resolve_callback(callback_query) -> None:
 
 def resolve_message(message) -> None:
     """Select an action to answer a message update."""
-    try:
-        from_user_id = message["from"]["id"]
-        chat_id = message["chat"]["id"]
-
-        if timeout_service.is_user_in_timeout(chat_id, from_user_id):
+    from_user_id = message["from"]["id"]
+    chat_id = message["chat"]["id"]
+    if timeout_service.is_user_in_timeout(chat_id, from_user_id):
+        return
+    username = ""
+    if "username" in message["from"]:
+        username = message["from"]["username"]
+    # if user who send message not found on users object, add on database:
+    user_service.add_or_update_user(
+        from_user_id, message["from"]["first_name"], username
+    )
+    text = ""
+    if "text" in message:
+        text = message["text"]
+    elif "caption" in message:
+        text = message["caption"]
+    else:
+        return
+    if not text.startswith("/"):
+        return
+    # sanitize text:
+    text = string_helper.string_sanitize(text)
+    is_group = message["chat"]["type"] == "group"
+    if is_group:
+        if text.lower() == "/help" or (
+            settings.bot_name and text.lower() == f"/help@{settings.bot_name}"
+        ):
+            send_group_help_message(
+                chat_id, message["from"]["first_name"], message["message_id"]
+            )
             return
-
-        username = ""
-
-        if "username" in message["from"]:
-            username = message["from"]["username"]
-        # if user who send message not found on users object, add on database:
-        user_service.add_or_update_user(
-            from_user_id, message["from"]["first_name"], username
-        )
-
-        text = ""
-
-        if "text" in message:
-            text = message["text"]
-        elif "caption" in message:
-            text = message["caption"]
-        else:
+        elif text.lower() == "/cmd" or (
+            settings.bot_name and text.lower() == f"/cmd@{settings.bot_name}"
+        ):
+            send_commands_message(
+                chat_id, message["from"]["first_name"], message["message_id"]
+            )
             return
-
-        if not text.startswith("/"):
+        elif text.lower().startswith("/mod"):
+            moderator_service.insert_moderator(chat_id, text, from_user_id)
             return
-
-        # sanitize text:
-        text = string_helper.string_sanitize(text)
-
-        is_group = message["chat"]["type"] == "group"
-
-        if is_group:
-            if text.lower() == "/help" or (
-                settings.bot_name and text.lower() == f"/help@{settings.bot_name}"
-            ):
-                send_group_help_message(
-                    chat_id, message["from"]["first_name"], message["message_id"]
-                )
-                return
-            elif text.lower() == "/cmd" or (
-                settings.bot_name and text.lower() == f"/cmd@{settings.bot_name}"
-            ):
-                send_commands_message(
-                    chat_id, message["from"]["first_name"], message["message_id"]
-                )
-                return
-            elif text.lower().startswith("/mod"):
-                moderator_service.insert_moderator(chat_id, text, from_user_id)
-                return
-            elif text.lower().startswith("/unmod"):
-                moderator_service.remove_moderator(chat_id, text, from_user_id)
-                return
-            elif text.lower().startswith("/mute"):
-                timeout_service.insert_timeout_user(chat_id, text, from_user_id)
-                return
-            elif text.lower().startswith("/unmute"):
-                timeout_service.remove_timeout_user(chat_id, text, from_user_id)
-                return
-            elif text.lower().startswith("/addcmd"):
-                file_id = None
-                media_type = MediaType.NONE
-
-                if "audio" in message:
-                    file_id = message["audio"]["file_id"]
-                    media_type = MediaType.AUDIO
-                elif "photo" in message:
-                    if len(message["photo"]) == 3:
-                        file_id = message["photo"][2]["file_id"]
-                    elif len(message["photo"]) == 2:
-                        file_id = message["photo"][1]["file_id"]
-                    else:
-                        file_id = message["photo"][0]["file_id"]
-                    media_type = MediaType.IMAGE
-                elif "animation" in message:
-                    file_id = message["animation"]["file_id"]
-                    media_type = MediaType.ANIMATION
-                elif "video" in message:
-                    file_id = message["video"]["file_id"]
-                    media_type = MediaType.VIDEO
-
-                command_service.insert_command(
-                    chat_id, text, from_user_id, file_id, media_type
-                )
-
-                return
-            elif text.lower().startswith("/delcmd"):
-                command_service.remove_command(chat_id, text, from_user_id)
-                return
-            elif len(text) >= 3:
-                command = text.split(" ", 0)[0].split("/")[1].lower()
-
-                if settings.bot_name and f"@{settings.bot_name}" in command:
-                    command = command.split(f"@{settings.bot_name}")[0]
-
-                db_command = command_service.get_command(command, chat_id)
-
-                if db_command:
-                    if db_command.media_type == MediaType.AUDIO:
-                        user = user_service.get_user_by_id_if_exists(from_user_id)
-                        message_service.send_audio(
-                            chat_id,
-                            db_command.file_id,
-                            db_command.text,
-                            user.user_name,
-                        )
-                    elif db_command.media_type == MediaType.IMAGE:
-                        message_service.send_image(
-                            chat_id, db_command.file_id, db_command.text
-                        )
-                    elif db_command.media_type == MediaType.ANIMATION:
-                        message_service.send_animation(chat_id, db_command.file_id)
-                    elif db_command.media_type == MediaType.VIDEO:
-                        message_service.send_video(chat_id, db_command.file_id)
-                    else:
-                        message_service.send_message(chat_id, db_command.text)
-                return
-        else:
-            if text.lower() == "/help" or text.lower() == "/start":
-                send_private_help_message(chat_id, message["from"]["first_name"])
-            elif text.lower() == "/promo":
-                keyword_service.get_user_keywords(chat_id)
-            elif text.lower().startswith("/promo"):
-                keyword_service.get_last_sales_by_keyword(chat_id, text)
-            elif text.lower().startswith("/clearpromo"):
-                keyword_service.remove_all_keywords(chat_id, text)
-            elif text.lower().startswith("/addpromo"):
-                keyword_service.insert_keyword(chat_id, text)
-            elif text.lower().startswith("/delpromo"):
-                keyword_service.remove_keyword(chat_id, text)
-            # RASTREIO CORREIOS
-            elif text.lower().startswith("/addrastreio"):
-                tracking_code_service.insert_tracking_code(chat_id, text)
-            elif text.lower().startswith("/delrastreio"):
-                tracking_code_service.remove_tracking_code(chat_id, text)
-            elif text.lower() == ("/rastreio"):
-                tracking_code_service.get_user_trackings(chat_id)
-            elif text.startswith("/rastreio"):
-                tracking_code_service.list_events_from_tracking_code(chat_id, text)
-
-    except Exception as ex:
-        syslog.create_warning("resolve_message", ex, chat_id, text)
+        elif text.lower().startswith("/unmod"):
+            moderator_service.remove_moderator(chat_id, text, from_user_id)
+            return
+        elif text.lower().startswith("/mute"):
+            timeout_service.insert_timeout_user(chat_id, text, from_user_id)
+            return
+        elif text.lower().startswith("/unmute"):
+            timeout_service.remove_timeout_user(chat_id, text, from_user_id)
+            return
+        elif text.lower().startswith("/addcmd"):
+            file_id = None
+            media_type = MediaType.NONE
+            if "audio" in message:
+                file_id = message["audio"]["file_id"]
+                media_type = MediaType.AUDIO
+            elif "photo" in message:
+                if len(message["photo"]) == 3:
+                    file_id = message["photo"][2]["file_id"]
+                elif len(message["photo"]) == 2:
+                    file_id = message["photo"][1]["file_id"]
+                else:
+                    file_id = message["photo"][0]["file_id"]
+                media_type = MediaType.IMAGE
+            elif "animation" in message:
+                file_id = message["animation"]["file_id"]
+                media_type = MediaType.ANIMATION
+            elif "video" in message:
+                file_id = message["video"]["file_id"]
+                media_type = MediaType.VIDEO
+            command_service.insert_command(
+                chat_id, text, from_user_id, file_id, media_type
+            )
+            return
+        elif text.lower().startswith("/delcmd"):
+            command_service.remove_command(chat_id, text, from_user_id)
+            return
+        elif len(text) >= 3:
+            command = text.split(" ", 0)[0].split("/")[1].lower()
+            if settings.bot_name and f"@{settings.bot_name}" in command:
+                command = command.split(f"@{settings.bot_name}")[0]
+            db_command = command_service.get_command(command, chat_id)
+            if db_command:
+                if db_command.media_type == MediaType.AUDIO:
+                    user = user_service.get_user_by_id_if_exists(from_user_id)
+                    message_service.send_audio(
+                        chat_id,
+                        db_command.file_id,
+                        db_command.text,
+                        user.user_name,
+                    )
+                elif db_command.media_type == MediaType.IMAGE:
+                    message_service.send_image(
+                        chat_id, db_command.file_id, db_command.text
+                    )
+                elif db_command.media_type == MediaType.ANIMATION:
+                    message_service.send_animation(chat_id, db_command.file_id)
+                elif db_command.media_type == MediaType.VIDEO:
+                    message_service.send_video(chat_id, db_command.file_id)
+                else:
+                    message_service.send_message(chat_id, db_command.text)
+            return
+    else:
+        if text.lower() == "/help" or text.lower() == "/start":
+            send_private_help_message(chat_id, message["from"]["first_name"])
+        elif text.lower() == "/promo":
+            keyword_service.get_user_keywords(chat_id)
+        elif text.lower().startswith("/promo"):
+            keyword_service.get_last_sales_by_keyword(chat_id, text)
+        elif text.lower().startswith("/clearpromo"):
+            keyword_service.remove_all_keywords(chat_id, text)
+        elif text.lower().startswith("/addpromo"):
+            keyword_service.insert_keyword(chat_id, text)
+        elif text.lower().startswith("/delpromo"):
+            keyword_service.remove_keyword(chat_id, text)
+        # RASTREIO CORREIOS
+        elif text.lower().startswith("/addrastreio"):
+            tracking_code_service.insert_tracking_code(chat_id, text)
+        elif text.lower().startswith("/delrastreio"):
+            tracking_code_service.remove_tracking_code(chat_id, text)
+        elif text.lower() == ("/rastreio"):
+            tracking_code_service.get_user_trackings(chat_id)
+        elif text.startswith("/rastreio"):
+            tracking_code_service.list_events_from_tracking_code(chat_id, text)
