@@ -172,7 +172,9 @@ def resolve_message(message) -> None:
         return
     # sanitize text:
     text = string_helper.string_sanitize(text)
-    is_group = message["chat"]["type"] == "group"
+    is_group = (
+        message["chat"]["type"] == "group" or message["chat"]["type"] == "supergroup"
+    )
     if is_group:
         if text.lower() == "/help" or (
             settings.bot_name and text.lower() == f"/help@{settings.bot_name}"
