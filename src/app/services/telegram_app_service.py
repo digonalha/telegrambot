@@ -15,11 +15,8 @@ def run_telegram_worker() -> None:
     while True:
         sleep(1)
         try:
-            if offset == 0:
-                updates = message_service.get_updates(0)
-                offset = message_service.get_update_id_offset(updates)
-            else:
-                updates = message_service.get_updates(offset)
+            updates = message_service.get_updates(offset)
+            offset = message_service.get_update_id_offset(updates)
 
             message_service.delete_messages(updates, timeout_service.timeout_users)
 

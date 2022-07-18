@@ -7,7 +7,7 @@ from shared.helpers.logging_helper import SystemLogging
 syslog = SystemLogging(__name__)
 
 
-def run__worker() -> None:
+def run_tracking_worker() -> None:
     """Loop for make requests to correios api."""
 
     while True:
