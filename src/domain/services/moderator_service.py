@@ -75,6 +75,7 @@ def insert_moderator(chat_id: int, message_text: str, send_by_user_id: int):
         message_service.send_message(
             chat_id, "Não foi possível cadastrar o novo moderador"
         )
+        raise
 
 
 def delete_moderator(user_id: int, chat_id: int) -> bool:
@@ -131,3 +132,4 @@ def remove_moderator(chat_id: int, message_text: str, send_by_user_id: int) -> N
     except Exception as ex:
         syslog.create_warning("remove_moderator", ex, send_by_user_id, message_text)
         message_service.send_message(chat_id, "Não foi possível remover o moderador")
+        raise

@@ -363,26 +363,24 @@ def run_webscrap_worker() -> None:
     """Loop for sale's tracker sites web scraping."""
     while True:
         try:
-            if promobit_retry < 100:
+            sleep(randint(62, 126))
+
+            if promobit_retry:
                 try:
                     check_promobit_sales()
                 except:
                     promobit_retry += 1
-                    raise
-            if gatry_retry < 100:
+            if gatry_retry:
                 try:
                     check_gatry_sales()
                 except:
                     gatry_retry += 1
-                    raise
-            if boletando_retry < 100:
+            if boletando_retry:
                 try:
                     check_boletando_sales()
                 except:
-                    boletando_retry += 1
-                    raise
-
-            sleep(randint(62, 126))
+                    boletando_retry += 1            
 
         except Exception as ex:
-            syslog.create_warning("run_webscrap_worker", ex)
+            syslog.create_warning("webscrap_worker", ex)
+            continue

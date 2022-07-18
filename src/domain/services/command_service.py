@@ -191,16 +191,13 @@ def insert_command(
             message_service.send_message(
                 chat_id, f"O comando */{new_command}* já existe"
             )
-    except ValueError as ve:
-        message_service.send_message(
-            chat_id,
-            "Para criar um novo comando, utilize:\n`/addcmd comando | resposta | descrição`\nou\n`/addcmd -c comando -a resposta -d descrição`",
-        )
     except Exception as ex:
         syslog.create_warning("insert_command", ex, send_by_user_id, message_text)
         message_service.send_message(
-            chat_id, "Não foi possível cadastrar o novo comando"
+            chat_id,
+            f"Não foi possível adicionar o comando */{new_command}* \n\nPara criar um novo comando, utilize:\n`/addcmd comando | resposta | descrição`\nou\n`/addcmd -c comando -a resposta -d descrição`",
         )
+        raise
 
 
 def delete_command(command_name: str, chat_id: int) -> bool:
@@ -245,13 +242,9 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int) -> Non
                 chat_id,
                 f"O comando */{command_name}* não existe",
             )
-    except ValueError as ve:
-        message_service.send_message(
-            chat_id,
-            "Para remover um comando customizado, utilize `/delcmd comando`",
-        )
     except Exception as ex:
         syslog.create_warning("remove_command", ex, send_by_user_id, message_text)
         message_service.send_message(
-            chat_id, f"Não foi possível remover o comando */{command_name}*"
+            chat_id,
+            f"Não foi possível remover o comando */{command_name}* \n\nPara remover um comando customizado, utilize `/delcmd comando`",
         )

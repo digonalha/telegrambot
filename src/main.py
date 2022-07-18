@@ -66,13 +66,13 @@ def main():
     t1.start()
     print("done!")
 
-    print("→ starting telegrambot worker... ", end="")
-    t2 = threading.Thread(target=telegram_app_service.run_telegram_worker)
+    print("→ starting correios tracking worker... ", end="")
+    t2 = threading.Thread(target=correios_app_service.run_tracking_worker)
     t2.start()
     print("done!")
 
-    print("→ starting correios tracking worker... ", end="")
-    t3 = threading.Thread(target=correios_app_service.run_tracking_worker)
+    print("→ starting telegrambot worker... ", end="")
+    t3 = threading.Thread(target=telegram_app_service.run_telegram_worker)
     t3.start()
     print("done!")
 

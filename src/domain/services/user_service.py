@@ -121,3 +121,4 @@ def add_or_update_user(user_id: int, first_name: str, user_name: str) -> None:
     except Exception as ex:
         user_info = f"first_name: {first_name}| username: {user_name}"
         syslog.create_warning("add_user_if_not_exists", ex, user_id, user_info)
+        raise

@@ -1,3 +1,4 @@
+from time import sleep
 from app.services import response_app_service
 from shared.helpers.logging_helper import SystemLogging
 from domain.services import message_service, timeout_service
@@ -12,6 +13,7 @@ def run_telegram_worker() -> None:
     offset = 0
 
     while True:
+        sleep(1)
         try:
             if offset == 0:
                 updates = message_service.get_updates(0)
@@ -30,10 +32,7 @@ def run_telegram_worker() -> None:
                     elif "callback_query" in update:
                         request_obj = update["callback_query"]
                         response_app_service.resolve_callback(request_obj)
+
         except Exception as ex:
-            syslog.create_warning("run_telegram_worker", ex)
-        finally:
-            if updates:
-                offset = message_service.get_update_id_offset(updates)
-            else:
-                offset = 0
+            syslog.create_warning("telegram_worker", ex)
+            continue

@@ -51,6 +51,7 @@ def insert_tracking_code(user_id: int, message_text: str):
         message_service.send_message(
             user_id, "Não foi possível cadastrar o código de rastreio"
         )
+        raise
 
 
 def add_tracking_code(user_id: int, code: str, name: str = None) -> bool:
@@ -112,6 +113,7 @@ def list_events_from_tracking_code(user_id: int, message_text: str):
         message_service.send_message(
             user_id, "Não foi possível retornar as informações do rastreio"
         )
+        raise
 
 
 def get_all_active() -> list:
@@ -173,6 +175,7 @@ def get_user_trackings(user_id: int) -> list:
             user_id,
             f"Ocorreu um erro ao buscar os códigos de rastreio",
         )
+        raise
 
 
 def delete_tracking_code(user_id: int, code: str) -> bool:
@@ -226,6 +229,7 @@ def remove_tracking_code(chat_id: int, message_text: str) -> None:
         message_service.send_message(
             chat_id, f"Não foi possível remover o código de rastreio *{code}*"
         )
+    raise
 
 
 def deactivate_tracking_code(tracking_code_id=int):

@@ -12,12 +12,11 @@ def run_tracking_worker() -> None:
 
     while True:
         try:
+            sleep(randint(60, 180))
             tracking_codes = tracking_code_service.get_all_active()
-
             for code in tracking_codes:
                 tracking_event_service.list_tracking_events(code, False)
 
         except Exception as ex:
-            syslog.create_warning("run_tracking_worker", ex, code.user_id)
-        finally:
-            sleep(randint(180, 360))
+            syslog.create_warning("telegram_worker", ex)
+            continue

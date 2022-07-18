@@ -186,6 +186,7 @@ def check_last_sales(
     except Exception as ex:
         str_keyword_dict = json.dumps(keyword)
         syslog.create_warning("check_last_sales", ex, user_id, str_keyword_dict)
+        raise
 
 
 def add_sale_if_not_exists(sale: dict) -> Sale:
@@ -208,6 +209,7 @@ def add_sale_if_not_exists(sale: dict) -> Sale:
         return db_sale
     except Exception as ex:
         syslog.create_warning("add_sale_if_not_exists", ex, 0, "")
+        raise
 
 
 def add_sale_if_aggregator_url_not_exists(sale: dict) -> Sale:
@@ -230,3 +232,4 @@ def add_sale_if_aggregator_url_not_exists(sale: dict) -> Sale:
         return db_sale
     except Exception as ex:
         syslog.create_warning("add_sale_if_not_exists", ex, 0, "")
+        raise

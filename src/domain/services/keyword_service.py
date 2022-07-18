@@ -59,6 +59,7 @@ def get_user_keywords(user_id: int) -> list:
             user_id,
             f"Ocorreu um erro ao buscar as palavras-chave",
         )
+        raise
 
 
 def add_keyword(keyword: dict) -> bool:
@@ -195,6 +196,7 @@ def insert_keyword(user_id: int, message_text: str):
             send_by_user.user_id,
             f'Não foi possível adicionar a palavra-chave *"{keyword}"*',
         )
+        raise
 
 
 def update_keyword(keyword: dict) -> bool:
@@ -268,12 +270,12 @@ def remove_keyword(user_id: int, message_text: str) -> None:
             user_id,
             "Para remover uma palavra-chave, utilize: \n\n`/delpromo palavra-chave`",
         )
-        return
     except Exception as ex:
         syslog.create_warning("remove_keyword", ex, user_id, message_text)
         message_service.send_message(
             user_id, f'Não foi possível remover a palavra-chave *"{keyword}"*'
         )
+        raise
 
 
 def remove_all_keywords_by_user_id(user_id: int) -> bool:
@@ -333,6 +335,7 @@ def remove_all_keywords(user_id: int, message_text: str) -> None:
         message_service.send_message(
             user_id, f"Não foi possível remover as palavras-chave"
         )
+        raise
 
 
 def get_last_sales_by_keyword(user_id: int, message_text: str):
@@ -379,6 +382,7 @@ def get_last_sales_by_keyword(user_id: int, message_text: str):
             user_id,
             f'Ocorreu um erro ao buscar promoções que contenham a palavra-chave *"{keyword}"*',
         )
+        raise
 
 
 def delete_by_callback(
