@@ -7,7 +7,7 @@ from shared.helpers.logging_helper import SystemLogging
 syslog = SystemLogging(__name__)
 
 
-def run_tracking_worker() -> None:
+def run__worker() -> None:
     """Loop for make requests to correios api."""
 
     while True:
@@ -18,5 +18,5 @@ def run_tracking_worker() -> None:
                 tracking_event_service.list_tracking_events(code, False)
 
         except Exception as ex:
-            syslog.create_warning("telegram_worker", ex)
+            syslog.create_warning("tracking_worker", ex)
             continue
