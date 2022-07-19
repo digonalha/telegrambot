@@ -5,6 +5,7 @@ from random import randint
 from app.configs import settings
 from shared.helpers.logging_helper import SystemLogging
 from domain.services.keyword_service import remove_all_keywords_by_user_id
+from shared.helpers.string_helper import escape_markdown_string
 
 syslog = SystemLogging(__name__)
 
@@ -53,14 +54,13 @@ def send_message(
     chat_id: int,
     message: str,
     reply_id: int = 0,
-    parse_mode: str = "markdown",
+    parse_mode: str = None,
     reply_markup: str = None,
     disable_web_page_preview: bool = True,
 ):
     data = {
         "chat_id": chat_id,
         "text": message,
-        "parse_mode": parse_mode,
         "disable_web_page_preview": disable_web_page_preview,
     }
 
@@ -68,29 +68,40 @@ def send_message(
         data["reply_to_message_id"] = reply_id
     if reply_markup:
         data["reply_markup"] = reply_markup
+    if parse_mode:
+        data["parse_mode"] = parse_mode
 
-    requests.post(f"{API_URI}/sendMessage", data=data)
+    res = requests.post(f"{API_URI}/sendMessage", data=data)
+
+    if res.status_code == 400 and "byte offset" in res.text:
+        data["text"] = escape_markdown_string(data["text"])
+        res = requests.post(f"{API_URI}/sendMessage", data=data)
 
 
 def edit_message(
     chat_id: int,
     message: str,
     message_id: int,
-    parse_mode: str = "markdown",
+    parse_mode: str = None,
     reply_markup: str = None,
 ):
     data = {
         "chat_id": chat_id,
         "message_id": message_id,
         "text": message,
-        "parse_mode": parse_mode,
         "disable_web_page_preview": True,
     }
 
     if reply_markup:
         data["reply_markup"] = reply_markup
+    if parse_mode:
+        data["parse_mode"] = parse_mode
 
-    requests.post(f"{API_URI}/editMessageText", data=data)
+    res = requests.post(f"{API_URI}/editMessageText", data=data)
+
+    if res.status_code == 400 and "byte offset" in res.text:
+        data["text"] = escape_markdown_string(data["text"])
+        res = requests.post(f"{API_URI}/editMessageText", data=data)
 
 
 def edit_message_reply_markup(
@@ -144,15 +155,23 @@ def send_image(
         arr_photo = literal_eval(file_id)
         random_index = randint(0, len(arr_photo) - 1)
         file_id = arr_photo[random_index]
-    data = {"chat_id": chat_id, "photo": file_id, "parse_mode": parse_mode}
+
+    data = {"chat_id": chat_id, "photo": file_id}
+
     if caption:
         data["caption"] = caption
     if reply_id:
         data["reply_to_message_id"] = reply_id
     if reply_markup:
         data["reply_markup"] = reply_markup
+    if parse_mode:
+        data["parse_mode"] = parse_mode
 
     res = requests.post(f"{API_URI}/sendPhoto", data=data)
+
+    if caption and res.status_code == 400 and "byte offset" in res.text:
+        data["caption"] = escape_markdown_string(data["caption"])
+        res = requests.post(f"{API_URI}/sendPhoto", data=data)
 
     if res.status_code == 400 and caption:
         send_message(
@@ -160,7 +179,6 @@ def send_image(
             message=caption,
             reply_id=reply_id,
             reply_markup=reply_markup,
-            parse_mode=parse_mode,
             disable_web_page_preview=False,
         )
 

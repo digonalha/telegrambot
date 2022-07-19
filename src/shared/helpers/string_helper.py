@@ -94,3 +94,19 @@ def get_old_new_price_str(new_price: float, old_price: float = None):
     if old_price and old_price > 0:
         old_price_str = f"<s>{format_currency(old_price)}</s>  "
     return f"{old_price_str}{format_currency(new_price)}"
+
+
+def escape_markdown_string(text: str):
+    return text.translate(
+        str.maketrans(
+            {
+                "*": r"\*",
+                "_": r"\_",
+                "\\": r"\\",
+                "~": r"\~",
+                "`": r"\`",
+                "[": r"\[",
+                "]": r"\]",
+            }
+        )
+    )
