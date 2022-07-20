@@ -75,7 +75,7 @@ def send_message(
 
         string_to_replace = f"$random_word[{str_words}]"
 
-        message = message.replace(string_to_replace, selected_word)
+        message = message.replace(string_to_replace, selected_word.strip())
 
     telegram_api.send_message(
         chat_id,
