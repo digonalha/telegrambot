@@ -169,10 +169,6 @@ def send_image(
 
     res = requests.post(f"{API_URI}/sendPhoto", data=data)
 
-    if caption and res.status_code == 400 and "byte offset" in res.text:
-        data["caption"] = escape_markdown_string(data["caption"])
-        res = requests.post(f"{API_URI}/sendPhoto", data=data)
-
     if res.status_code == 400 and caption:
         send_message(
             chat_id=chat_id,
