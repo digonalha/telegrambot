@@ -7,10 +7,9 @@ from domain.schemas.tracking_event_schemas.tracking_event_create import (
 )
 
 
-local_session = database.get()
-
-
 def add(tracking_event: TrackingEventCreate) -> TrackingEvent:
+    local_session = database.get()
+
     new_event = TrackingEvent(**tracking_event.dict())
 
     local_session.add(new_event)
@@ -22,7 +21,8 @@ def add(tracking_event: TrackingEventCreate) -> TrackingEvent:
 
 def get(tracking_code_id: int, code: str, event_datetime: datetime):
     return (
-        local_session.query(TrackingEvent)
+        database.get()
+        .query(TrackingEvent)
         .filter(
             TrackingEvent.tracking_code_id == tracking_code_id,
             TrackingEvent.code == code,

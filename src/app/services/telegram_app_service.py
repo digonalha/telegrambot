@@ -13,7 +13,7 @@ def run_telegram_worker() -> None:
     offset = 0
 
     while True:
-        sleep(1)
+        sleep(0.5)
         try:
             updates = message_service.get_updates(offset)
             offset = message_service.get_update_id_offset(updates)

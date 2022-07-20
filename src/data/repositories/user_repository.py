@@ -4,11 +4,9 @@ from domain.schemas.user_schemas.user_create import UserCreate
 from domain.schemas.user_schemas.user_update import UserUpdate
 
 
-local_session = database.get()
-
-
 def add(user: UserCreate) -> User:
     new_user = User(**user.dict())
+    local_session = database.get()
 
     local_session.add(new_user)
     local_session.commit()
@@ -18,14 +16,16 @@ def add(user: UserCreate) -> User:
 
 
 def get_by_id(user_id: int) -> User:
-    return local_session.query(User).filter(User.user_id == user_id).first()
+    return database.get().query(User).filter(User.user_id == user_id).first()
 
 
 def get_all() -> None:
-    return local_session.query(User).all()
+    return database.get().query(User).all()
 
 
 def update(user: UserUpdate) -> User:
+    local_session = database.get()
+
     db_user = local_session.query(User).filter(User.user_id == user.user_id).first()
 
     if not db_user:

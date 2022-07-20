@@ -4,10 +4,9 @@ from data.database import database
 from domain.schemas.command_schemas.command_create import CommandCreate
 from domain.models.command import Command
 
-local_session = database.get()
-
 
 def add(command: CommandCreate):
+    local_session = database.get()
     new_command = Command(**command.dict())
 
     local_session.add(new_command)
@@ -18,6 +17,7 @@ def add(command: CommandCreate):
 
 
 def delete(command: str, chat_id: int):
+    local_session = database.get()
     local_session.query(Command).filter(
         func.lower(Command.command) == command.lower(),
         Command.chat_id == chat_id,
@@ -27,12 +27,13 @@ def delete(command: str, chat_id: int):
 
 
 def get_all():
-    return local_session.query(Command).all()
+    return database.get().query(Command).all()
 
 
 def get(command: str, chat_id: int):
     return (
-        local_session.query(Command)
+        database.get()
+        .query(Command)
         .filter(
             func.lower(Command.command) == command.lower(),
             Command.chat_id == chat_id,
@@ -42,9 +43,13 @@ def get(command: str, chat_id: int):
 
 
 def count_by_chat_id(chat_id: int) -> int:
-    result = local_session.execute(
-        text("SELECT COUNT(*) FROM command WHERE chat_id = :id"),
-        {"id": chat_id},
-    ).scalar()
+    result = (
+        database.get()
+        .execute(
+            text("SELECT COUNT(*) FROM command WHERE chat_id = :id"),
+            {"id": chat_id},
+        )
+        .scalar()
+    )
 
     return result

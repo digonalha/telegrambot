@@ -4,10 +4,9 @@ from data.database import database
 from domain.schemas.sale_schemas.sale_create import SaleCreate
 from domain.models.sale import Sale
 
-local_session = database.get()
-
 
 def add(sale: SaleCreate):
+    local_session = database.get()
     new_sale = Sale(**sale.dict())
 
     local_session.add(new_sale)
@@ -21,22 +20,24 @@ def get_last_day_sales():
     greater_than_date = datetime.combine(date.today(), time()) - timedelta(
         1
     )  # date today - 1 day
-    return local_session.query(Sale).filter(Sale.sale_date >= greater_than_date).all()
+    return database.get().query(Sale).filter(Sale.sale_date >= greater_than_date).all()
 
 
 def get_by_id(id: int):
-    return local_session.query(Sale).filter(Sale.sale_id == id).first()
+    return database.get().query(Sale).filter(Sale.sale_id == id).first()
 
 
 def get_by_aggregator_url(aggregator_url: str):
     return (
-        local_session.query(Sale).filter(Sale.aggregator_url == aggregator_url).first()
+        database.get().query(Sale).filter(Sale.aggregator_url == aggregator_url).first()
     )
 
 
 def get_last_day_sales_by_keyword(
     arr_keyword: str, max_price: int = None, skip: int = 0, take: int = 3
 ) -> list():
+    local_session = database.get()
+
     str_SQL = """SELECT ts.product_name, ts.product_image_url, ts.sale_url, ts.aggregator_url, ts.price, ts.old_price, ts.sale_date
                FROM sale ts 
                WHERE lower(ts.product_name) LIKE ALL (:arr_keyword) 
@@ -67,6 +68,8 @@ def get_last_day_sales_by_keyword(
 
 
 def count_last_day_sales_by_keyword(arr_keyword: str, max_price: int = None) -> int:
+    local_session = database.get()
+
     str_SQL = """SELECT COUNT(*) 
                  FROM sale ts
                  WHERE lower(ts.product_name) LIKE ALL (:arr_keyword) 

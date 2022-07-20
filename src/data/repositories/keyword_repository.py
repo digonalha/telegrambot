@@ -5,10 +5,9 @@ from domain.schemas.keyword_schemas.keyword_create import KeywordCreate
 from domain.schemas.keyword_schemas.keyword_update import KeywordUpdate
 from domain.models.keyword import Keyword
 
-local_session = database.get()
-
 
 def add(keyword: KeywordCreate):
+    local_session = database.get()
     new_keyword = Keyword(**keyword.dict())
 
     local_session.add(new_keyword)
@@ -19,6 +18,7 @@ def add(keyword: KeywordCreate):
 
 
 def update(keyword: KeywordUpdate) -> Keyword:
+    local_session = database.get()
     db_keyword = (
         local_session.query(Keyword)
         .filter(
@@ -39,7 +39,8 @@ def update(keyword: KeywordUpdate) -> Keyword:
 
 
 def delete(user_id: int, keyword: str):
-    local_session.query(Keyword).filter(
+    local_session = database.get()
+    database.get().query(Keyword).filter(
         Keyword.user_id == user_id,
         func.lower(Keyword.keyword) == keyword.lower(),
     ).delete(synchronize_session="fetch")
@@ -48,17 +49,19 @@ def delete(user_id: int, keyword: str):
 
 
 def delete_all_by_user_id(user_id: int):
+    local_session = database.get()
     local_session.query(Keyword).filter(Keyword.user_id == user_id).delete()
     local_session.commit()
 
 
 def get_all():
-    return local_session.query(Keyword).all()
+    return database.get().query(Keyword).all()
 
 
 def get(user_id: int, keyword: str):
     return (
-        local_session.query(Keyword)
+        database.get()
+        .query(Keyword)
         .filter(
             Keyword.user_id == user_id,
             func.lower(Keyword.keyword) == keyword.lower(),
@@ -69,7 +72,8 @@ def get(user_id: int, keyword: str):
 
 def get_by_user_id(user_id: int):
     return (
-        local_session.query(Keyword)
+        database.get()
+        .query(Keyword)
         .filter(Keyword.user_id == user_id)
         .order_by(Keyword.keyword)
         .all()
