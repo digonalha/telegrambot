@@ -229,7 +229,7 @@ def remove_tracking_code(chat_id: int, message_text: str) -> None:
         message_service.send_message(
             chat_id, f"Não foi possível remover o código de rastreio *{code}*"
         )
-    raise
+        raise
 
 
 def deactivate_tracking_code(tracking_code_id=int):
