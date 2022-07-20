@@ -176,6 +176,7 @@ def send_image(
             reply_id=reply_id,
             reply_markup=reply_markup,
             disable_web_page_preview=False,
+            parse_mode=parse_mode
         )
 
 
