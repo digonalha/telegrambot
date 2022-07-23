@@ -53,7 +53,7 @@ def load_prerequisites(attempts: int = 0):
             time.sleep(time_in_seconds)
             load_prerequisites(total_attempts)
         else:
-            main_syslog.create_warning("start_bot", ex)
+            main_syslog.create_warning("load_prerequisites", ex)
             print("could not start application. please check the log file")
             exit()
 
