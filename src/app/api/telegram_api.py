@@ -22,7 +22,7 @@ def create_log_from_response(function_name, response, chat_id: int = None):
         and "description" in response
         and "blocked by the user" in response["description"]
     ):
-        # delete keywords from user
+        # delete all keywords from user
         remove_all_keywords_by_user_id(chat_id)
         return True
 
@@ -176,7 +176,7 @@ def send_image(
             reply_id=reply_id,
             reply_markup=reply_markup,
             disable_web_page_preview=False,
-            parse_mode=parse_mode
+            parse_mode=parse_mode,
         )
 
 
