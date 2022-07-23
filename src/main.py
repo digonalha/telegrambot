@@ -44,9 +44,9 @@ def load_prerequisites(attempts: int = 0):
         keyword_service.get_all_keywords()
         print("done!")
     except Exception as ex:
-        if total_attempts <= 10:
+        if total_attempts <= 50:
             total_attempts += 1
-            time_in_seconds = total_attempts * 10
+            time_in_seconds = total_attempts * 5
             print(
                 f"an error occurred. waiting {time_in_seconds} seconds to try again..."
             )
