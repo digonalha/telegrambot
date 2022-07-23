@@ -50,7 +50,6 @@ def load_prerequisites(attempts: int = 0):
             print(
                 f"an error occurred. waiting {time_in_seconds} seconds to try again..."
             )
-
             time.sleep(time_in_seconds)
             load_prerequisites(total_attempts)
         else:
