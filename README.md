@@ -36,7 +36,7 @@ Para o bot identificar o usuário nos comandos pelo username, ele precisa indexa
 
 ------
 
-Os comandos do tipo texto podem ser cadastrados para retornar números ou palavras aleatórias. Para isso você deve utilizar na reposta os patterns:
+Os comandos do tipo texto podem ser cadastrados para retornar números ou palavras aleatórias. Para isso você deve utilizar na reposta os patterns abaixo:
 
 **$random_number\[x,y\] (intervalo entre 2 números)**
 
