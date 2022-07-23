@@ -31,7 +31,11 @@ E pronto! Após a execução do comando, será instalado o banco de dados postgr
 ```
 
 Para o bot identificar o usuário nos comandos pelo username, ele precisa indexar esse usuario no banco de dados.
-Os comandos do tipo texto podem ser cadastrados para retornar numero e palavras aleatórias. Para isso você deve utilizar na reposta os patterns **$random_number\[x,y\] (intervalo entre 2 números)** e **$random_word\[word1,word2,...,word10\] (máx. 10 palavras)**
+
+Os comandos do tipo texto podem ser cadastrados para retornar numero e palavras aleatórias. Para isso você deve utilizar na reposta os patterns:
+
+**$random_number\[x,y\] (intervalo entre 2 números)**
+**$random_word\[word1,word2,...,word10\] (máx. 10 palavras)**
 
 ## No chat privado
 
