@@ -82,22 +82,22 @@ def tracking_event_str(tracking_event):
         and tracking_event.unit_type_destination
         and tracking_event.unit_type_origin != "País"
     ):
-        tracking_message += f"\nde <b>{tracking_event.unit_type_origin}</b> em <b>{tracking_event.city_origin} - {tracking_event.state_origin}</b>"
+        tracking_message += f"\n‣  de <b>{tracking_event.unit_type_origin}</b> em <b>{tracking_event.city_origin} - {tracking_event.state_origin}</b>"
     elif tracking_event.unit_type_origin != "País":
-        tracking_message += f"\nem <b>{tracking_event.unit_type_origin}</b>, <b>{tracking_event.city_origin} - {tracking_event.state_origin}</b>"
+        tracking_message += f"\n‣  em <b>{tracking_event.unit_type_origin}</b>, <b>{tracking_event.city_origin} - {tracking_event.state_origin}</b>"
     else:
-        tracking_message += f"\nem <b>{tracking_event.unit_name_origin}</b>"
+        tracking_message += f"\n‣  em <b>{tracking_event.unit_name_origin}</b>"
 
     if (
         tracking_event.unit_type_destination
         and tracking_event.unit_type_origin != "País"
     ):
-        tracking_message += f"\npara <b>{tracking_event.unit_type_destination}</b> em <b>{tracking_event.city_destination} - {tracking_event.state_destination}</b>"
+        tracking_message += f"\n‣  para <b>{tracking_event.unit_type_destination}</b> em <b>{tracking_event.city_destination} - {tracking_event.state_destination}</b>"
     elif (
         tracking_event.unit_type_origin == "País"
         and tracking_event.unit_name_destination
     ):
-        tracking_message += f"\npara <b>{tracking_event.unit_name_destination}</b>"
+        tracking_message += f"\n‣  para <b>{tracking_event.unit_name_destination}</b>"
 
         if tracking_event.state_destination:
             tracking_message += f" - <b>{tracking_event.state_destination}</b>"
@@ -133,8 +133,8 @@ def list_tracking_events(code, list_all=True):
     tracking_message = ""
 
     if len(tracking_events) > 0:
-        name = "" if not code.name else f": {code.name}"
-        tracking_message = f"<b>Rastreio Correios</b>{name}\n[{code.tracking_code}]\n\n"
+        name = "" if not code.name else f"\n[{code.name}]"
+        tracking_message = f"<b>Rastreio Correios</b>{name}\n[{code.tracking_code}]\n"
 
         index = 0
 
@@ -143,19 +143,17 @@ def list_tracking_events(code, list_all=True):
                 index += 1
 
             if index > 1:
-                tracking_message += "\n\n"
+                tracking_message += "\n     •\n     •\n     •"
 
-            tracking_message += f"🏷\n"
+            tracking_message += f"\n"
             tracking_message += tracking_event_str(tracking_event)
 
-        if len(tracking_info) > 1:
-            last_update = (
-                parser.parse(tracking_info[0]["dtHrCriado"])
-                if tracking_info[0]["codigo"] == "BDE"
-                else datetime.now()
-            )
-
-            tracking_message += f"\n\n******\n<b>Tempo decorrido</b>: \n{days_between(parser.parse(tracking_info[len(tracking_info) - 1]['dtHrCriado']), last_update)} dias"
+        last_update = (
+            parser.parse(tracking_info[0]["dtHrCriado"])
+            if tracking_info[0]["codigo"] == "BDE"
+            else datetime.now()
+        )
+        tracking_message += f"\n\n******\n<b>Tempo decorrido</b>: \n{days_between(parser.parse(tracking_info[len(tracking_info) - 1]['dtHrCriado']), last_update)} dia(s)"
     elif list_all:
         tracking_message = f"Nenhum evento encontrado para o código de rastreio <b>{code.tracking_code}</b>"
 
@@ -169,4 +167,9 @@ def list_tracking_events(code, list_all=True):
         tracking_code_service.deactivate_tracking_code(code.id)
 
     if tracking_message:
-        message_service.send_message(code.user_id, tracking_message, parse_mode="HTML")
+        message_service.send_image(
+            code.user_id,
+            tracking_code_service.CORREIOS_LOGO_IMAGE_ID,
+            tracking_message,
+            parse_mode="HTML",
+        )

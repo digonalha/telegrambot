@@ -12,6 +12,8 @@ from data.repositories import tracking_code_repository
 
 syslog = SystemLogging(__name__)
 
+CORREIOS_LOGO_IMAGE_ID = "AgACAgEAAxkBAAJeAWLe08Yv3oygw1sxUyNIXg7vwlmQAAJwrDEbJnP4RnVWEBfc32x9AQADAgADbQADKQQ"
+
 
 def is_valid_tracking_code(code: str) -> bool:
     return regex.match("^[A-Z]{2}[0-9]{9}[A-Z]{2}$", code)
@@ -166,9 +168,10 @@ def get_user_trackings(user_id: int) -> list:
 
             message += f"\n<i>Clique no código de rastreio para copiá-lo</i>\n<i>/rastreio • /addrastreio • /delrastreio</i>"
 
-            message_service.send_message(user_id, message, parse_mode="HTML")
-        else:
-            message_service.send_message(user_id, message)
+        message_service.send_image(
+            user_id, CORREIOS_LOGO_IMAGE_ID, message, parse_mode="HTML"
+        )
+
     except Exception as ex:
         syslog.create_warning("get_user_trackings", ex, user_id, "")
         message_service.send_message(
