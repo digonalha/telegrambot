@@ -72,7 +72,7 @@ def add_tracking_event(
 
 
 def tracking_event_str(tracking_event):
-    tracking_message = f"{tracking_event.description}"
+    tracking_message = f"<u>{tracking_event.description}</u>"
 
     if tracking_event.detail:
         tracking_message += f"\n<i>{tracking_event.detail}</i>"
@@ -143,7 +143,7 @@ def list_tracking_events(code, list_all=True):
                 index += 1
 
             if index > 1:
-                tracking_message += "\n     •\n     •\n     •"
+                tracking_message += "\n     ,\n     ',\n     '"
 
             tracking_message += f"\n"
             tracking_message += tracking_event_str(tracking_event)

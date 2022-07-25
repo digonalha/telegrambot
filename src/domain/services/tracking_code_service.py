@@ -137,7 +137,7 @@ def get_user_trackings(user_id: int) -> list:
         if not user:
             raise Exception("user not found. id: " + user_id)
 
-        message = f"Nenhum código de rastreio encontrado. Você pode adicionar códigos de rastreio utilizando: \n\n`/addrastreio código-rastreio | nome`\n\n_parâmetro nome opcional_"
+        message = f"Nenhum código de rastreio encontrado. Você pode adicionar códigos de rastreio utilizando: \n\n`/addrastreio código-rastreio | nome(opcional)`"
 
         if tracking_codes and len(tracking_codes) > 0:
 
@@ -162,7 +162,7 @@ def get_user_trackings(user_id: int) -> list:
                         tracking_event
                     )
 
-                message += f"\n{emoji} {'' if not tracking_code.name else ' [' + tracking_code.name + ']'}  <code>{tracking_code.tracking_code}</code>\n"
+                message += f"\n{emoji} • {'' if not tracking_code.name else '[' + tracking_code.name + ']'} [<code>{tracking_code.tracking_code}</code>]\n"
                 message += str_event
                 message += f"\n\n******"
 
