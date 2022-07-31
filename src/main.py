@@ -9,13 +9,6 @@ from app.services import (
 )
 from data.database import database
 from shared.helpers.logging_helper import SystemLogging
-from domain.services import (
-    user_service,
-    moderator_service,
-    command_service,
-    sale_service,
-    keyword_service,
-)
 
 main_syslog = SystemLogging(__name__)
 
@@ -33,15 +26,6 @@ def load_prerequisites(attempts: int = 0):
         # create tables if not exists
         print("→ creating tables if not exists... ", end="")
         database.create_tables()
-        print("done!")
-
-        # get current users on database
-        print("→ get all objects from tables... ", end="")
-        user_service.get_all_users()
-        moderator_service.get_all_moderators()
-        command_service.get_all_commands()
-        sale_service.get_last_day_sales()
-        keyword_service.get_all_keywords()
         print("done!")
     except Exception as ex:
         if total_attempts <= 50:
