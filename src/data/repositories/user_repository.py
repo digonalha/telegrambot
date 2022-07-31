@@ -19,6 +19,10 @@ def get_by_id(user_id: int) -> User:
     return database.get().query(User).filter(User.user_id == user_id).first()
 
 
+def get_by_username(username: str) -> User:
+    return database.get().query(User).filter(User.user_name == username).first()
+
+
 def get_all() -> None:
     return database.get().query(User).all()
 

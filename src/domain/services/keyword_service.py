@@ -11,8 +11,6 @@ from domain.schemas.keyword_schemas.keyword_create import KeywordCreate
 from domain.models.keyword import Keyword
 from domain.services import user_service, sale_service
 
-
-keywords = []
 syslog = SystemLogging(__name__)
 
 
@@ -21,9 +19,7 @@ def get_keyword(user_id: int, keyword: str) -> Keyword:
 
 
 def get_all_keywords() -> None:
-    """Fill the global variable keyword with all keywords found in database."""
-    global keywords
-    keywords = keyword_repository.get_all()
+    return keyword_repository.get_all()
 
 
 def get_user_keywords(user_id: int) -> list:
@@ -64,16 +60,6 @@ def get_user_keywords(user_id: int) -> list:
 
 def add_keyword(keyword: dict) -> bool:
     """Create a new keyword on database if not exists."""
-    if len(keywords) > 0 and next(
-        (
-            stk
-            for stk in keywords
-            if stk.user_id == keyword["user_id"] and stk.keyword == keyword["keyword"]
-        ),
-        None,
-    ):
-        return False
-
     if not keyword_repository.get(
         keyword["user_id"],
         keyword["keyword"],
@@ -81,7 +67,6 @@ def add_keyword(keyword: dict) -> bool:
         db_keyword = keyword_repository.add(KeywordCreate(**keyword))
 
         if db_keyword:
-            keywords.append(db_keyword)
             return True
 
     return False
@@ -210,36 +195,17 @@ def update_keyword(keyword: dict) -> bool:
     )
 
     if updated_keyword:
-        try:
-            keywords.remove(updated_keyword)
-            keywords.append(updated_keyword)
-
-            return True
-        except:
-            get_all_keywords()
+        return True
 
     return False
 
 
 def delete_keyword(user_id: int, keyword: str) -> bool:
     """Remove a keyword from database if exists."""
-    if len(keywords) == 0 or not (
-        next(
-            (
-                stk
-                for stk in keywords
-                if stk.user_id == user_id and stk.keyword.lower() == keyword.lower()
-            ),
-            None,
-        )
-    ):
-        return False
-
     keyword_db = keyword_repository.get(user_id, keyword)
 
     if keyword_db:
         keyword_repository.delete(user_id, keyword)
-        keywords.remove(keyword_db)
         return True
 
     return False
@@ -282,12 +248,7 @@ def remove_all_keywords_by_user_id(user_id: int) -> bool:
     keyword_repository.delete_all_by_user_id(user_id)
     keywords = keyword_repository.get_by_user_id(user_id)
 
-    all_removed = not keywords or len(keywords) == 0
-
-    if all_removed:
-        get_all_keywords()
-
-    return all_removed
+    return not keywords or len(keywords) == 0
 
 
 def remove_all_keywords(user_id: int, message_text: str) -> None:

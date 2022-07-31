@@ -45,7 +45,9 @@ def send_user_message(
     users_keyword_to_answer = []
     lower_product_name = sale.product_name.lower()
 
-    for keyword in keyword_service.keywords:
+    keywords = keyword_service.get_all_keywords()
+
+    for keyword in keywords:
         lower_keyword = keyword.keyword.lower()
         split_keyword = lower_keyword.split()
         if all(k in lower_product_name for k in split_keyword):

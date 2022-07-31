@@ -21,11 +21,12 @@ def send_commands_message(chat_id: int, name: str, message_id: int):
     """Send a list of custom commands when asked on chat."""
     messages = ""
 
-    command_service.commands.sort(key=lambda x: x.command)
+    commands = command_service.get_by_group(chat_id)
+    commands.sort(key=lambda x: x.command)
 
     total_commands = 0
 
-    for cc in command_service.commands:
+    for cc in commands:
         if cc.chat_id == chat_id:
             total_commands += 1
             description = "Nenhuma descrição encontrada"

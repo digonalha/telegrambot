@@ -26,6 +26,17 @@ def delete(command: str, chat_id: int):
     local_session.commit()
 
 
+def get_by_group(chat_id: int):
+    return (
+        database.get()
+        .query(Command)
+        .filter(
+            Command.chat_id == chat_id,
+        )
+        .all()
+    )
+
+
 def get_all():
     return database.get().query(Command).all()
 

@@ -10,7 +10,6 @@ from domain.schemas.command_schemas.command_create import CommandCreate
 from domain.services import user_service
 from domain.models.command import Command
 
-commands = []
 syslog = SystemLogging(__name__)
 
 
@@ -27,50 +26,29 @@ default_commands = [
     "addpromo",
     "delpromo",
     "clearpromo",
+    "rastreio",
+    "addrastreio",
+    "delrastreio",
 ]
-
-
-def get_command(command: str, chat_id: int) -> Command:
-    """Get command if exists on global users variable."""
-    return next(
-        (
-            cc
-            for cc in commands
-            if cc.command.lower() == command and cc.chat_id == chat_id
-        ),
-        None,
-    )
-
-
-def get_all_commands() -> None:
-    """Fill the global variable commands with all commands found in database."""
-    global commands
-    commands = command_repository.get_all()
 
 
 def add_command(new_command: dict) -> bool:
     """Create a new command on database if not exists."""
-    if len(commands) > 0 and next(
-        (
-            cc
-            for cc in commands
-            if cc.command == new_command["command"]
-            and cc.chat_id == new_command["chat_id"]
-        ),
-        None,
-    ):
-        return False
-
     command_already_in_db = command_repository.get(
         new_command["command"], new_command["chat_id"]
     )
 
     if not command_already_in_db:
         db_command = command_repository.add(CommandCreate(**new_command))
-        commands.append(db_command)
-        return True
+
+        if db_command:
+            return True
 
     return False
+
+
+def get_command(command: str, chat_id: int) -> Command:
+    return command_repository.get(command, chat_id)
 
 
 def insert_command(
@@ -202,17 +180,8 @@ def insert_command(
 
 def delete_command(command_name: str, chat_id: int) -> bool:
     """Remove a command from database if exists."""
-    db_command = next(
-        (cc for cc in commands if cc.chat_id == chat_id and cc.command == command_name),
-        None,
-    )
-
-    if not db_command:
-        return False
-
     if command_repository.get(command_name, chat_id):
         command_repository.delete(command_name, chat_id)
-        commands.remove(db_command)
         return True
 
     return False
@@ -248,3 +217,7 @@ def remove_command(chat_id: int, message_text: str, send_by_user_id: int) -> Non
             chat_id,
             f"Não foi possível remover o comando */{command_name}* \n\nPara remover um comando customizado, utilize `/delcmd comando`",
         )
+
+
+def get_by_group(chat_id: str):
+    return command_repository.get_by_group(chat_id)

@@ -40,7 +40,8 @@ def update(keyword: KeywordUpdate) -> Keyword:
 
 def delete(user_id: int, keyword: str):
     local_session = database.get()
-    database.get().query(Keyword).filter(
+
+    local_session.query(Keyword).filter(
         Keyword.user_id == user_id,
         func.lower(Keyword.keyword) == keyword.lower(),
     ).delete(synchronize_session="fetch")

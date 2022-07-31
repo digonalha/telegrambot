@@ -9,15 +9,7 @@ from domain.schemas.sale_schemas.sale_create import SaleCreate
 from domain.models.sale import Sale
 from domain.services import keyword_service
 
-
-sales = []
 syslog = SystemLogging(__name__)
-
-
-def get_last_day_sales() -> None:
-    """Fill the global variable sales with last 24h sales found in database."""
-    global sales
-    sales = sale_repository.get_last_day_sales()
 
 
 def count_last_day_sales_by_keyword(keyword: str, max_price: float = None) -> list:
@@ -194,17 +186,8 @@ def add_sale_if_not_exists(sale: dict) -> Sale:
     try:
         db_sale = None
 
-        if next(
-            (u for u in sales if u.sale_id == sale["sale_id"]),
-            None,
-        ):
-            return
-
         if not sale_repository.get_by_id(sale["sale_id"]):
             db_sale = sale_repository.add(SaleCreate(**sale))
-
-            if db_sale:
-                sales.append(db_sale)
 
         return db_sale
     except Exception as ex:
@@ -217,17 +200,8 @@ def add_sale_if_aggregator_url_not_exists(sale: dict) -> Sale:
     try:
         db_sale = None
 
-        if next(
-            (u for u in sales if u.aggregator_url == sale["aggregator_url"]),
-            None,
-        ):
-            return
-
         if not sale_repository.get_by_aggregator_url(sale["aggregator_url"]):
             db_sale = sale_repository.add(SaleCreate(**sale))
-
-            if db_sale:
-                sales.append(db_sale)
 
         return db_sale
     except Exception as ex:

@@ -7,24 +7,11 @@ from shared.helpers.logging_helper import SystemLogging
 from domain.schemas.moderator_schemas.moderator_create import ModeratorCreate
 from domain.services import user_service
 
-moderators = []
 syslog = SystemLogging(__name__)
-
-
-def get_all_moderators() -> None:
-    """Fill the global variable moderators with all moderators found in database."""
-    global moderators
-    moderators = moderator_repository.get_all()
 
 
 def add_moderator(user_id: int, chat_id: int) -> bool:
     """Create a new moderator on database if not exists."""
-    if len(moderators) > 0 and next(
-        (m for m in moderators if m.user_id == user_id and m.chat_id == chat_id),
-        None,
-    ):
-        return False
-
     if not moderator_repository.get(user_id, chat_id):
         db_moderator = moderator_repository.add(
             ModeratorCreate(
@@ -35,7 +22,6 @@ def add_moderator(user_id: int, chat_id: int) -> bool:
         )
 
         if db_moderator:
-            moderators.append(db_moderator)
             return True
 
     return False
@@ -80,19 +66,10 @@ def insert_moderator(chat_id: int, message_text: str, send_by_user_id: int):
 
 def delete_moderator(user_id: int, chat_id: int) -> bool:
     """Remove a moderator from database if exists."""
-    if len(moderators) == 0 or not (
-        next(
-            (m for m in moderators if m.user_id == user_id and m.chat_id == chat_id),
-            None,
-        )
-    ):
-        return False
-
     user_mod = moderator_repository.get(user_id, chat_id)
 
     if user_mod:
         moderator_repository.delete(user_id, chat_id)
-        moderators.remove(user_mod)
         return True
 
     return False
