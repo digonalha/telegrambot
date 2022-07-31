@@ -31,6 +31,9 @@ def count_last_day_sales_by_keyword(keyword: str, max_price: float = None) -> li
     return sale_repository.count_last_day_sales_by_keyword(keyword_to_search, max_price)
 
 
+def get_last_day_sales():
+    return sale_repository.get_last_day_sales()
+
 def get_last_day_sales_by_keyword(
     keyword: str, max_price: float = None, skip: int = 0, take: int = 3
 ) -> list:

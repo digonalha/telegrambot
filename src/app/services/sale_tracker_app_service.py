@@ -211,7 +211,7 @@ def check_promobit_sales() -> bool:
         send_user_message(db_sale, aggregator_name="Promobit")
 
 
-def check_gatry_sales():
+def check_gatry_sales(sales):
     site_url = "https://gatry.com"
     page = requests.get(site_url, timeout=15)
     parsed_page = BeautifulSoup(page.content, "html.parser")
@@ -224,7 +224,7 @@ def check_gatry_sales():
         sale_id = int(agg_url.split("/")[2])
 
         if next(
-            (ts for ts in sale_service.sales if sale_id == ts.sale_id),
+            (ts for ts in sales if sale_id == ts.sale_id),
             None,
         ):
             continue
@@ -287,7 +287,7 @@ def check_gatry_sales():
         send_user_message(db_sale, aggregator_name="Gatry")
 
 
-def check_boletando_sales():
+def check_boletando_sales(sales):
     site_url = "https://boletando.com/"
     page = requests.get(site_url, timeout=15)
     parsed_page = BeautifulSoup(page.content, "html.parser")
@@ -297,9 +297,8 @@ def check_boletando_sales():
         imagem = info.find("figure").find("a").find("img")
         product_description = info.find("h3").find("a")
         agg_url = product_description["href"]
-
         if next(
-            (ts for ts in sale_service.sales if agg_url == ts.aggregator_url),
+            (ts for ts in sales if agg_url == ts.aggregator_url),
             None,
         ):
             continue
@@ -365,7 +364,9 @@ def run_webscrap_worker() -> None:
     """Loop for sale's tracker sites web scraping."""
     while True:
         try:
-            sleep(randint(62, 126))
+            # sleep(randint(62, 126))
+
+            sales = sale_service.get_last_day_sales()
 
             if promobit_retry >= 0:
                 try:
@@ -375,13 +376,13 @@ def run_webscrap_worker() -> None:
                     promobit_retry += 1
             if gatry_retry >= 0:
                 try:
-                    check_gatry_sales()
+                    check_gatry_sales(sales)
                 except Exception as ex:
                     syslog.create_warning("webscrap_worker - gatry", ex)
                     gatry_retry += 1
             if boletando_retry >= 0:
                 try:
-                    check_boletando_sales()
+                    check_boletando_sales(sales)
                 except Exception as ex:
                     syslog.create_warning("webscrap_worker - boletando", ex)
                     boletando_retry += 1
