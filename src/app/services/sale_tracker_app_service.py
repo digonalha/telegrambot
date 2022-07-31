@@ -364,7 +364,7 @@ def run_webscrap_worker() -> None:
     """Loop for sale's tracker sites web scraping."""
     while True:
         try:
-            # sleep(randint(62, 126))
+            sleep(randint(62, 126))
 
             sales = sale_service.get_last_day_sales()
 
