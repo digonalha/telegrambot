@@ -33,7 +33,7 @@ def get_updates(offset: int):
     query_offset = ""
     if offset > 0:
         query_offset = f"?offset={offset}"
-    res = requests.get(f"{API_URI}/getUpdates{query_offset}", timeout=10)
+    res = requests.get(f"{API_URI}/getUpdates{query_offset}", timeout=(10, 10))
     response_json = res.json()
     if create_log_from_response("get_updates", response_json):
         return response_json["result"]
