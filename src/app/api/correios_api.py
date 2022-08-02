@@ -8,14 +8,17 @@ API_URI = f"https://proxyapp.correios.com.br/v1/sro-rastro"
 
 
 def get_object_tracking_info(tracking_id: str) -> list():
-    res = requests.get(f"{API_URI}/{tracking_id}", timeout=(10, 10))
+    try:
+        res = requests.get(f"{API_URI}/{tracking_id}", timeout=(10, 10))
 
-    if res.status_code != 200:
-        return None
+        if res.status_code != 200:
+            return None
 
-    response_json = res.json()
+        response_json = res.json()
 
-    if "eventos" in response_json["objetos"][0]:
-        return response_json["objetos"][0]["eventos"]
+        if "eventos" in response_json["objetos"][0]:
+            return response_json["objetos"][0]["eventos"]
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(get_object_tracking_info.__name__, ex_timeout)
 
     return []

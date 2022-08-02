@@ -30,24 +30,36 @@ def create_log_from_response(function_name, response, chat_id: int = None):
 
 
 def get_updates(offset: int):
-    query_offset = ""
-    if offset > 0:
-        query_offset = f"?offset={offset}"
-    res = requests.get(f"{API_URI}/getUpdates{query_offset}", timeout=(10, 10))
-    response_json = res.json()
-    if create_log_from_response("get_updates", response_json):
-        return response_json["result"]
-    else:
-        return []
+    try:
+        query_offset = ""
+
+        if offset > 0:
+            query_offset = f"?offset={offset}"
+
+        res = requests.get(f"{API_URI}/getUpdates{query_offset}", timeout=(10, 10))
+        response_json = res.json()
+
+        if create_log_from_response("get_updates", response_json):
+            return response_json["result"]
+
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(get_updates.__name__, ex_timeout)
+
+    return []
 
 
 def delete_message(chat_id: int, message_id: int):
-    res = requests.post(
-        f"{API_URI}/deleteMessage",
-        {"chat_id": chat_id, "message_id": message_id},
-    )
+    try:
+        res = requests.post(
+            f"{API_URI}/deleteMessage",
+            {"chat_id": chat_id, "message_id": message_id},
+            timeout=(10, 10),
+        )
 
-    create_log_from_response("delete_message", res.json(), chat_id)
+        create_log_from_response("delete_message", res.json(), chat_id)
+
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(delete_message.__name__, ex_timeout)
 
 
 def send_message(
@@ -58,24 +70,28 @@ def send_message(
     reply_markup: str = None,
     disable_web_page_preview: bool = True,
 ):
-    data = {
-        "chat_id": chat_id,
-        "text": message,
-        "disable_web_page_preview": disable_web_page_preview,
-    }
+    try:
+        data = {
+            "chat_id": chat_id,
+            "text": message,
+            "disable_web_page_preview": disable_web_page_preview,
+        }
 
-    if reply_id != None and reply_id > 0:
-        data["reply_to_message_id"] = reply_id
-    if reply_markup:
-        data["reply_markup"] = reply_markup
-    if parse_mode:
-        data["parse_mode"] = parse_mode
+        if reply_id != None and reply_id > 0:
+            data["reply_to_message_id"] = reply_id
+        if reply_markup:
+            data["reply_markup"] = reply_markup
+        if parse_mode:
+            data["parse_mode"] = parse_mode
 
-    res = requests.post(f"{API_URI}/sendMessage", data=data)
-
-    if res.status_code == 400 and "byte offset" in res.text:
-        data["text"] = escape_markdown_string(data["text"])
         res = requests.post(f"{API_URI}/sendMessage", data=data)
+
+        if res.status_code == 400 and "byte offset" in res.text:
+            data["text"] = escape_markdown_string(data["text"])
+            res = requests.post(f"{API_URI}/sendMessage", data=data, timeout=(10, 10))
+
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(send_message.__name__, ex_timeout)
 
 
 def edit_message(
@@ -85,23 +101,29 @@ def edit_message(
     parse_mode: str = None,
     reply_markup: str = None,
 ):
-    data = {
-        "chat_id": chat_id,
-        "message_id": message_id,
-        "text": message,
-        "disable_web_page_preview": True,
-    }
+    try:
+        data = {
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "text": message,
+            "disable_web_page_preview": True,
+        }
 
-    if reply_markup:
-        data["reply_markup"] = reply_markup
-    if parse_mode:
-        data["parse_mode"] = parse_mode
+        if reply_markup:
+            data["reply_markup"] = reply_markup
+        if parse_mode:
+            data["parse_mode"] = parse_mode
 
-    res = requests.post(f"{API_URI}/editMessageText", data=data)
-
-    if res.status_code == 400 and "byte offset" in res.text:
-        data["text"] = escape_markdown_string(data["text"])
         res = requests.post(f"{API_URI}/editMessageText", data=data)
+
+        if res.status_code == 400 and "byte offset" in res.text:
+            data["text"] = escape_markdown_string(data["text"])
+            res = requests.post(
+                f"{API_URI}/editMessageText", data=data, timeout=(10, 10)
+            )
+
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(edit_message.__name__, ex_timeout)
 
 
 def edit_message_reply_markup(
@@ -109,38 +131,54 @@ def edit_message_reply_markup(
     message_id: int,
     reply_markup: str,
 ):
-    data = {
-        "chat_id": chat_id,
-        "message_id": message_id,
-        "reply_markup": reply_markup,
-    }
+    try:
+        data = {
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "reply_markup": reply_markup,
+        }
 
-    requests.post(f"{API_URI}/editMessageReplyMarkup", data=data)
+        requests.post(f"{API_URI}/editMessageReplyMarkup", data=data, timeout=(10, 10))
+
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(edit_message_reply_markup.__name__, ex_timeout)
 
 
 def send_animation(chat_id: int, file_id: str, reply_id: int = 0):
-    data = {"chat_id": chat_id, "animation": file_id}
-    if reply_id != None and reply_id > 0:
-        data["reply_to_message_id"] = reply_id
+    try:
+        data = {"chat_id": chat_id, "animation": file_id}
+        if reply_id != None and reply_id > 0:
+            data["reply_to_message_id"] = reply_id
 
-    requests.post(f"{API_URI}/sendAnimation", data=data)
+        requests.post(f"{API_URI}/sendAnimation", data=data, timeout=(10, 10))
+
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(send_animation.__name__, ex_timeout)
 
 
 def send_video(chat_id: int, video_url: str, reply_id: int = 0):
-    data = {"chat_id": chat_id, "video": video_url}
-    if reply_id != None and reply_id > 0:
-        data["reply_to_message_id"] = reply_id
+    try:
+        data = {"chat_id": chat_id, "video": video_url}
+        if reply_id != None and reply_id > 0:
+            data["reply_to_message_id"] = reply_id
 
-    requests.post(f"{API_URI}/sendVideo", data=data)
+        requests.post(f"{API_URI}/sendVideo", data=data, timeout=(10, 10))
+
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(send_video.__name__, ex_timeout)
 
 
 def send_audio(chat_id: int, file_id: str, title: str, username: str):
-    data = {
-        "chat_id": chat_id,
-        "audio": file_id,
-    }
+    try:
+        data = {
+            "chat_id": chat_id,
+            "audio": file_id,
+        }
 
-    requests.post(f"{API_URI}/sendAudio", data=data)
+        requests.post(f"{API_URI}/sendAudio", data=data, timeout=(10, 10))
+
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(edit_message.__name__, ex_timeout)
 
 
 def send_image(
@@ -151,38 +189,45 @@ def send_image(
     reply_markup: str = None,
     parse_mode: str = "markdown",
 ):
-    if file_id.startswith("[") and file_id.endswith("]"):
-        arr_photo = literal_eval(file_id)
-        random_index = randint(0, len(arr_photo) - 1)
-        file_id = arr_photo[random_index]
+    try:
+        if file_id.startswith("[") and file_id.endswith("]"):
+            arr_photo = literal_eval(file_id)
+            random_index = randint(0, len(arr_photo) - 1)
+            file_id = arr_photo[random_index]
 
-    data = {"chat_id": chat_id, "photo": file_id}
+        data = {"chat_id": chat_id, "photo": file_id}
 
-    if caption:
-        data["caption"] = caption
-    if reply_id:
-        data["reply_to_message_id"] = reply_id
-    if reply_markup:
-        data["reply_markup"] = reply_markup
-    if parse_mode:
-        data["parse_mode"] = parse_mode
+        if caption:
+            data["caption"] = caption
+        if reply_id:
+            data["reply_to_message_id"] = reply_id
+        if reply_markup:
+            data["reply_markup"] = reply_markup
+        if parse_mode:
+            data["parse_mode"] = parse_mode
 
-    res = requests.post(f"{API_URI}/sendPhoto", data=data)
+        res = requests.post(f"{API_URI}/sendPhoto", data=data, timeout=(10, 10))
 
-    if res.status_code == 400 and caption:
-        send_message(
-            chat_id=chat_id,
-            message=caption,
-            reply_id=reply_id,
-            reply_markup=reply_markup,
-            disable_web_page_preview=False,
-            parse_mode=parse_mode,
-        )
+        if res.status_code == 400 and caption:
+            send_message(
+                chat_id=chat_id,
+                message=caption,
+                reply_id=reply_id,
+                reply_markup=reply_markup,
+                disable_web_page_preview=False,
+                parse_mode=parse_mode,
+            )
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(send_image.__name__, ex_timeout)
 
 
 def answer_callback_query(callback_query_id: str, notification_text: str):
-    data = {"callback_query_id": callback_query_id}
-    if notification_text and len(notification_text) > 0:
-        data["show_alert"] = True
-        data["text"] = notification_text
-    requests.post(f"{API_URI}/answerCallbackQuery", data=data)
+    try:
+        data = {"callback_query_id": callback_query_id}
+        if notification_text and len(notification_text) > 0:
+            data["show_alert"] = True
+            data["text"] = notification_text
+        requests.post(f"{API_URI}/answerCallbackQuery", data=data, timeout=(10, 10))
+
+    except requests.exceptions.Timeout as ex_timeout:
+        syslog.create_warning(answer_callback_query.__name__, ex_timeout)
