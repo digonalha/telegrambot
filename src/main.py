@@ -9,6 +9,7 @@ from app.services import (
 )
 from data.database import database
 from shared.helpers.logging_helper import SystemLogging
+from app.configs import settings
 
 main_syslog = SystemLogging(__name__)
 
@@ -50,10 +51,11 @@ def main():
     t1.start()
     print("done!")
 
-    print("→ starting correios tracking worker... ", end="")
-    t2 = threading.Thread(target=correios_app_service.run_tracking_worker)
-    t2.start()
-    print("done!")
+    if settings.enable_tracking:
+        print("→ starting correios tracking worker... ", end="")
+        t2 = threading.Thread(target=correios_app_service.run_tracking_worker)
+        t2.start()
+        print("done!")
 
     print("→ starting telegrambot worker... ", end="")
     t3 = threading.Thread(target=telegram_app_service.run_telegram_worker)

@@ -88,12 +88,19 @@ def send_private_help_message(chat_id: int, name: str) -> None:
         "*/addpromo* `palavra-chave | valor-máx(opcional)` - adiciona a palavra-chave na lista de monitoramento de promoções do usuário. Caso o valor-máx esteja preenchido, limita o monitoramento baseando-se no valor.\n"
         "*/delpromo* `palavra-chave` - remove a palavra-chave da lista de monitoramento de promoções do usuário\n"
         "*/clearpromo* - remove todas as palavras-chave da lista de monitoramento de promoções\n\n"
-        "*Rastreio Correios* \n"
+        r"%enable_tracking%"
+        "Eu também tenho um canal onde posto promoções. Acesse pelo link: https://t.me/promobotcanal <3"
+    )
+
+    tracking_message = ""
+
+    if settings.enable_tracking:
+        tracking_message = "*Rastreio Correios* \n"
         "*/rastreio* `código-rastreio(opcional)` - lista os códigos de rastreio dos correios monitorados pelo usuário. Caso o código-rastreio esteja preenchido, lista os eventos disponíveis.\n"
         "*/addrastreio* `código-rastreio | nome(opcional)` - adiciona um código de rastreio no serviço de rastreio dos correios\n"
         "*/delrastreio* `código-rastreio` - remove um código de rastreio do serviço de rastreio dos correios\n\n"
-        "Eu também tenho um canal onde posto promoções. Acesse pelo link: https://t.me/promobotcanal <3"
-    )
+
+    help_message = help_message.replace(r"%enable_tracking%", tracking_message)
 
     message_service.send_message(chat_id, help_message, disable_web_page_preview=True)
 
@@ -269,11 +276,12 @@ def resolve_message(message) -> None:
         elif text.lower().startswith("/delpromo"):
             keyword_service.remove_keyword(chat_id, text)
         # RASTREIO CORREIOS
-        elif text.lower().startswith("/addrastreio"):
-            tracking_code_service.insert_tracking_code(chat_id, text)
-        elif text.lower().startswith("/delrastreio"):
-            tracking_code_service.remove_tracking_code(chat_id, text)
-        elif text.lower() == ("/rastreio"):
-            tracking_code_service.get_user_trackings(chat_id)
-        elif text.startswith("/rastreio"):
-            tracking_code_service.list_events_from_tracking_code(chat_id, text)
+        if settings.enable_tracking:
+            if text.lower().startswith("/addrastreio"):
+                tracking_code_service.insert_tracking_code(chat_id, text)
+            elif text.lower().startswith("/delrastreio"):
+                tracking_code_service.remove_tracking_code(chat_id, text)
+            elif text.lower() == ("/rastreio"):
+                tracking_code_service.get_user_trackings(chat_id)
+            elif text.startswith("/rastreio"):
+                tracking_code_service.list_events_from_tracking_code(chat_id, text)

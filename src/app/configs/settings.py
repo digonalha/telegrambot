@@ -9,13 +9,14 @@ max_keywords = 10
 promo_version = None
 error_log_channel = None
 promobot_channel = None
+enable_tracking = False
 
 
 def load():
     try:
         load_dotenv()
 
-        global connection_string, api_token, bot_name, max_commands, max_keywords, promo_version, error_log_channel, promobot_channel
+        global connection_string, api_token, bot_name, max_commands, max_keywords, promo_version, error_log_channel, promobot_channel, enable_tracking
 
         connection_string = os.getenv("CONNECTION_STRING")
         api_token = os.getenv("API_TOKEN")
@@ -25,6 +26,7 @@ def load():
         promo_version = os.getenv("PROMO_VERSION")
         error_log_channel = os.getenv("ERROR_LOG_CHANNEL")
         promobot_channel = os.getenv("PROMOBOT_CHANNEL")
+        enable_tracking = os.getenv("ENABLE_TRACKING")
 
         if not connection_string:
             raise Exception("cant find connection_string. check your .env file")
