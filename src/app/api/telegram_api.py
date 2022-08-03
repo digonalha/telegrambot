@@ -42,8 +42,8 @@ def get_updates(offset: int):
         if create_log_from_response("get_updates", response_json):
             return response_json["result"]
 
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(get_updates.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(get_updates.__name__, ex)
 
     return []
 
@@ -58,8 +58,8 @@ def delete_message(chat_id: int, message_id: int):
 
         create_log_from_response("delete_message", res.json(), chat_id)
 
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(delete_message.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(delete_message.__name__, ex)
 
 
 def send_message(
@@ -90,8 +90,8 @@ def send_message(
             data["text"] = escape_markdown_string(data["text"])
             res = requests.post(f"{API_URI}/sendMessage", data=data, timeout=(10, 10))
 
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(send_message.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(send_message.__name__, ex)
 
 
 def edit_message(
@@ -122,8 +122,8 @@ def edit_message(
                 f"{API_URI}/editMessageText", data=data, timeout=(10, 10)
             )
 
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(edit_message.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(edit_message.__name__, ex)
 
 
 def edit_message_reply_markup(
@@ -140,8 +140,8 @@ def edit_message_reply_markup(
 
         requests.post(f"{API_URI}/editMessageReplyMarkup", data=data, timeout=(10, 10))
 
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(edit_message_reply_markup.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(edit_message_reply_markup.__name__, ex)
 
 
 def send_animation(chat_id: int, file_id: str, reply_id: int = 0):
@@ -152,8 +152,8 @@ def send_animation(chat_id: int, file_id: str, reply_id: int = 0):
 
         requests.post(f"{API_URI}/sendAnimation", data=data, timeout=(10, 10))
 
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(send_animation.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(send_animation.__name__, ex)
 
 
 def send_video(chat_id: int, video_url: str, reply_id: int = 0):
@@ -164,8 +164,8 @@ def send_video(chat_id: int, video_url: str, reply_id: int = 0):
 
         requests.post(f"{API_URI}/sendVideo", data=data, timeout=(10, 10))
 
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(send_video.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(send_video.__name__, ex)
 
 
 def send_audio(chat_id: int, file_id: str, title: str, username: str):
@@ -177,8 +177,8 @@ def send_audio(chat_id: int, file_id: str, title: str, username: str):
 
         requests.post(f"{API_URI}/sendAudio", data=data, timeout=(10, 10))
 
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(edit_message.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(edit_message.__name__, ex)
 
 
 def send_image(
@@ -217,8 +217,8 @@ def send_image(
                 disable_web_page_preview=False,
                 parse_mode=parse_mode,
             )
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(send_image.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(send_image.__name__, ex)
 
 
 def answer_callback_query(callback_query_id: str, notification_text: str):
@@ -229,5 +229,5 @@ def answer_callback_query(callback_query_id: str, notification_text: str):
             data["text"] = notification_text
         requests.post(f"{API_URI}/answerCallbackQuery", data=data, timeout=(10, 10))
 
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(answer_callback_query.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(answer_callback_query.__name__, ex)

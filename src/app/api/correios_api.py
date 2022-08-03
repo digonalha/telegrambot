@@ -18,7 +18,7 @@ def get_object_tracking_info(tracking_id: str) -> list():
 
         if "eventos" in response_json["objetos"][0]:
             return response_json["objetos"][0]["eventos"]
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(get_object_tracking_info.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(get_object_tracking_info.__name__, ex)
 
     return []

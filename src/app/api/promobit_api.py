@@ -18,7 +18,7 @@ def get_last_sales(limit: int = 50) -> list():
 
         response_json = res.json()
         return response_json["offers"]
-    except requests.exceptions.Timeout as ex_timeout:
-        syslog.create_warning(get_last_sales.__name__, ex_timeout)
+    except Exception as ex:
+        syslog.create_warning(get_last_sales.__name__, ex)
 
     return []
