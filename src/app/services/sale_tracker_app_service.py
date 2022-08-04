@@ -387,6 +387,5 @@ def run_webscrap_worker() -> None:
                     syslog.create_warning("webscrap_worker - boletando", ex)
                     boletando_retry += 1
 
-        except Exception as ex:
-            syslog.create_warning("webscrap_worker", ex)
+        except:
             continue
