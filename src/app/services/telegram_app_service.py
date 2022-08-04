@@ -13,7 +13,6 @@ def run_telegram_worker() -> None:
     offset = 0
 
     while True:
-        sleep(0.5)
         try:
             updates = message_service.get_updates(offset)
             offset = message_service.get_update_id_offset(updates)
@@ -30,6 +29,5 @@ def run_telegram_worker() -> None:
                         request_obj = update["callback_query"]
                         response_app_service.resolve_callback(request_obj)
 
-        except Exception as ex:
-            syslog.create_warning("telegram_worker", ex)
+        except:
             continue
