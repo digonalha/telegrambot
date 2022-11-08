@@ -17,8 +17,11 @@ def get_last_sales(limit: int = 50) -> list():
             return []
 
         response_json = res.json()
-        return response_json["offers"]
+
+        if response_json["offers"]:
+            return response_json["offers"]
+
+        return []
     except Exception as ex:
         syslog.create_warning(get_last_sales.__name__, ex)
-
-    return []
+        return []
