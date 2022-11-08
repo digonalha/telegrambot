@@ -36,16 +36,16 @@ def get_updates(offset: int):
         if offset > 0:
             query_offset = f"?offset={offset}"
 
-        res = requests.get(f"{API_URI}/getUpdates{query_offset}", timeout=(60, 60))
+        res = requests.get(f"{API_URI}/getUpdates{query_offset}")
         response_json = res.json()
 
         if create_log_from_response("get_updates", response_json):
             return response_json["result"]
 
+        return []
     except Exception as ex:
         syslog.create_warning(get_updates.__name__, ex)
-
-    return []
+        return []
 
 
 def delete_message(chat_id: int, message_id: int):
@@ -88,7 +88,7 @@ def send_message(
 
         if res.status_code == 400 and "byte offset" in res.text:
             data["text"] = escape_markdown_string(data["text"])
-            res = requests.post(f"{API_URI}/sendMessage", data=data, timeout=(60, 60))
+            res = requests.post(f"{API_URI}/sendMessage", data=data)
 
     except Exception as ex:
         syslog.create_warning(send_message.__name__, ex)
@@ -138,7 +138,7 @@ def edit_message_reply_markup(
             "reply_markup": reply_markup,
         }
 
-        requests.post(f"{API_URI}/editMessageReplyMarkup", data=data, timeout=(60, 60))
+        requests.post(f"{API_URI}/editMessageReplyMarkup", data=data)
 
     except Exception as ex:
         syslog.create_warning(edit_message_reply_markup.__name__, ex)
@@ -150,7 +150,7 @@ def send_animation(chat_id: int, file_id: str, reply_id: int = 0):
         if reply_id != None and reply_id > 0:
             data["reply_to_message_id"] = reply_id
 
-        requests.post(f"{API_URI}/sendAnimation", data=data, timeout=(60, 60))
+        requests.post(f"{API_URI}/sendAnimation", data=data)
 
     except Exception as ex:
         syslog.create_warning(send_animation.__name__, ex)
@@ -162,7 +162,7 @@ def send_video(chat_id: int, video_url: str, reply_id: int = 0):
         if reply_id != None and reply_id > 0:
             data["reply_to_message_id"] = reply_id
 
-        requests.post(f"{API_URI}/sendVideo", data=data, timeout=(60, 60))
+        requests.post(f"{API_URI}/sendVideo", data=data)
 
     except Exception as ex:
         syslog.create_warning(send_video.__name__, ex)
@@ -175,7 +175,7 @@ def send_audio(chat_id: int, file_id: str, title: str, username: str):
             "audio": file_id,
         }
 
-        requests.post(f"{API_URI}/sendAudio", data=data, timeout=(60, 60))
+        requests.post(f"{API_URI}/sendAudio", data=data)
 
     except Exception as ex:
         syslog.create_warning(edit_message.__name__, ex)
@@ -206,7 +206,7 @@ def send_image(
         if parse_mode:
             data["parse_mode"] = parse_mode
 
-        res = requests.post(f"{API_URI}/sendPhoto", data=data, timeout=(60, 60))
+        res = requests.post(f"{API_URI}/sendPhoto", data=data)
 
         if res.status_code == 400 and caption:
             send_message(
@@ -227,7 +227,7 @@ def answer_callback_query(callback_query_id: str, notification_text: str):
         if notification_text and len(notification_text) > 0:
             data["show_alert"] = True
             data["text"] = notification_text
-        requests.post(f"{API_URI}/answerCallbackQuery", data=data, timeout=(60, 60))
+        requests.post(f"{API_URI}/answerCallbackQuery", data=data)
 
     except Exception as ex:
         syslog.create_warning(answer_callback_query.__name__, ex)

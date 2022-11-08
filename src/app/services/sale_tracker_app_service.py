@@ -22,7 +22,7 @@ syslog = SystemLogging(__name__)
 
 def get_promobit_sale_info(aggregator_url: str) -> str:
     try:
-        page = requests.get(aggregator_url, timeout=(60, 60))
+        page = requests.get(aggregator_url)
         parsed_page = BeautifulSoup(page.content, "html.parser")
 
         scripts_result = parsed_page.find("script", id="__NEXT_DATA__").text
@@ -213,7 +213,7 @@ def check_promobit_sales() -> bool:
 
 def check_gatry_sales(sales):
     site_url = "https://gatry.com"
-    page = requests.get(site_url, timeout=(60, 60))
+    page = requests.get(site_url)
     parsed_page = BeautifulSoup(page.content, "html.parser")
     promos = parsed_page.find_all("article")
     for promo in promos:
@@ -289,7 +289,7 @@ def check_gatry_sales(sales):
 
 def check_boletando_sales(sales):
     site_url = "https://boletando.com/"
-    page = requests.get(site_url, timeout=(60, 60))
+    page = requests.get(site_url)
     parsed_page = BeautifulSoup(page.content, "html.parser")
     promos = parsed_page.find_all(class_="col_item")
     for promo in promos:
