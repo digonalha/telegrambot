@@ -1,5 +1,5 @@
 from datetime import datetime
-from random import randint
+from random import randint, random
 
 from app.api import telegram_api
 from shared.helpers.logging_helper import SystemLogging
@@ -51,31 +51,17 @@ def send_message(
         first_number = int(first_number)
         second_number = int(second_number)
 
-        if first_number < 0 or first_number > 1000:
-            return
-        elif second_number < 0 or second_number > 1000:
-            return
-
         perc = randint(first_number, second_number)
         string_to_replace = f"$random_number[{str_numbers}]"
 
         message = message.replace(string_to_replace, str(perc))
     if "$random_word[" in message:
-        str_words = message.split("$random_word[")[1].split("]", 1)[0]
-        words = str_words.split(",")
-
-        total_words = len(words)
-
-        if total_words < 2 or total_words > 10:
-            return
-
-        rand_index = randint(0, total_words - 1)
-
-        selected_word = words[rand_index]
+        str_words = message.split("$random_word[")[1].split("]", 1)[0].split(",")
+        words = str_words
 
         string_to_replace = f"$random_word[{str_words}]"
 
-        message = message.replace(string_to_replace, selected_word.strip())
+        message = message.replace(string_to_replace, random.choice(words).strip())
 
     telegram_api.send_message(
         chat_id,
