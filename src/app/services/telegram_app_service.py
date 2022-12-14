@@ -31,8 +31,10 @@ def run_telegram_worker() -> None:
     """Loop for make requests to telegram api."""
     print(" → listening for updates...")
     offset = 0
-    try:
-        while True:
+
+    while True:
+        try:
             offset = telegram_worker(offset)
-    except Exception as ex:
-        syslog.create_warning(f"WORKER STOPED: {run_telegram_worker.__name__}", ex)
+        except Exception as ex:
+            syslog.create_warning(f"WORKER STOPED: {run_telegram_worker.__name__}", ex)
+            continue

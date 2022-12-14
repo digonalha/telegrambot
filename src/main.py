@@ -47,7 +47,10 @@ def main():
     load_prerequisites()
 
     print("→ starting sale_tracker worker... ", end="")
-    t1 = threading.Thread(target=sale_tracker_app_service.run_sale_tracker_worker)
+    t1 = threading.Thread(
+        target=sale_tracker_app_service.run_sale_tracker_worker,
+        name="sale_tracker_worker",
+    )
     t1.start()
     print("done!")
 
@@ -58,7 +61,9 @@ def main():
         print("done!")
 
     print("→ starting telegram worker... ", end="")
-    t3 = threading.Thread(target=telegram_app_service.run_telegram_worker)
+    t3 = threading.Thread(
+        target=telegram_app_service.run_telegram_worker, name="telegram_worker"
+    )
     t3.start()
     print("done!")
 
