@@ -47,25 +47,25 @@ def main():
     load_prerequisites()
 
     print("→ starting sale_tracker worker... ", end="")
-    t1 = threading.Thread(
+    sale_worker = threading.Thread(
         target=sale_tracker_app_service.run_sale_tracker_worker,
         name="sale_tracker_worker",
     )
-    t1.start()
+    sale_worker.start()
+    print("done!")
+
+    print("→ starting telegram worker... ", end="")
+    telegram_worker = threading.Thread(
+        target=telegram_app_service.run_telegram_worker, name="telegram_worker"
+    )
+    telegram_worker.start()
     print("done!")
 
     if settings.enable_tracking:
         print("→ starting correios tracking worker... ", end="")
-        t2 = threading.Thread(target=correios_app_service.run_tracking_worker)
-        t2.start()
+        tracking_worker = threading.Thread(target=correios_app_service.run_tracking_worker)
+        tracking_worker.start()
         print("done!")
-
-    print("→ starting telegram worker... ", end="")
-    t3 = threading.Thread(
-        target=telegram_app_service.run_telegram_worker, name="telegram_worker"
-    )
-    t3.start()
-    print("done!")
 
 
 if __name__ == "__main__":
