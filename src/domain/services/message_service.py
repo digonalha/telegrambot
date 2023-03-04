@@ -56,8 +56,8 @@ def send_message(
 
         message = message.replace(string_to_replace, str(perc))
     if "$random_word[" in message:
-        str_words = message.split("$random_word[")[1].split("]", 1)[0].split(",")
-        words = str_words
+        str_words = message.split("$random_word[")[1].split("]", 1)[0]
+        words = str_words.split(",")
 
         string_to_replace = f"$random_word[{str_words}]"
 
