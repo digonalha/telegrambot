@@ -1,5 +1,5 @@
 from datetime import datetime
-from random import randint, random
+from random import randint, choice
 
 from app.api import telegram_api
 from shared.helpers.logging_helper import SystemLogging
@@ -61,7 +61,7 @@ def send_message(
 
         string_to_replace = f"$random_word[{str_words}]"
 
-        message = message.replace(string_to_replace, random.choice(words).strip())
+        message = message.replace(string_to_replace, choice(words).strip())
 
     telegram_api.send_message(
         chat_id,
