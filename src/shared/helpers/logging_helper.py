@@ -12,7 +12,7 @@ class SystemLogging:
         self.logger = logging.getLogger(name)
 
         console_handler = logging.StreamHandler()
-        file_handler = logging.FileHandler("info.log")
+        file_handler = logging.FileHandler("./info.log")
         console_handler.setLevel(logging.DEBUG)
         file_handler.setLevel(logging.WARNING)
 
@@ -50,7 +50,7 @@ class SystemLogging:
         error_msg += f"*Error:*  `{error}` \n"
 
         if str_traceback:
-            error_msg += f"\_\_\_\_\_\_\_\_\_\_\_\n"
+            error_msg += "_" * 10 + "\n"
             error_msg += f"*Traceback:*\n`{str_traceback}`\n"
 
         self.logger.warning(error)

@@ -1,3 +1,4 @@
+import time
 from app.services import response_app_service
 from shared.helpers.logging_helper import SystemLogging
 from domain.services import message_service, timeout_service
@@ -36,5 +37,6 @@ def run_telegram_worker() -> None:
         try:
             offset = telegram_worker(offset)
         except Exception as ex:
-            syslog.create_warning(f"WORKER STOPED: {run_telegram_worker.__name__}", ex)
             continue
+
+        time.sleep(2)
