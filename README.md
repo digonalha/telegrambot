@@ -1,6 +1,6 @@
 ### esse projeto saiu um pouco do controle e ficou meio disfuncional. caso queira mandar prs, ficarei feliz em revisa-los e aprovar. um dia volto a mexer nele.
 ### material para estudo, bot Taxador está desativado por tempo indefinido.
-### metodo de consumo da api do correios não funciona mais, está desabilitado no momento.
+### metodo de consumo da api do correios não funciona mais, está desabilitado.
 
 
 # telegrambot
