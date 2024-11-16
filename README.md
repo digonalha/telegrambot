@@ -1,3 +1,8 @@
+# esse projeto saiu um pouco do controle e ficou meio disfuncional. caso queira mandar prs, ficarei feliz em revisa-los e aprovar.
+# material para estudo, bot Taxador está desativado por tempo indefinido.
+# metodo de consumo da api do correios não funciona mais, está desabilitado no momento.
+
+
 # telegrambot
 
 Essa aplicação tem três propósitos: gerenciar grupos, monitorar promoções e rastrear objetos na api do Correios no Telegram. Preferi não utilizar nenhuma biblioteca já conhecido da API do telegram e criar a minha própria por motivos de estudo. Também utilizo BeautifulSoup para fazer webscraper na hora de buscar promoções. Você pode testar o bot pelo link abaixo:
